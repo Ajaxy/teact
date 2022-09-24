@@ -12,4 +12,3 @@ Anyone is welcome to contribute.
 - Add unit tests.
 - Consider separating Teact and TeactN.
 - Consider extracting `useHeaveAnimationCheck`.
-- Consider making `handleErrors` less verbose or configurable.

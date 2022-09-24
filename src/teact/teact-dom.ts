@@ -104,7 +104,7 @@ function renderWithVirtual<T extends VirtualElement | undefined>(
   if (!$current && $new) {
     if (isNewComponent || isNewFragment) {
       if (isNewComponent) {
-        $new = initComponent(parentEl, $new as VirtualElementComponent, $parent, index) as typeof $new;
+        $new = initComponent(parentEl, $new as VirtualElementComponent, $parent, index) as unknown as typeof $new;
       }
 
       mountChildren(parentEl, $new as VirtualElementComponent | VirtualElementFragment, { nextSibling, fragment });
@@ -123,7 +123,7 @@ function renderWithVirtual<T extends VirtualElement | undefined>(
 
       if (isNewComponent || isNewFragment) {
         if (isNewComponent) {
-          $new = initComponent(parentEl, $new as VirtualElementComponent, $parent, index) as typeof $new;
+          $new = initComponent(parentEl, $new as VirtualElementComponent, $parent, index) as unknown as typeof $new;
         }
 
         remount(parentEl, $current, undefined);
@@ -531,11 +531,6 @@ function renderFragment(
 }
 
 function processControlled(tag: string, props: AnyLiteral) {
-  // TODO Remove after tests
-  if (!props.teactExperimentControlled) {
-    return;
-  }
-
   const isValueControlled = props.value !== undefined;
   const isCheckedControlled = props.checked !== undefined;
   const isControlled = (isValueControlled || isCheckedControlled) && CONTROLLABLE_TAGS.includes(tag.toUpperCase());
