@@ -1,0 +1,28 @@
+{
+  "name": "teact",
+  "version": "1.0.0",
+  "description": "Tiny and fast alternative for React",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ajaxy/teact.git"
+  },
+  "keywords": [
+    "react",
+    "jsx",
+    "tsx",
+    "framework"
+  ],
+  "author": "Alexander Zinchuk (alexander@zinchuk.com)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Ajaxy/teact/issues"
+  },
+  "homepage": "https://github.com/Ajaxy/teact#readme",
+  "devDependencies": {
+    "@types/react": "^18.0.21"
+  }
+}
