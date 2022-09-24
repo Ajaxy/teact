@@ -9,7 +9,7 @@ TeactDOM.render(
 function App() {
   return (
     <div>
-      <h2>Hello world</h2>
+      <h2>Hello Teact!</h2>
 
       <Child />
       <Checkbox />

@@ -21,7 +21,7 @@ module.exports = (_env, { mode = 'production' }) => {
       filename: '[name].[contenthash].js',
       chunkFilename: '[id].[chunkhash].js',
       assetModuleFilename: '[name].[contenthash][ext]',
-      path: path.resolve(__dirname, 'dist'),
+      path: path.resolve(__dirname, '../docs/demo'),
       clean: true,
     },
 

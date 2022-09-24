@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "demo:dev": "webpack serve --config demo/webpack.config.js --mode development",
+    "demo:build": "webpack --config demo/webpack.config.js  --mode development",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
