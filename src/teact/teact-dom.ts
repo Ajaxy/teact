@@ -548,7 +548,17 @@ function processControlled(tag: string, props: AnyLiteral) {
     onChange?.(e);
 
     if (value !== undefined) {
-      e.currentTarget.value = value;
+      const { selectionStart, selectionEnd } = e.currentTarget;
+
+      if (e.currentTarget.value !== value) {
+        e.currentTarget.value = value;
+        e.currentTarget.setSelectionRange(selectionStart, selectionEnd);
+      }
+
+      // eslint-disable-next-line no-underscore-dangle
+      e.currentTarget.dataset.__teactSelectionStart = String(selectionStart);
+      // eslint-disable-next-line no-underscore-dangle
+      e.currentTarget.dataset.__teactSelectionEnd = String(selectionEnd);
     }
 
     if (checked !== undefined) {
@@ -607,7 +617,11 @@ function setAttribute(element: HTMLElement, key: string, value: any) {
     // An optimization attempt
   } else if (key === 'value') {
     if ((element as HTMLInputElement).value !== value) {
+      const {
+        __teactSelectionStart: selectionStart, __teactSelectionEnd: selectionEnd,
+      } = (element as HTMLInputElement).dataset;
       (element as HTMLInputElement).value = value;
+      (element as HTMLInputElement).setSelectionRange(Number(selectionStart), Number(selectionEnd));
     }
   } else if (key === 'style') {
     element.style.cssText = value;
