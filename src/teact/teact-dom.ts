@@ -20,7 +20,6 @@ import {
   unmountComponent,
   isFragmentElement,
 } from './teact';
-import generateIdFor from '../util/generateIdFor';
 import { DEBUG } from '../config';
 import { addEventListener, removeAllDelegatedListeners, removeEventListener } from './dom-events';
 import { unique } from '../util/iteratees';
@@ -38,17 +37,14 @@ const MAPPED_ATTRIBUTES: { [k: string]: string } = {
 };
 const INDEX_KEY_PREFIX = '__indexKey#';
 
-const headsByElement: Record<string, VirtualDomHead> = {};
+const headsByElement = new WeakMap<HTMLElement, VirtualDomHead>();
 
 function render($element: VirtualElement | undefined, parentEl: HTMLElement) {
-  let headId = parentEl.getAttribute('data-teact-head-id');
-  if (!headId) {
-    headId = generateIdFor(headsByElement);
-    headsByElement[headId] = { children: [] };
-    parentEl.setAttribute('data-teact-head-id', headId);
+  if (!headsByElement.has(parentEl)) {
+    headsByElement.set(parentEl, { children: [] });
   }
 
-  const $head = headsByElement[headId];
+  const $head = headsByElement.get(parentEl)!;
   const $newElement = renderWithVirtual(parentEl, $head.children[0], $element, $head, 0);
   $head.children = $newElement ? [$newElement] : [];
 
@@ -258,6 +254,8 @@ function createNode($element: VirtualElementReal): Node {
 
   if (typeof props.ref === 'object') {
     props.ref.current = element;
+  } else if (typeof props.ref === 'function') {
+    props.ref(element);
   }
 
   processControlled(tag, props);
