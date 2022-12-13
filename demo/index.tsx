@@ -2,17 +2,14 @@ import React, { useState } from '../src/teact/teact';
 import TeactDOM from '../src/teact/teact-dom';
 
 TeactDOM.render(
-  <App />,
+  <App/>,
   document.getElementById('root')!,
 );
 
 function App() {
   return (
     <div>
-      <h2>Hello Teact!</h2>
-
-      <Child />
-      <Checkbox />
+      <h1>This is Inside Div <h2>Inside H2</h2></h1>
     </div>
   );
 }
