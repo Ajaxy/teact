@@ -9,7 +9,8 @@ TeactDOM.render(
 function App() {
   return (
     <div>
-      <h1>This is Inside Div <h2>Inside H2</h2></h1>
+      <Child/>
+      <Checkbox/>
     </div>
   );
 }

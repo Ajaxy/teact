@@ -84,6 +84,12 @@ export function initComponent(
   $parent: VirtualElementParent | VirtualDomHead,
   index: number,
 ) {
+  console.log('Init Component ' , {
+    parentEl,
+    $element,
+    $parent,
+    index,
+  })
   const {componentInstance} = $element;
 
   if (!componentInstance.isMounted) {

@@ -1,5 +1,4 @@
 import {CheckShouldUpdateVirtual} from "./update.chain";
-import {VirtualElement} from "../../teact/teact";
 import {VirtualChainOptions} from "./interface";
 import {CheckShouldUpdateListenerVirtual} from "./update-listener.chain";
 import {CheckShouldCancelReRenderVirtual} from "./cancel-reRender.chain";
@@ -12,7 +11,7 @@ export class ChainOfRenderVirtual {
     args : VirtualChainOptions
   ) : VirtualChainOptions {
     const result = new CheckShouldUpdateVirtual().setNextChecker(
-      new CheckShouldUpdateVirtual().setNextChecker(
+      new CheckShouldUpdateListenerVirtual().setNextChecker(
         new CheckShouldCancelReRenderVirtual().setNextChecker(
           new CheckShouldCreateComponent()
         )
