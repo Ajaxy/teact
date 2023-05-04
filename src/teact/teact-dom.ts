@@ -19,14 +19,22 @@ import {
   renderComponent,
   unmountComponent,
   isFragmentElement,
+  runImmediateEffects,
+  willRunImmediateEffects,
 } from './teact';
 import { DEBUG } from '../config';
 import { addEventListener, removeAllDelegatedListeners, removeEventListener } from './dom-events';
 import { unique } from '../util/iteratees';
 
-type VirtualDomHead = {
+interface VirtualDomHead {
   children: [VirtualElement] | [];
-};
+}
+
+interface SelectionState {
+  selectionStart: number | null;
+  selectionEnd: number | null;
+  isCaretAtEnd: boolean;
+}
 
 const FILTERED_ATTRIBUTES = new Set(['key', 'ref', 'teactFastList', 'teactOrderKey']);
 const HTML_ATTRIBUTES = new Set(['dir', 'role', 'form']);
@@ -37,7 +45,11 @@ const MAPPED_ATTRIBUTES: { [k: string]: string } = {
 };
 const INDEX_KEY_PREFIX = '__indexKey#';
 
-const headsByElement = new WeakMap<HTMLElement, VirtualDomHead>();
+const headsByElement = new WeakMap<Element, VirtualDomHead>();
+const extraClasses = new WeakMap<Element, Set<string>>();
+
+// eslint-disable-next-line @typescript-eslint/naming-convention
+let DEBUG_virtualTreeSize = 1;
 
 function render($element: VirtualElement | undefined, parentEl: HTMLElement) {
   if (!headsByElement.has(parentEl)) {
@@ -46,6 +58,11 @@ function render($element: VirtualElement | undefined, parentEl: HTMLElement) {
 
   const $head = headsByElement.get(parentEl)!;
   const $newElement = renderWithVirtual(parentEl, $head.children[0], $element, $head, 0);
+
+  if (!willRunImmediateEffects()) {
+    runImmediateEffects();
+  }
+
   $head.children = $newElement ? [$newElement] : [];
 
   return undefined;
@@ -305,15 +322,18 @@ function remount(
   }
 }
 
-export function unmountRealTree($element: VirtualElement) {
+function unmountRealTree($element: VirtualElement) {
   if (isComponentElement($element)) {
     unmountComponent($element.componentInstance);
-  } else {
+  } else if (!isFragmentElement($element)) {
     if (isTagElement($element)) {
-      if ($element.target) {
-        removeAllDelegatedListeners($element.target as HTMLElement);
+      const { target } = $element;
 
-        if ($element.props.ref?.current === $element.target) {
+      if (target) {
+        extraClasses.delete(target);
+        removeAllDelegatedListeners(target);
+
+        if ($element.props.ref?.current === target) {
           $element.props.ref.current = undefined;
         }
       }
@@ -545,20 +565,18 @@ function processControlled(tag: string, props: AnyLiteral) {
     onInput?.(e);
     onChange?.(e);
 
-    if (value !== undefined) {
+    if (value !== undefined && value !== e.currentTarget.value) {
       const { selectionStart, selectionEnd } = e.currentTarget;
+      const isCaretAtEnd = selectionStart === selectionEnd && selectionEnd === e.currentTarget.value.length;
 
-      if (e.currentTarget.value !== value) {
-        e.currentTarget.value = value;
+      e.currentTarget.value = value;
 
-        if (selectionStart !== undefined && selectionEnd !== undefined) {
-          e.currentTarget.setSelectionRange(selectionStart, selectionEnd);
+      if (typeof selectionStart === 'number' && typeof selectionEnd === 'number') {
+        e.currentTarget.setSelectionRange(selectionStart, selectionEnd);
 
-          // eslint-disable-next-line no-underscore-dangle
-          e.currentTarget.dataset.__teactSelectionStart = String(selectionStart);
-          // eslint-disable-next-line no-underscore-dangle
-          e.currentTarget.dataset.__teactSelectionEnd = String(selectionEnd);
-        }
+        const selectionState: SelectionState = { selectionStart, selectionEnd, isCaretAtEnd };
+        // eslint-disable-next-line no-underscore-dangle
+        e.currentTarget.dataset.__teactSelectionState = JSON.stringify(selectionState);
       }
     }
 
@@ -612,20 +630,25 @@ function updateAttributes($current: VirtualElementTag, $new: VirtualElementTag, 
 }
 
 function setAttribute(element: HTMLElement, key: string, value: any) {
-  // An optimization attempt
   if (key === 'className') {
-    element.className = value;
-    // An optimization attempt
+    updateClassName(element, value);
   } else if (key === 'value') {
-    if ((element as HTMLInputElement).value !== value) {
-      const {
-        __teactSelectionStart: selectionStart, __teactSelectionEnd: selectionEnd,
-      } = (element as HTMLInputElement).dataset;
+    const inputEl = element as HTMLInputElement;
 
-      (element as HTMLInputElement).value = value;
+    if (inputEl.value !== value) {
+      inputEl.value = value;
 
-      if (selectionStart !== undefined && selectionEnd !== undefined) {
-        (element as HTMLInputElement).setSelectionRange(Number(selectionStart), Number(selectionEnd));
+      // eslint-disable-next-line no-underscore-dangle
+      const selectionStateJson = inputEl.dataset.__teactSelectionState;
+      if (selectionStateJson) {
+        const { selectionStart, selectionEnd, isCaretAtEnd } = JSON.parse(selectionStateJson) as SelectionState;
+
+        if (isCaretAtEnd) {
+          const length = inputEl.value.length;
+          inputEl.setSelectionRange(length, length);
+        } else if (typeof selectionStart === 'number' && typeof selectionEnd === 'number') {
+          inputEl.setSelectionRange(selectionStart, selectionEnd);
+        }
       }
     }
   } else if (key === 'style') {
@@ -644,7 +667,7 @@ function setAttribute(element: HTMLElement, key: string, value: any) {
 
 function removeAttribute(element: HTMLElement, key: string, value: any) {
   if (key === 'className') {
-    element.className = '';
+    updateClassName(element, '');
   } else if (key === 'value') {
     (element as HTMLInputElement).value = '';
   } else if (key === 'style') {
@@ -653,10 +676,90 @@ function removeAttribute(element: HTMLElement, key: string, value: any) {
     element.innerHTML = '';
   } else if (key.startsWith('on')) {
     removeEventListener(element, key, value, key.endsWith('Capture'));
-  } else if (key.startsWith('data-') || key.startsWith('aria-') || HTML_ATTRIBUTES.has(key)) {
-    element.removeAttribute(key);
   } else if (!FILTERED_ATTRIBUTES.has(key)) {
-    delete (element as any)[MAPPED_ATTRIBUTES[key] || key];
+    element.removeAttribute(key);
+  }
+}
+
+function updateClassName(element: HTMLElement, value: string) {
+  const extra = extraClasses.get(element);
+  if (!extra) {
+    element.className = value;
+    return;
+  }
+
+  const extraArray = Array.from(extra);
+  if (value) {
+    extraArray.push(value);
+  }
+
+  element.className = extraArray.join(' ');
+}
+
+export function addExtraClass(element: Element, className: string, forceSingle = false) {
+  if (!forceSingle) {
+    const classNames = className.split(' ');
+    if (classNames.length > 1) {
+      classNames.forEach((cn) => {
+        addExtraClass(element, cn, true);
+      });
+
+      return;
+    }
+  }
+
+  element.classList.add(className);
+
+  const classList = extraClasses.get(element);
+  if (classList) {
+    classList.add(className);
+  } else {
+    extraClasses.set(element, new Set([className]));
+  }
+}
+
+export function removeExtraClass(element: Element, className: string, forceSingle = false) {
+  if (!forceSingle) {
+    const classNames = className.split(' ');
+    if (classNames.length > 1) {
+      classNames.forEach((cn) => {
+        removeExtraClass(element, cn, true);
+      });
+
+      return;
+    }
+  }
+
+  element.classList.remove(className);
+
+  const classList = extraClasses.get(element);
+  if (classList) {
+    classList.delete(className);
+
+    if (!classList.size) {
+      extraClasses.delete(element);
+    }
+  }
+}
+
+export function toggleExtraClass(element: Element, className: string, force?: boolean, forceSingle = false) {
+  if (!forceSingle) {
+    const classNames = className.split(' ');
+    if (classNames.length > 1) {
+      classNames.forEach((cn) => {
+        toggleExtraClass(element, cn, force, true);
+      });
+
+      return;
+    }
+  }
+
+  element.classList.toggle(className, force);
+
+  if (element.classList.contains(className)) {
+    addExtraClass(element, className);
+  } else {
+    removeExtraClass(element, className);
   }
 }
 
@@ -673,6 +776,8 @@ function DEBUG_checkKeyUniqueness(children: VirtualElementChildren) {
     }, []);
 
     if (keys.length !== unique(keys).length) {
+      // eslint-disable-next-line no-console
+      console.warn('[Teact] Duplicated keys:', keys.filter((e, i, a) => a.indexOf(e) !== i));
       throw new Error('[Teact] Children keys are not unique');
     }
   }

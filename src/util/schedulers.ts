@@ -1,13 +1,38 @@
-type Scheduler =
-  typeof requestAnimationFrame
-  | typeof onTickEnd;
+export type Scheduler = typeof requestAnimationFrame | typeof onTickEnd;
 
-export function throttleWithRaf<F extends AnyToVoidFunction>(fn: F) {
-  return throttleWith(fastRaf, fn);
-}
+export function throttle<F extends AnyToVoidFunction>(
+  fn: F,
+  ms: number,
+  shouldRunFirst = true,
+) {
+  let interval: number | undefined;
+  let isPending: boolean;
+  let args: Parameters<F>;
 
-export function throttleWithPrimaryRaf<F extends AnyToVoidFunction>(fn: F) {
-  return throttleWith(fastRafPrimary, fn);
+  return (..._args: Parameters<F>) => {
+    isPending = true;
+    args = _args;
+
+    if (!interval) {
+      if (shouldRunFirst) {
+        isPending = false;
+        fn(...args);
+      }
+
+      // eslint-disable-next-line no-restricted-globals
+      interval = self.setInterval(() => {
+        if (!isPending) {
+          // eslint-disable-next-line no-restricted-globals
+          self.clearInterval(interval!);
+          interval = undefined;
+          return;
+        }
+
+        isPending = false;
+        fn(...args);
+      }, ms);
+    }
+  };
 }
 
 export function throttleWithTickEnd<F extends AnyToVoidFunction>(fn: F) {
@@ -32,59 +57,86 @@ export function throttleWith<F extends AnyToVoidFunction>(schedulerFn: Scheduler
   };
 }
 
-let fastRafCallbacks: NoneToVoidFunction[] | undefined;
-let fastRafPrimaryCallbacks: NoneToVoidFunction[] | undefined;
+export function onIdle(cb: NoneToVoidFunction, timeout?: number) {
+  // eslint-disable-next-line no-restricted-globals
+  if (self.requestIdleCallback) {
+    // eslint-disable-next-line no-restricted-globals
+    self.requestIdleCallback(cb, { timeout });
+  } else {
+    onTickEnd(cb);
+  }
+}
 
-// May result in an immediate execution if called from another `requestAnimationFrame` callback
-export function fastRaf(callback: NoneToVoidFunction, isPrimary = false) {
+const FAST_RAF_TIMEOUT_FALLBACK_MS = 300;
+
+let fastRafCallbacks: Set<NoneToVoidFunction> | undefined;
+let fastRafFallbackCallbacks: Set<NoneToVoidFunction> | undefined;
+let fastRafFallbackTimeout: number | undefined;
+
+// May result in an immediate execution if called from another RAF callback which was scheduled
+// (and therefore is executed) earlier than RAF callback scheduled by `fastRaf`
+export function fastRaf(callback: NoneToVoidFunction, withTimeoutFallback = false) {
   if (!fastRafCallbacks) {
-    fastRafCallbacks = isPrimary ? [] : [callback];
-    fastRafPrimaryCallbacks = isPrimary ? [callback] : [];
+    fastRafCallbacks = new Set([callback]);
 
     requestAnimationFrame(() => {
       const currentCallbacks = fastRafCallbacks!;
-      const currentPrimaryCallbacks = fastRafPrimaryCallbacks!;
+
       fastRafCallbacks = undefined;
-      fastRafPrimaryCallbacks = undefined;
-      currentPrimaryCallbacks.forEach((cb) => cb());
+      fastRafFallbackCallbacks = undefined;
+
+      if (fastRafFallbackTimeout) {
+        clearTimeout(fastRafFallbackTimeout);
+        fastRafFallbackTimeout = undefined;
+      }
+
       currentCallbacks.forEach((cb) => cb());
     });
-  } else if (isPrimary) {
-    fastRafPrimaryCallbacks!.push(callback);
   } else {
-    fastRafCallbacks.push(callback);
+    fastRafCallbacks.add(callback);
   }
-}
 
-export function fastRafPrimary(callback: NoneToVoidFunction) {
-  fastRaf(callback, true);
+  if (withTimeoutFallback) {
+    if (!fastRafFallbackCallbacks) {
+      fastRafFallbackCallbacks = new Set([callback]);
+    } else {
+      fastRafFallbackCallbacks.add(callback);
+    }
+
+    if (!fastRafFallbackTimeout) {
+      fastRafFallbackTimeout = window.setTimeout(() => {
+        const currentTimeoutCallbacks = fastRafFallbackCallbacks!;
+
+        if (fastRafCallbacks) {
+          currentTimeoutCallbacks.forEach(fastRafCallbacks.delete, fastRafCallbacks);
+        }
+        fastRafFallbackCallbacks = undefined;
+
+        if (fastRafFallbackTimeout) {
+          clearTimeout(fastRafFallbackTimeout);
+          fastRafFallbackTimeout = undefined;
+        }
+
+        currentTimeoutCallbacks.forEach((cb) => cb());
+      }, FAST_RAF_TIMEOUT_FALLBACK_MS);
+    }
+  }
 }
 
 let onTickEndCallbacks: NoneToVoidFunction[] | undefined;
-let onTickEndPrimaryCallbacks: NoneToVoidFunction[] | undefined;
 
-export function onTickEnd(callback: NoneToVoidFunction, isPrimary = false) {
+export function onTickEnd(callback: NoneToVoidFunction) {
   if (!onTickEndCallbacks) {
-    onTickEndCallbacks = isPrimary ? [] : [callback];
-    onTickEndPrimaryCallbacks = isPrimary ? [callback] : [];
+    onTickEndCallbacks = [callback];
 
     Promise.resolve().then(() => {
       const currentCallbacks = onTickEndCallbacks!;
-      const currentPrimaryCallbacks = onTickEndPrimaryCallbacks!;
       onTickEndCallbacks = undefined;
-      onTickEndPrimaryCallbacks = undefined;
-      currentPrimaryCallbacks.forEach((cb) => cb());
       currentCallbacks.forEach((cb) => cb());
     });
-  } else if (isPrimary) {
-    onTickEndPrimaryCallbacks!.push(callback);
   } else {
     onTickEndCallbacks.push(callback);
   }
-}
-
-export function onTickEndPrimary(callback: NoneToVoidFunction) {
-  onTickEnd(callback, true);
 }
 
 let beforeUnloadCallbacks: NoneToVoidFunction[] | undefined;
