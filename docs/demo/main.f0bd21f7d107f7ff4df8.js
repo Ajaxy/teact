@@ -18,6 +18,374 @@ var DEBUG_MORE = false;
 
 /***/ }),
 
+/***/ "./src/lib/fasterdom/fasterdom.ts":
+/*!****************************************!*\
+  !*** ./src/lib/fasterdom/fasterdom.ts ***!
+  \****************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "disableStrict": () => (/* reexport safe */ _stricterdom__WEBPACK_IMPORTED_MODULE_2__.disableStrict),
+/* harmony export */   "enableStrict": () => (/* reexport safe */ _stricterdom__WEBPACK_IMPORTED_MODULE_2__.enableStrict),
+/* harmony export */   "forceMeasure": () => (/* reexport safe */ _stricterdom__WEBPACK_IMPORTED_MODULE_2__.forceMeasure),
+/* harmony export */   "getPhase": () => (/* reexport safe */ _stricterdom__WEBPACK_IMPORTED_MODULE_2__.getPhase),
+/* harmony export */   "requestForcedReflow": () => (/* binding */ requestForcedReflow),
+/* harmony export */   "requestMeasure": () => (/* binding */ requestMeasure),
+/* harmony export */   "requestMutation": () => (/* binding */ requestMutation),
+/* harmony export */   "requestNextMutation": () => (/* binding */ requestNextMutation),
+/* harmony export */   "setHandler": () => (/* reexport safe */ _stricterdom__WEBPACK_IMPORTED_MODULE_2__.setHandler),
+/* harmony export */   "setPhase": () => (/* reexport safe */ _stricterdom__WEBPACK_IMPORTED_MODULE_2__.setPhase)
+/* harmony export */ });
+/* harmony import */ var _util_schedulers__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../util/schedulers */ "./src/util/schedulers.ts");
+/* harmony import */ var _util_safeExec__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../util/safeExec */ "./src/util/safeExec.ts");
+/* harmony import */ var _stricterdom__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./stricterdom */ "./src/lib/fasterdom/stricterdom.ts");
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+
+
+
+var pendingMeasureTasks = [];
+var pendingMutationTasks = [];
+var pendingForceReflowTasks = [];
+var runUpdatePassOnRaf = throttleWithRafFallback(function () {
+  var currentMeasureTasks = pendingMeasureTasks;
+  pendingMeasureTasks = [];
+  currentMeasureTasks.forEach(function (task) {
+    (0,_util_safeExec__WEBPACK_IMPORTED_MODULE_1__["default"])(task);
+  }); // We use promises to provide correct order for Mutation Observer callback microtasks
+
+  Promise.resolve().then(function () {
+    (0,_stricterdom__WEBPACK_IMPORTED_MODULE_2__.setPhase)('mutate');
+    var currentMutationTasks = pendingMutationTasks;
+    pendingMutationTasks = [];
+    currentMutationTasks.forEach(function (task) {
+      (0,_util_safeExec__WEBPACK_IMPORTED_MODULE_1__["default"])(task);
+    });
+  }).then(function () {
+    (0,_stricterdom__WEBPACK_IMPORTED_MODULE_2__.setPhase)('measure');
+    var pendingForceReflowMutationTasks = []; // Will include tasks created during the loop
+
+    var _iterator = _createForOfIteratorHelper(pendingForceReflowTasks),
+        _step;
+
+    try {
+      var _loop = function _loop() {
+        var task = _step.value;
+        (0,_util_safeExec__WEBPACK_IMPORTED_MODULE_1__["default"])(function () {
+          var mutationTask = task();
+
+          if (mutationTask) {
+            pendingForceReflowMutationTasks.push(mutationTask);
+          }
+        });
+      };
+
+      for (_iterator.s(); !(_step = _iterator.n()).done;) {
+        _loop();
+      }
+    } catch (err) {
+      _iterator.e(err);
+    } finally {
+      _iterator.f();
+    }
+
+    pendingForceReflowTasks = [];
+    return pendingForceReflowMutationTasks;
+  }).then(function (pendingForceReflowMutationTasks) {
+    (0,_stricterdom__WEBPACK_IMPORTED_MODULE_2__.setPhase)('mutate'); // Will include tasks created during the loop
+
+    var _iterator2 = _createForOfIteratorHelper(pendingForceReflowMutationTasks),
+        _step2;
+
+    try {
+      for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+        var task = _step2.value;
+        (0,_util_safeExec__WEBPACK_IMPORTED_MODULE_1__["default"])(task);
+      }
+    } catch (err) {
+      _iterator2.e(err);
+    } finally {
+      _iterator2.f();
+    }
+  }).then(function () {
+    (0,_stricterdom__WEBPACK_IMPORTED_MODULE_2__.setPhase)('measure');
+  });
+});
+function requestMeasure(cb) {
+  pendingMeasureTasks.push(cb);
+  runUpdatePassOnRaf();
+}
+function requestMutation(cb) {
+  pendingMutationTasks.push(cb);
+  runUpdatePassOnRaf();
+}
+function requestNextMutation(cb) {
+  requestMeasure(function () {
+    requestMutation(cb);
+  });
+}
+function requestForcedReflow(cb) {
+  pendingForceReflowTasks.push(cb);
+  runUpdatePassOnRaf();
+}
+
+function throttleWithRafFallback(fn) {
+  return (0,_util_schedulers__WEBPACK_IMPORTED_MODULE_0__.throttleWith)(function (throttledFn) {
+    (0,_util_schedulers__WEBPACK_IMPORTED_MODULE_0__.fastRaf)(throttledFn, true);
+  }, fn);
+}
+
+
+
+/***/ }),
+
+/***/ "./src/lib/fasterdom/layoutCauses.ts":
+/*!*******************************************!*\
+  !*** ./src/lib/fasterdom/layoutCauses.ts ***!
+  \*******************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+// https://gist.github.com/paulirish/5d52fb081b3570c81e3a
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
+  Element: {
+    props: ['clientLeft', 'clientTop', 'clientWidth', 'clientHeight', 'scrollWidth', 'scrollHeight', 'scrollLeft', 'scrollTop'],
+    methods: ['getClientRects', 'getBoundingClientRect', 'scrollBy', 'scrollTo', 'scrollIntoView', 'scrollIntoViewIfNeeded']
+  },
+  HTMLElement: {
+    props: ['offsetLeft', 'offsetTop', 'offsetWidth', 'offsetHeight', 'offsetParent', 'innerText'],
+    methods: ['focus']
+  },
+  window: {
+    props: ['scrollX', 'scrollY', 'innerHeight', 'innerWidth'],
+    methods: ['getComputedStyle']
+  },
+  VisualViewport: {
+    props: ['height', 'width', 'offsetTop', 'offsetLeft']
+  },
+  Document: {
+    props: ['scrollingElement'],
+    methods: ['elementFromPoint']
+  },
+  HTMLInputElement: {
+    methods: ['select']
+  },
+  MouseEvent: {
+    props: ['layerX', 'layerY', 'offsetX', 'offsetY']
+  },
+  Range: {
+    methods: ['getClientRects', 'getBoundingClientRect']
+  }
+});
+
+/***/ }),
+
+/***/ "./src/lib/fasterdom/stricterdom.ts":
+/*!******************************************!*\
+  !*** ./src/lib/fasterdom/stricterdom.ts ***!
+  \******************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "disableStrict": () => (/* binding */ disableStrict),
+/* harmony export */   "enableStrict": () => (/* binding */ enableStrict),
+/* harmony export */   "forceMeasure": () => (/* binding */ forceMeasure),
+/* harmony export */   "getPhase": () => (/* binding */ getPhase),
+/* harmony export */   "setHandler": () => (/* binding */ setHandler),
+/* harmony export */   "setPhase": () => (/* binding */ setPhase)
+/* harmony export */ });
+/* harmony import */ var _layoutCauses__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./layoutCauses */ "./src/lib/fasterdom/layoutCauses.ts");
+function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
+
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function _iterableToArrayLimit(arr, i) { var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]; if (_i == null) return; var _arr = []; var _n = true; var _d = false; var _s, _e; try { for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
+
+// eslint-disable-next-line no-console
+var DEFAULT_ERROR_HANDLER = console.error;
+var onError = DEFAULT_ERROR_HANDLER;
+var nativeMethods = new Map();
+var phase = 'measure';
+var isStrict = false;
+var observer;
+function setPhase(newPhase) {
+  phase = newPhase;
+}
+function getPhase() {
+  return phase;
+}
+function enableStrict() {
+  if (isStrict) return;
+  isStrict = true;
+  setupLayoutDetectors();
+  setupMutationObserver();
+}
+function disableStrict() {
+  if (!isStrict) return;
+  clearMutationObserver();
+  clearLayoutDetectors();
+  isStrict = false;
+}
+function forceMeasure(cb) {
+  if (phase !== 'mutate') {
+    throw new Error('The current phase is \'measure\'');
+  }
+
+  phase = 'measure';
+  var result = cb();
+  phase = 'mutate';
+  return result;
+}
+function setHandler(handler) {
+  onError = handler || DEFAULT_ERROR_HANDLER;
+}
+
+function setupLayoutDetectors() {
+  Object.entries(_layoutCauses__WEBPACK_IMPORTED_MODULE_0__["default"]).forEach(function (_ref) {
+    var _ref2 = _slicedToArray(_ref, 2),
+        name = _ref2[0],
+        causes = _ref2[1];
+
+    var entity = window[name];
+    var prototype = _typeof(entity) === 'object' ? entity : entity.prototype;
+
+    if ('props' in causes) {
+      causes.props.forEach(function (prop) {
+        var _Object$getOwnPropert;
+
+        var nativeGetter = (_Object$getOwnPropert = Object.getOwnPropertyDescriptor(prototype, prop)) === null || _Object$getOwnPropert === void 0 ? void 0 : _Object$getOwnPropert.get;
+
+        if (!nativeGetter) {
+          return;
+        }
+
+        nativeMethods.set("".concat(name, "#").concat(prop), nativeGetter);
+        Object.defineProperty(prototype, prop, {
+          get: function get() {
+            onMeasure(prop);
+            return nativeGetter.call(this);
+          }
+        });
+      });
+    }
+
+    if ('methods' in causes) {
+      causes.methods.forEach(function (method) {
+        var nativeMethod = prototype[method];
+        nativeMethods.set("".concat(name, "#").concat(method), nativeMethod); // eslint-disable-next-line func-names
+
+        prototype[method] = function () {
+          onMeasure(method);
+
+          for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+            args[_key] = arguments[_key];
+          }
+
+          return nativeMethod.apply(this, args);
+        };
+      });
+    }
+  });
+}
+
+function clearLayoutDetectors() {
+  Object.entries(_layoutCauses__WEBPACK_IMPORTED_MODULE_0__["default"]).forEach(function (_ref3) {
+    var _ref4 = _slicedToArray(_ref3, 2),
+        name = _ref4[0],
+        causes = _ref4[1];
+
+    var entity = window[name];
+    var prototype = _typeof(entity) === 'object' ? entity : entity.prototype;
+
+    if ('props' in causes) {
+      causes.props.forEach(function (prop) {
+        var nativeGetter = nativeMethods.get("".concat(name, "#").concat(prop));
+
+        if (!nativeGetter) {
+          return;
+        }
+
+        Object.defineProperty(prototype, prop, {
+          get: nativeGetter
+        });
+      });
+    }
+
+    if ('methods' in causes) {
+      causes.methods.forEach(function (method) {
+        prototype[method] = nativeMethods.get("".concat(name, "#").concat(method));
+      });
+    }
+  });
+  nativeMethods.clear();
+}
+
+function setupMutationObserver() {
+  observer = new MutationObserver(function (mutations) {
+    if (phase !== 'mutate') {
+      mutations.forEach(function (_ref5) {
+        var target = _ref5.target,
+            type = _ref5.type,
+            attributeName = _ref5.attributeName;
+
+        if (!document.contains(target)) {
+          return;
+        }
+
+        if (type === 'childList' && target instanceof HTMLElement && target.contentEditable) {
+          return;
+        }
+
+        if (attributeName !== null && attributeName !== void 0 && attributeName.startsWith('data-')) {
+          return;
+        } // eslint-disable-next-line no-console
+
+
+        onError(new Error("Unexpected mutation detected: `".concat(type === 'attributes' ? attributeName : type, "`")));
+      });
+    }
+  });
+  observer.observe(document.body, {
+    childList: true,
+    attributes: true,
+    subtree: true,
+    characterData: false
+  });
+}
+
+function clearMutationObserver() {
+  var _observer;
+
+  (_observer = observer) === null || _observer === void 0 ? void 0 : _observer.disconnect();
+  observer = undefined;
+}
+
+function onMeasure(propName) {
+  if (phase !== 'measure') {
+    onError(new Error("Unexpected measurement detected: `".concat(propName, "`")));
+  }
+}
+
+/***/ }),
+
 /***/ "./src/teact/dom-events.ts":
 /*!*********************************!*\
   !*** ./src/teact/dom-events.ts ***!
@@ -230,14 +598,15 @@ if (_config__WEBPACK_IMPORTED_MODULE_0__.DEBUG) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "addExtraClass": () => (/* binding */ addExtraClass),
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__),
-/* harmony export */   "unmountRealTree": () => (/* binding */ unmountRealTree)
+/* harmony export */   "removeExtraClass": () => (/* binding */ removeExtraClass),
+/* harmony export */   "toggleExtraClass": () => (/* binding */ toggleExtraClass)
 /* harmony export */ });
 /* harmony import */ var _teact__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./teact */ "./src/teact/teact.ts");
-/* harmony import */ var _util_generateIdFor__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../util/generateIdFor */ "./src/util/generateIdFor.ts");
-/* harmony import */ var _config__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../config */ "./src/config.ts");
-/* harmony import */ var _dom_events__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./dom-events */ "./src/teact/dom-events.ts");
-/* harmony import */ var _util_iteratees__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../util/iteratees */ "./src/util/iteratees.ts");
+/* harmony import */ var _config__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../config */ "./src/config.ts");
+/* harmony import */ var _dom_events__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./dom-events */ "./src/teact/dom-events.ts");
+/* harmony import */ var _util_iteratees__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../util/iteratees */ "./src/util/iteratees.ts");
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
 
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
@@ -256,7 +625,6 @@ function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" =
 
 
 
-
 var FILTERED_ATTRIBUTES = new Set(['key', 'ref', 'teactFastList', 'teactOrderKey']);
 var HTML_ATTRIBUTES = new Set(['dir', 'role', 'form']);
 var CONTROLLABLE_TAGS = ['INPUT', 'TEXTAREA', 'SELECT'];
@@ -265,21 +633,25 @@ var MAPPED_ATTRIBUTES = {
   autoComplete: 'autocomplete'
 };
 var INDEX_KEY_PREFIX = '__indexKey#';
-var headsByElement = {};
+var headsByElement = new WeakMap();
+var extraClasses = new WeakMap(); // eslint-disable-next-line @typescript-eslint/naming-convention
+
+var DEBUG_virtualTreeSize = 1;
 
 function render($element, parentEl) {
-  var headId = parentEl.getAttribute('data-teact-head-id');
-
-  if (!headId) {
-    headId = (0,_util_generateIdFor__WEBPACK_IMPORTED_MODULE_1__["default"])(headsByElement);
-    headsByElement[headId] = {
+  if (!headsByElement.has(parentEl)) {
+    headsByElement.set(parentEl, {
       children: []
-    };
-    parentEl.setAttribute('data-teact-head-id', headId);
+    });
   }
 
-  var $head = headsByElement[headId];
+  var $head = headsByElement.get(parentEl);
   var $newElement = renderWithVirtual(parentEl, $head.children[0], $element, $head, 0);
+
+  if (!(0,_teact__WEBPACK_IMPORTED_MODULE_0__.willRunImmediateEffects)()) {
+    (0,_teact__WEBPACK_IMPORTED_MODULE_0__.runImmediateEffects)();
+  }
+
   $head.children = $newElement ? [$newElement] : [];
   return undefined;
 }
@@ -308,7 +680,7 @@ function renderWithVirtual(parentEl, $current, $new, $parent, index) {
     return $new;
   }
 
-  if (_config__WEBPACK_IMPORTED_MODULE_2__.DEBUG && $new) {
+  if (_config__WEBPACK_IMPORTED_MODULE_1__.DEBUG && $new) {
     var newTarget = 'target' in $new && $new.target;
 
     if (newTarget && (!$current || 'target' in $current && newTarget !== $current.target)) {
@@ -450,6 +822,8 @@ function createNode($element) {
 
   if (_typeof(props.ref) === 'object') {
     props.ref.current = element;
+  } else if (typeof props.ref === 'function') {
+    props.ref(element);
   }
 
   processControlled(tag, props);
@@ -497,14 +871,17 @@ function remount(parentEl, $current, node, componentNextSibling) {
 function unmountRealTree($element) {
   if ((0,_teact__WEBPACK_IMPORTED_MODULE_0__.isComponentElement)($element)) {
     (0,_teact__WEBPACK_IMPORTED_MODULE_0__.unmountComponent)($element.componentInstance);
-  } else {
+  } else if (!(0,_teact__WEBPACK_IMPORTED_MODULE_0__.isFragmentElement)($element)) {
     if ((0,_teact__WEBPACK_IMPORTED_MODULE_0__.isTagElement)($element)) {
-      if ($element.target) {
+      var target = $element.target;
+
+      if (target) {
         var _$element$props$ref;
 
-        (0,_dom_events__WEBPACK_IMPORTED_MODULE_3__.removeAllDelegatedListeners)($element.target);
+        extraClasses["delete"](target);
+        (0,_dom_events__WEBPACK_IMPORTED_MODULE_2__.removeAllDelegatedListeners)(target);
 
-        if (((_$element$props$ref = $element.props.ref) === null || _$element$props$ref === void 0 ? void 0 : _$element$props$ref.current) === $element.target) {
+        if (((_$element$props$ref = $element.props.ref) === null || _$element$props$ref === void 0 ? void 0 : _$element$props$ref.current) === target) {
           $element.props.ref.current = undefined;
         }
       }
@@ -542,7 +919,7 @@ function getNextSibling($current) {
 }
 
 function renderChildren($current, $new, currentEl, nextSibling) {
-  if (_config__WEBPACK_IMPORTED_MODULE_2__.DEBUG) {
+  if (_config__WEBPACK_IMPORTED_MODULE_1__.DEBUG) {
     DEBUG_checkKeyUniqueness($new.children);
   }
 
@@ -583,7 +960,7 @@ function renderFastListChildren($current, $new, currentEl) {
   var newKeys = new Set($new.children.map(function ($newChild) {
     var key = 'props' in $newChild ? $newChild.props.key : undefined;
 
-    if (_config__WEBPACK_IMPORTED_MODULE_2__.DEBUG && (0,_teact__WEBPACK_IMPORTED_MODULE_0__.isParentElement)($newChild)) {
+    if (_config__WEBPACK_IMPORTED_MODULE_1__.DEBUG && (0,_teact__WEBPACK_IMPORTED_MODULE_0__.isParentElement)($newChild)) {
       // eslint-disable-next-line no-null/no-null
       if (key === undefined || key === null) {
         // eslint-disable-next-line no-console
@@ -713,8 +1090,23 @@ function processControlled(tag, props) {
     onInput === null || onInput === void 0 ? void 0 : onInput(e);
     onChange === null || onChange === void 0 ? void 0 : onChange(e);
 
-    if (value !== undefined) {
+    if (value !== undefined && value !== e.currentTarget.value) {
+      var _e$currentTarget = e.currentTarget,
+          selectionStart = _e$currentTarget.selectionStart,
+          selectionEnd = _e$currentTarget.selectionEnd;
+      var isCaretAtEnd = selectionStart === selectionEnd && selectionEnd === e.currentTarget.value.length;
       e.currentTarget.value = value;
+
+      if (typeof selectionStart === 'number' && typeof selectionEnd === 'number') {
+        e.currentTarget.setSelectionRange(selectionStart, selectionEnd);
+        var selectionState = {
+          selectionStart: selectionStart,
+          selectionEnd: selectionEnd,
+          isCaretAtEnd: isCaretAtEnd
+        }; // eslint-disable-next-line no-underscore-dangle
+
+        e.currentTarget.dataset.__teactSelectionState = JSON.stringify(selectionState);
+      }
     }
 
     if (checked !== undefined) {
@@ -766,12 +1158,29 @@ function updateAttributes($current, $new, element) {
 }
 
 function setAttribute(element, key, value) {
-  // An optimization attempt
   if (key === 'className') {
-    element.className = value; // An optimization attempt
+    updateClassName(element, value);
   } else if (key === 'value') {
-    if (element.value !== value) {
-      element.value = value;
+    var inputEl = element;
+
+    if (inputEl.value !== value) {
+      inputEl.value = value; // eslint-disable-next-line no-underscore-dangle
+
+      var selectionStateJson = inputEl.dataset.__teactSelectionState;
+
+      if (selectionStateJson) {
+        var _ref7 = JSON.parse(selectionStateJson),
+            selectionStart = _ref7.selectionStart,
+            selectionEnd = _ref7.selectionEnd,
+            isCaretAtEnd = _ref7.isCaretAtEnd;
+
+        if (isCaretAtEnd) {
+          var length = inputEl.value.length;
+          inputEl.setSelectionRange(length, length);
+        } else if (typeof selectionStart === 'number' && typeof selectionEnd === 'number') {
+          inputEl.setSelectionRange(selectionStart, selectionEnd);
+        }
+      }
     }
   } else if (key === 'style') {
     element.style.cssText = value;
@@ -779,7 +1188,7 @@ function setAttribute(element, key, value) {
     // eslint-disable-next-line no-underscore-dangle
     element.innerHTML = value.__html;
   } else if (key.startsWith('on')) {
-    (0,_dom_events__WEBPACK_IMPORTED_MODULE_3__.addEventListener)(element, key, value, key.endsWith('Capture'));
+    (0,_dom_events__WEBPACK_IMPORTED_MODULE_2__.addEventListener)(element, key, value, key.endsWith('Capture'));
   } else if (key.startsWith('data-') || key.startsWith('aria-') || HTML_ATTRIBUTES.has(key)) {
     element.setAttribute(key, value);
   } else if (!FILTERED_ATTRIBUTES.has(key)) {
@@ -789,7 +1198,7 @@ function setAttribute(element, key, value) {
 
 function removeAttribute(element, key, value) {
   if (key === 'className') {
-    element.className = '';
+    updateClassName(element, '');
   } else if (key === 'value') {
     element.value = '';
   } else if (key === 'style') {
@@ -797,14 +1206,99 @@ function removeAttribute(element, key, value) {
   } else if (key === 'dangerouslySetInnerHTML') {
     element.innerHTML = '';
   } else if (key.startsWith('on')) {
-    (0,_dom_events__WEBPACK_IMPORTED_MODULE_3__.removeEventListener)(element, key, value, key.endsWith('Capture'));
-  } else if (key.startsWith('data-') || key.startsWith('aria-') || HTML_ATTRIBUTES.has(key)) {
-    element.removeAttribute(key);
+    (0,_dom_events__WEBPACK_IMPORTED_MODULE_2__.removeEventListener)(element, key, value, key.endsWith('Capture'));
   } else if (!FILTERED_ATTRIBUTES.has(key)) {
-    delete element[MAPPED_ATTRIBUTES[key] || key];
+    element.removeAttribute(key);
+  }
+}
+
+function updateClassName(element, value) {
+  var extra = extraClasses.get(element);
+
+  if (!extra) {
+    element.className = value;
+    return;
+  }
+
+  var extraArray = Array.from(extra);
+
+  if (value) {
+    extraArray.push(value);
+  }
+
+  element.className = extraArray.join(' ');
+}
+
+function addExtraClass(element, className) {
+  var forceSingle = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+
+  if (!forceSingle) {
+    var classNames = className.split(' ');
+
+    if (classNames.length > 1) {
+      classNames.forEach(function (cn) {
+        addExtraClass(element, cn, true);
+      });
+      return;
+    }
+  }
+
+  element.classList.add(className);
+  var classList = extraClasses.get(element);
+
+  if (classList) {
+    classList.add(className);
+  } else {
+    extraClasses.set(element, new Set([className]));
+  }
+}
+function removeExtraClass(element, className) {
+  var forceSingle = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+
+  if (!forceSingle) {
+    var classNames = className.split(' ');
+
+    if (classNames.length > 1) {
+      classNames.forEach(function (cn) {
+        removeExtraClass(element, cn, true);
+      });
+      return;
+    }
+  }
+
+  element.classList.remove(className);
+  var classList = extraClasses.get(element);
+
+  if (classList) {
+    classList["delete"](className);
+
+    if (!classList.size) {
+      extraClasses["delete"](element);
+    }
+  }
+}
+function toggleExtraClass(element, className, force) {
+  var forceSingle = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+
+  if (!forceSingle) {
+    var classNames = className.split(' ');
+
+    if (classNames.length > 1) {
+      classNames.forEach(function (cn) {
+        toggleExtraClass(element, cn, force, true);
+      });
+      return;
+    }
+  }
+
+  element.classList.toggle(className, force);
+
+  if (element.classList.contains(className)) {
+    addExtraClass(element, className);
+  } else {
+    removeExtraClass(element, className);
   }
 } // eslint-disable-next-line @typescript-eslint/naming-convention
-
 
 function DEBUG_checkKeyUniqueness(children) {
   var firstChild = children[0];
@@ -818,7 +1312,11 @@ function DEBUG_checkKeyUniqueness(children) {
       return acc;
     }, []);
 
-    if (keys.length !== (0,_util_iteratees__WEBPACK_IMPORTED_MODULE_4__.unique)(keys).length) {
+    if (keys.length !== (0,_util_iteratees__WEBPACK_IMPORTED_MODULE_3__.unique)(keys).length) {
+      // eslint-disable-next-line no-console
+      console.warn('[Teact] Duplicated keys:', keys.filter(function (e, i, a) {
+        return a.indexOf(e) !== i;
+      }));
       throw new Error('[Teact] Children keys are not unique');
     }
   }
@@ -851,19 +1349,24 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "memo": () => (/* binding */ memo),
 /* harmony export */   "mountComponent": () => (/* binding */ mountComponent),
 /* harmony export */   "renderComponent": () => (/* binding */ renderComponent),
+/* harmony export */   "runImmediateEffects": () => (/* binding */ runImmediateEffects),
 /* harmony export */   "unmountComponent": () => (/* binding */ unmountComponent),
 /* harmony export */   "useCallback": () => (/* binding */ useCallback),
 /* harmony export */   "useEffect": () => (/* binding */ useEffect),
 /* harmony export */   "useLayoutEffect": () => (/* binding */ useLayoutEffect),
 /* harmony export */   "useMemo": () => (/* binding */ useMemo),
 /* harmony export */   "useRef": () => (/* binding */ useRef),
-/* harmony export */   "useState": () => (/* binding */ useState)
+/* harmony export */   "useState": () => (/* binding */ useState),
+/* harmony export */   "willRunImmediateEffects": () => (/* binding */ willRunImmediateEffects)
 /* harmony export */ });
-/* harmony import */ var _config__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../config */ "./src/config.ts");
-/* harmony import */ var _util_schedulers__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../util/schedulers */ "./src/util/schedulers.ts");
-/* harmony import */ var _util_iteratees__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../util/iteratees */ "./src/util/iteratees.ts");
-/* harmony import */ var _util_arePropsShallowEqual__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../util/arePropsShallowEqual */ "./src/util/arePropsShallowEqual.ts");
-/* harmony import */ var _util_handleError__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../util/handleError */ "./src/util/handleError.ts");
+/* harmony import */ var _lib_fasterdom_fasterdom__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../lib/fasterdom/fasterdom */ "./src/lib/fasterdom/fasterdom.ts");
+/* harmony import */ var _config__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../config */ "./src/config.ts");
+/* harmony import */ var _util_schedulers__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../util/schedulers */ "./src/util/schedulers.ts");
+/* harmony import */ var _util_iteratees__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../util/iteratees */ "./src/util/iteratees.ts");
+/* harmony import */ var _util_arePropsShallowEqual__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../util/arePropsShallowEqual */ "./src/util/arePropsShallowEqual.ts");
+/* harmony import */ var _util_debugOverlay__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../util/debugOverlay */ "./src/util/debugOverlay.ts");
+/* harmony import */ var _util_signals__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../util/signals */ "./src/util/signals.ts");
+/* harmony import */ var _util_safeExec__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../util/safeExec */ "./src/util/safeExec.ts");
 function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
 
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
@@ -889,6 +1392,9 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
 
 
+
+
+
 var VirtualElementTypesEnum;
 
 (function (VirtualElementTypesEnum) {
@@ -903,6 +1409,7 @@ var Fragment = Symbol('Fragment');
 var DEBUG_RENDER_THRESHOLD = 7;
 var DEBUG_EFFECT_THRESHOLD = 7;
 var DEBUG_SILENT_RENDERS_FOR = new Set(['TeactMemoWrapper', 'TeactNContainer', 'Button', 'ListItem', 'MenuItem']);
+var lastComponentId = 0;
 var renderingInstance;
 function isEmptyElement($element) {
   return $element.type === VirtualElementTypesEnum.Empty;
@@ -960,6 +1467,7 @@ function createComponentInstance(Component, props, children) {
   }
 
   var componentInstance = {
+    id: ++lastComponentId,
     $element: {},
     Component: Component,
     name: Component.name,
@@ -1060,26 +1568,96 @@ function buildEmptyElement() {
 } // eslint-disable-next-line @typescript-eslint/naming-convention
 
 
-var DEBUG_components = {};
+var DEBUG_components = {
+  TOTAL: {
+    componentName: 'TOTAL',
+    renderCount: 0
+  }
+};
 document.addEventListener('dblclick', function () {
   // eslint-disable-next-line no-console
-  console.warn('COMPONENTS', (0,_util_iteratees__WEBPACK_IMPORTED_MODULE_2__.orderBy)(Object.values(DEBUG_components), 'renderCount', 'desc'));
+  console.warn('COMPONENTS', (0,_util_iteratees__WEBPACK_IMPORTED_MODULE_3__.orderBy)(Object.values(DEBUG_components), 'renderCount', 'desc'));
 });
+var instancesPendingUpdate = new Set();
+var idsToExcludeFromUpdate = new Set();
+var pendingEffects = new Map();
+var pendingCleanups = new Map();
+var pendingLayoutEffects = new Map();
+var pendingLayoutCleanups = new Map();
+var areImmediateEffectsPending = false;
+/*
+  Order:
+  - component effect cleanups
+  - component effects
+  - measure tasks
+  - mutation tasks
+  - component updates
+  - component layout effect cleanups
+  - component layout effects
+  - forced layout measure tasks
+  - forced layout mutation tasks
+ */
+
+var runUpdatePassOnRaf = (0,_util_schedulers__WEBPACK_IMPORTED_MODULE_2__.throttleWith)(_lib_fasterdom_fasterdom__WEBPACK_IMPORTED_MODULE_0__.requestMeasure, function () {
+  areImmediateEffectsPending = true;
+  idsToExcludeFromUpdate = new Set();
+  var instancesToUpdate = Array.from(instancesPendingUpdate).sort(function (a, b) {
+    return a.id - b.id;
+  });
+  instancesPendingUpdate = new Set();
+  var currentCleanups = pendingCleanups;
+  pendingCleanups = new Map();
+  currentCleanups.forEach(function (cb) {
+    return cb();
+  });
+  var currentEffects = pendingEffects;
+  pendingEffects = new Map();
+  currentEffects.forEach(function (cb) {
+    return cb();
+  });
+  (0,_lib_fasterdom_fasterdom__WEBPACK_IMPORTED_MODULE_0__.requestMutation)(function () {
+    instancesToUpdate.forEach(prepareComponentForFrame);
+    instancesToUpdate.forEach(function (instance) {
+      if (idsToExcludeFromUpdate.has(instance.id)) {
+        return;
+      }
+
+      forceUpdateComponent(instance);
+    });
+    areImmediateEffectsPending = false;
+    runImmediateEffects();
+  });
+});
+function willRunImmediateEffects() {
+  return areImmediateEffectsPending;
+}
+function runImmediateEffects() {
+  var currentLayoutCleanups = pendingLayoutCleanups;
+  pendingLayoutCleanups = new Map();
+  currentLayoutCleanups.forEach(function (cb) {
+    return cb();
+  });
+  var currentLayoutEffects = pendingLayoutEffects;
+  pendingLayoutEffects = new Map();
+  currentLayoutEffects.forEach(function (cb) {
+    return cb();
+  });
+}
 function renderComponent(componentInstance) {
-  renderingInstance = componentInstance;
-  componentInstance.hooks.state.cursor = 0;
-  componentInstance.hooks.effects.cursor = 0;
-  componentInstance.hooks.memos.cursor = 0;
-  componentInstance.hooks.refs.cursor = 0;
+  idsToExcludeFromUpdate.add(componentInstance.id);
   var Component = componentInstance.Component,
       props = componentInstance.props;
   var newRenderedValue;
+  (0,_util_safeExec__WEBPACK_IMPORTED_MODULE_7__["default"])(function () {
+    renderingInstance = componentInstance;
+    componentInstance.hooks.state.cursor = 0;
+    componentInstance.hooks.effects.cursor = 0;
+    componentInstance.hooks.memos.cursor = 0;
+    componentInstance.hooks.refs.cursor = 0; // eslint-disable-next-line @typescript-eslint/naming-convention
 
-  try {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     var DEBUG_startAt;
 
-    if (_config__WEBPACK_IMPORTED_MODULE_0__.DEBUG) {
+    if (_config__WEBPACK_IMPORTED_MODULE_1__.DEBUG) {
       var componentName = componentInstance.name;
 
       if (!DEBUG_components[componentName]) {
@@ -1090,7 +1668,7 @@ function renderComponent(componentInstance) {
         };
       }
 
-      if (_config__WEBPACK_IMPORTED_MODULE_0__.DEBUG_MORE) {
+      if (_config__WEBPACK_IMPORTED_MODULE_1__.DEBUG_MORE) {
         if (!DEBUG_SILENT_RENDERS_FOR.has(componentName)) {
           // eslint-disable-next-line no-console
           console.log("[Teact] Render ".concat(componentName));
@@ -1102,7 +1680,7 @@ function renderComponent(componentInstance) {
 
     newRenderedValue = Component(props);
 
-    if (_config__WEBPACK_IMPORTED_MODULE_0__.DEBUG) {
+    if (_config__WEBPACK_IMPORTED_MODULE_1__.DEBUG) {
       var duration = performance.now() - DEBUG_startAt;
       var _componentName = componentInstance.name;
 
@@ -1114,11 +1692,18 @@ function renderComponent(componentInstance) {
       DEBUG_components[_componentName].renderTimes.push(duration);
 
       DEBUG_components[_componentName].renderCount++;
+      DEBUG_components.TOTAL.renderCount++;
+
+      if (_config__WEBPACK_IMPORTED_MODULE_1__.DEBUG_MORE) {
+        (0,_util_debugOverlay__WEBPACK_IMPORTED_MODULE_5__.incrementOverlayCounter)("".concat(_componentName, " renders"));
+        (0,_util_debugOverlay__WEBPACK_IMPORTED_MODULE_5__.incrementOverlayCounter)("".concat(_componentName, " duration"), duration);
+      }
     }
-  } catch (err) {
-    (0,_util_handleError__WEBPACK_IMPORTED_MODULE_4__.handleError)(err);
+  }, function () {
+    // eslint-disable-next-line no-console
+    console.error("[Teact] Error while rendering component ".concat(componentInstance.name));
     newRenderedValue = componentInstance.renderedValue;
-  }
+  });
 
   if (componentInstance.isMounted && newRenderedValue === componentInstance.renderedValue) {
     return componentInstance.$element;
@@ -1154,16 +1739,16 @@ function unmountComponent(componentInstance) {
     return;
   }
 
+  idsToExcludeFromUpdate.add(componentInstance.id);
   componentInstance.hooks.effects.byCursor.forEach(function (effect) {
+    var _effect$releaseSignal;
+
     if (effect.cleanup) {
-      try {
-        effect.cleanup();
-      } catch (err) {
-        (0,_util_handleError__WEBPACK_IMPORTED_MODULE_4__.handleError)(err);
-      } finally {
-        effect.cleanup = undefined;
-      }
+      (0,_util_safeExec__WEBPACK_IMPORTED_MODULE_7__["default"])(effect.cleanup);
     }
+
+    effect.cleanup = undefined;
+    (_effect$releaseSignal = effect.releaseSignals) === null || _effect$releaseSignal === void 0 ? void 0 : _effect$releaseSignal.call(effect);
   });
   componentInstance.isMounted = false;
   helpGc(componentInstance);
@@ -1171,8 +1756,9 @@ function unmountComponent(componentInstance) {
 
 function helpGc(componentInstance) {
   componentInstance.hooks.effects.byCursor.forEach(function (hook) {
+    hook.schedule = undefined;
     hook.cleanup = undefined;
-    hook.effect = undefined;
+    hook.releaseSignals = undefined;
     hook.dependencies = undefined;
   });
   componentInstance.hooks.state.byCursor.forEach(function (hook) {
@@ -1192,7 +1778,6 @@ function helpGc(componentInstance) {
   componentInstance.renderedValue = undefined;
   componentInstance.Component = undefined;
   componentInstance.props = undefined;
-  componentInstance.forceUpdate = undefined;
   componentInstance.onUpdate = undefined;
 }
 
@@ -1203,12 +1788,6 @@ function prepareComponentForFrame(componentInstance) {
 
   componentInstance.hooks.state.byCursor.forEach(function (hook) {
     hook.value = hook.nextValue;
-  });
-  componentInstance.prepareForFrame = (0,_util_schedulers__WEBPACK_IMPORTED_MODULE_1__.throttleWithPrimaryRaf)(function () {
-    return prepareComponentForFrame(componentInstance);
-  });
-  componentInstance.forceUpdate = (0,_util_schedulers__WEBPACK_IMPORTED_MODULE_1__.throttleWithRaf)(function () {
-    return forceUpdateComponent(componentInstance);
   });
 }
 
@@ -1236,27 +1815,23 @@ function useState(initial, debugKey) {
       nextValue: initial,
       setter: function (componentInstance) {
         return function (newValue) {
-          if (byCursor[cursor].nextValue !== newValue) {
-            byCursor[cursor].nextValue = typeof newValue === 'function' ? newValue(byCursor[cursor].value) : newValue;
+          if (typeof newValue === 'function') {
+            newValue = newValue(byCursor[cursor].value);
+          }
 
-            if (!componentInstance.prepareForFrame || !componentInstance.forceUpdate) {
-              componentInstance.prepareForFrame = (0,_util_schedulers__WEBPACK_IMPORTED_MODULE_1__.throttleWithPrimaryRaf)(function () {
-                return prepareComponentForFrame(componentInstance);
-              });
-              componentInstance.forceUpdate = (0,_util_schedulers__WEBPACK_IMPORTED_MODULE_1__.throttleWithRaf)(function () {
-                return forceUpdateComponent(componentInstance);
-              });
-            }
+          if (byCursor[cursor].nextValue === newValue) {
+            return;
+          }
 
-            componentInstance.prepareForFrame();
-            componentInstance.forceUpdate();
+          byCursor[cursor].nextValue = newValue;
+          instancesPendingUpdate.add(componentInstance);
+          runUpdatePassOnRaf();
 
-            if (_config__WEBPACK_IMPORTED_MODULE_0__.DEBUG_MORE) {
-              if (componentInstance.name !== 'TeactNContainer') {
-                // eslint-disable-next-line no-console
-                console.log('[Teact.useState]', componentInstance.name, // `componentInstance.Component` may be set to `null` by GC helper
-                componentInstance.Component && componentInstance.Component.DEBUG_contentComponentName ? "> ".concat(componentInstance.Component.DEBUG_contentComponentName) : '', debugKey ? "State update for ".concat(debugKey, ", next value: ") : "State update at cursor #".concat(cursor, ", next value: "), byCursor[cursor].nextValue);
-              }
+          if (_config__WEBPACK_IMPORTED_MODULE_1__.DEBUG_MORE) {
+            if (componentInstance.name !== 'TeactNContainer') {
+              // eslint-disable-next-line no-console
+              console.log('[Teact.useState]', componentInstance.name, // `componentInstance.Component` may be set to `null` by GC helper
+              componentInstance.Component && componentInstance.Component.DEBUG_contentComponentName ? "> ".concat(componentInstance.Component.DEBUG_contentComponentName) : '', "State update at cursor #".concat(cursor).concat(debugKey ? " (".concat(debugKey, ")") : '', ", next value: "), byCursor[cursor].nextValue);
             }
           }
         };
@@ -1268,7 +1843,7 @@ function useState(initial, debugKey) {
   return [byCursor[cursor].value, byCursor[cursor].setter];
 }
 
-function useLayoutEffectBase(schedulerFn, primarySchedulerFn, effect, dependencies, debugKey) {
+function useEffectBase(isLayout, effect, dependencies, debugKey) {
   var _byCursor$cursor;
 
   var _renderingInstance$ho2 = renderingInstance.hooks.effects,
@@ -1276,28 +1851,24 @@ function useLayoutEffectBase(schedulerFn, primarySchedulerFn, effect, dependenci
       byCursor = _renderingInstance$ho2.byCursor;
   var componentInstance = renderingInstance;
 
-  function execCleanup() {
-    if (!componentInstance.isMounted) {
-      return;
-    }
+  var runEffectCleanup = function runEffectCleanup() {
+    return (0,_util_safeExec__WEBPACK_IMPORTED_MODULE_7__["default"])(function () {
+      var cleanup = byCursor[cursor].cleanup;
 
-    var cleanup = byCursor[cursor].cleanup;
+      if (!cleanup) {
+        return;
+      } // eslint-disable-next-line @typescript-eslint/naming-convention
 
-    if (!cleanup) {
-      return;
-    }
 
-    try {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       var DEBUG_startAt;
 
-      if (_config__WEBPACK_IMPORTED_MODULE_0__.DEBUG) {
+      if (_config__WEBPACK_IMPORTED_MODULE_1__.DEBUG) {
         DEBUG_startAt = performance.now();
       }
 
       cleanup();
 
-      if (_config__WEBPACK_IMPORTED_MODULE_0__.DEBUG) {
+      if (_config__WEBPACK_IMPORTED_MODULE_1__.DEBUG) {
         var duration = performance.now() - DEBUG_startAt;
         var componentName = componentInstance.name;
 
@@ -1306,44 +1877,63 @@ function useLayoutEffectBase(schedulerFn, primarySchedulerFn, effect, dependenci
           console.warn("[Teact] Slow cleanup at effect cursor #".concat(cursor, ": ").concat(componentName, ", ").concat(Math.round(duration), " ms"));
         }
       }
-    } catch (err) {
-      (0,_util_handleError__WEBPACK_IMPORTED_MODULE_4__.handleError)(err);
-    } finally {
+    }, function () {
+      // eslint-disable-next-line no-console
+      console.error("[Teact] Error in effect cleanup at cursor #".concat(cursor, " in ").concat(componentInstance.name));
+    }, function () {
       byCursor[cursor].cleanup = undefined;
-    }
-  }
+    });
+  };
 
-  function exec() {
-    if (!componentInstance.isMounted) {
-      return;
-    }
+  var runEffect = function runEffect() {
+    return (0,_util_safeExec__WEBPACK_IMPORTED_MODULE_7__["default"])(function () {
+      if (!componentInstance.isMounted) {
+        return;
+      } // eslint-disable-next-line @typescript-eslint/naming-convention
 
-    execCleanup(); // eslint-disable-next-line @typescript-eslint/naming-convention
 
-    var DEBUG_startAt;
+      var DEBUG_startAt;
 
-    if (_config__WEBPACK_IMPORTED_MODULE_0__.DEBUG) {
-      DEBUG_startAt = performance.now();
-    }
-
-    var result = effect();
-
-    if (typeof result === 'function') {
-      byCursor[cursor].cleanup = result;
-    }
-
-    if (_config__WEBPACK_IMPORTED_MODULE_0__.DEBUG) {
-      var duration = performance.now() - DEBUG_startAt;
-      var componentName = componentInstance.name;
-
-      if (duration > DEBUG_EFFECT_THRESHOLD) {
-        // eslint-disable-next-line no-console
-        console.warn("[Teact] Slow effect at cursor #".concat(cursor, ": ").concat(componentName, ", ").concat(Math.round(duration), " ms"));
+      if (_config__WEBPACK_IMPORTED_MODULE_1__.DEBUG) {
+        DEBUG_startAt = performance.now();
       }
+
+      var result = effect();
+
+      if (typeof result === 'function') {
+        byCursor[cursor].cleanup = result;
+      }
+
+      if (_config__WEBPACK_IMPORTED_MODULE_1__.DEBUG) {
+        var duration = performance.now() - DEBUG_startAt;
+        var componentName = componentInstance.name;
+
+        if (duration > DEBUG_EFFECT_THRESHOLD) {
+          // eslint-disable-next-line no-console
+          console.warn("[Teact] Slow effect at cursor #".concat(cursor, ": ").concat(componentName, ", ").concat(Math.round(duration), " ms"));
+        }
+      }
+    }, function () {
+      // eslint-disable-next-line no-console
+      console.error("[Teact] Error in effect at cursor #".concat(cursor, " in ").concat(componentInstance.name));
+    });
+  };
+
+  function schedule() {
+    var effectId = "".concat(componentInstance.id, "_").concat(cursor);
+
+    if (isLayout) {
+      pendingLayoutCleanups.set(effectId, runEffectCleanup);
+      pendingLayoutEffects.set(effectId, runEffect);
+    } else {
+      pendingCleanups.set(effectId, runEffectCleanup);
+      pendingEffects.set(effectId, runEffect);
     }
+
+    runUpdatePassOnRaf();
   }
 
-  if (byCursor[cursor] !== undefined && dependencies && byCursor[cursor].dependencies) {
+  if (dependencies && (_byCursor$cursor = byCursor[cursor]) !== null && _byCursor$cursor !== void 0 && _byCursor$cursor.dependencies) {
     if (dependencies.some(function (dependency, i) {
       return dependency !== byCursor[cursor].dependencies[i];
     })) {
@@ -1361,8 +1951,7 @@ function useLayoutEffectBase(schedulerFn, primarySchedulerFn, effect, dependenci
         console.log("[Teact] Effect \"".concat(debugKey, "\" caused by dependencies."), causedBy.join(', '));
       }
 
-      primarySchedulerFn(execCleanup);
-      schedulerFn(exec);
+      schedule();
     }
   } else {
     if (debugKey) {
@@ -1370,23 +1959,45 @@ function useLayoutEffectBase(schedulerFn, primarySchedulerFn, effect, dependenci
       console.log("[Teact] Effect \"".concat(debugKey, "\" caused by missing dependencies."));
     }
 
-    primarySchedulerFn(execCleanup);
-    schedulerFn(exec);
+    schedule();
   }
 
-  byCursor[cursor] = {
-    effect: effect,
+  var isFirstRun = !byCursor[cursor];
+  byCursor[cursor] = _objectSpread(_objectSpread({}, byCursor[cursor]), {}, {
     dependencies: dependencies,
-    cleanup: (_byCursor$cursor = byCursor[cursor]) === null || _byCursor$cursor === void 0 ? void 0 : _byCursor$cursor.cleanup
-  };
+    schedule: schedule
+  });
+
+  function setupSignals() {
+    var cleanups = dependencies === null || dependencies === void 0 ? void 0 : dependencies.filter(_util_signals__WEBPACK_IMPORTED_MODULE_6__.isSignal).map(function (signal) {
+      return signal.subscribe(function () {
+        byCursor[cursor].schedule();
+      });
+    });
+
+    if (!(cleanups !== null && cleanups !== void 0 && cleanups.length)) {
+      return undefined;
+    }
+
+    return function () {
+      cleanups.forEach(function (cleanup) {
+        return cleanup();
+      });
+    };
+  }
+
+  if (isFirstRun) {
+    byCursor[cursor].releaseSignals = setupSignals();
+  }
+
   renderingInstance.hooks.effects.cursor++;
 }
 
 function useEffect(effect, dependencies, debugKey) {
-  return useLayoutEffectBase(_util_schedulers__WEBPACK_IMPORTED_MODULE_1__.fastRaf, _util_schedulers__WEBPACK_IMPORTED_MODULE_1__.fastRafPrimary, effect, dependencies, debugKey);
+  return useEffectBase(false, effect, dependencies, debugKey);
 }
 function useLayoutEffect(effect, dependencies, debugKey) {
-  return useLayoutEffectBase(_util_schedulers__WEBPACK_IMPORTED_MODULE_1__.onTickEnd, _util_schedulers__WEBPACK_IMPORTED_MODULE_1__.onTickEndPrimary, effect, dependencies, debugKey);
+  return useEffectBase(true, effect, dependencies, debugKey);
 }
 function useMemo(resolver, dependencies, debugKey) {
   var _renderingInstance$ho3 = renderingInstance.hooks.memos,
@@ -1396,12 +2007,12 @@ function useMemo(resolver, dependencies, debugKey) {
   var _ref = byCursor[cursor] || {},
       value = _ref.value;
 
-  if (byCursor[cursor] === undefined || dependencies.some(function (dependency, i) {
+  if (byCursor[cursor] === undefined || dependencies.length !== byCursor[cursor].dependencies.length || dependencies.some(function (dependency, i) {
     return dependency !== byCursor[cursor].dependencies[i];
   })) {
-    if (_config__WEBPACK_IMPORTED_MODULE_0__.DEBUG && debugKey) {
+    if (_config__WEBPACK_IMPORTED_MODULE_1__.DEBUG && debugKey) {
       // eslint-disable-next-line no-console
-      console.log("[Teact.useMemo] ".concat(renderingInstance.name, " (").concat(debugKey, "): Update is caused by:"), byCursor[cursor] ? (0,_util_arePropsShallowEqual__WEBPACK_IMPORTED_MODULE_3__.getUnequalProps)(dependencies, byCursor[cursor].dependencies).join(', ') : '[first render]');
+      console.log("[Teact.useMemo] ".concat(renderingInstance.name, " (").concat(debugKey, "): Update is caused by:"), byCursor[cursor] ? (0,_util_arePropsShallowEqual__WEBPACK_IMPORTED_MODULE_4__.getUnequalProps)(byCursor[cursor].dependencies, dependencies).join(', ') : '[first render]');
     }
 
     value = resolver();
@@ -1509,25 +2120,183 @@ function getUnequalProps(currentProps, newProps) {
 
 /***/ }),
 
-/***/ "./src/util/generateIdFor.ts":
-/*!***********************************!*\
-  !*** ./src/util/generateIdFor.ts ***!
-  \***********************************/
+/***/ "./src/util/callbacks.ts":
+/*!*******************************!*\
+  !*** ./src/util/callbacks.ts ***!
+  \*******************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */   "createCallbackManager": () => (/* binding */ createCallbackManager)
 /* harmony export */ });
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (function (store) {
-  var id;
+function createCallbackManager() {
+  var callbacks = new Set();
 
-  do {
-    id = String(Math.random()).replace('0.', 'id');
-  } while (store.hasOwnProperty(id));
+  function addCallback(cb) {
+    callbacks.add(cb);
+    return function () {
+      removeCallback(cb);
+    };
+  }
 
-  return id;
-});
+  function removeCallback(cb) {
+    callbacks["delete"](cb);
+  }
+
+  function runCallbacks() {
+    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    callbacks.forEach(function (callback) {
+      callback.apply(void 0, args);
+    });
+  }
+
+  function hasCallbacks() {
+    return Boolean(callbacks.size);
+  }
+
+  return {
+    runCallbacks: runCallbacks,
+    addCallback: addCallback,
+    removeCallback: removeCallback,
+    hasCallbacks: hasCallbacks
+  };
+}
+
+/***/ }),
+
+/***/ "./src/util/debugOverlay.ts":
+/*!**********************************!*\
+  !*** ./src/util/debugOverlay.ts ***!
+  \**********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "debugToOverlay": () => (/* binding */ debugToOverlay),
+/* harmony export */   "incrementOverlayCounter": () => (/* binding */ incrementOverlayCounter),
+/* harmony export */   "renderCounters": () => (/* binding */ renderCounters)
+/* harmony export */ });
+/* harmony import */ var _schedulers__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./schedulers */ "./src/util/schedulers.ts");
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function _iterableToArrayLimit(arr, i) { var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]; if (_i == null) return; var _arr = []; var _n = true; var _d = false; var _s, _e; try { for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
+
+var KEYS_TO_IGNORE = new Set(['TeactMemoWrapper renders', 'TeactNContainer renders', 'Button renders']);
+var MIN_RENDERS_TO_SHOW = 5;
+var MIN_DURATION_TO_SHOW = 2;
+var BG_GREEN = ' style="background: lightgreen"';
+var counters = {};
+var renderCountersThrottled = (0,_schedulers__WEBPACK_IMPORTED_MODULE_0__.throttle)(renderCounters, 500, false);
+var loggerEl;
+function debugToOverlay(text) {
+  if (!loggerEl) {
+    setupOverlay();
+  }
+
+  var date = new Date();
+  var dateFormatted = "".concat(date.toLocaleTimeString(), ".").concat(date.getMilliseconds());
+  var wasAtBottom = loggerEl.scrollTop + 10 >= loggerEl.scrollHeight - loggerEl.offsetHeight;
+  loggerEl.innerHTML += "".concat(dateFormatted, ": ").concat(text, "<br/>");
+
+  if (wasAtBottom) {
+    loggerEl.scrollTop = loggerEl.scrollHeight;
+  }
+}
+function incrementOverlayCounter(key) {
+  var value = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
+  var now = Date.now();
+
+  if (!counters[key]) {
+    counters[key] = {
+      value: value,
+      lastUpdateAt: now
+    };
+  } else {
+    counters[key].value += value;
+    counters[key].lastUpdateAt = now;
+  }
+
+  renderCountersThrottled();
+}
+function renderCounters() {
+  if (!loggerEl) {
+    setupOverlay();
+  }
+
+  var halfSecondAgo = Date.now() - 500;
+
+  var _Object$entries$reduc = Object.entries(counters).reduce(function (acc, _ref) {
+    var _ref2 = _slicedToArray(_ref, 2),
+        key = _ref2[0],
+        value = _ref2[1].value;
+
+    if (KEYS_TO_IGNORE.has(key)) {
+      return acc;
+    }
+
+    if (key.includes('renders') && value > acc[0]) {
+      acc[0] = value;
+    }
+
+    if (key.includes('duration') && value > acc[1]) {
+      acc[1] = value;
+    }
+
+    return acc;
+  }, [0, 0]),
+      _Object$entries$reduc2 = _slicedToArray(_Object$entries$reduc, 2),
+      maxRenders = _Object$entries$reduc2[0],
+      maxDuration = _Object$entries$reduc2[1];
+
+  loggerEl.innerHTML = Object.entries(counters).filter(function (_ref3) {
+    var _ref4 = _slicedToArray(_ref3, 2),
+        key = _ref4[0],
+        value = _ref4[1].value;
+
+    return !KEYS_TO_IGNORE.has(key) && (key.includes('renders') && value > MIN_RENDERS_TO_SHOW || key.includes('duration') && value > MIN_DURATION_TO_SHOW);
+  }).sort(function (a, b) {
+    return b[1].lastUpdateAt - a[1].lastUpdateAt;
+  }).map(function (_ref5) {
+    var _ref6 = _slicedToArray(_ref5, 2),
+        key = _ref6[0],
+        _ref6$ = _ref6[1],
+        value = _ref6$.value,
+        lastUpdateAt = _ref6$.lastUpdateAt;
+
+    return ["<div style=\"background: #ff0000".concat(factorToHex(value / (key.includes('renders') ? maxRenders : maxDuration)), "\">"), "  <span".concat(lastUpdateAt > halfSecondAgo ? BG_GREEN : '', ">").concat(key, ": ").concat(Math.round(value), "</span>"), '</div>'].join('\n');
+  }).join('\n');
+}
+
+function setupOverlay() {
+  loggerEl = document.createElement('div');
+  loggerEl.style.cssText = 'position: absolute; left: 0; bottom: 25px; z-index: 9998; width: 260px; height: 200px;' + ' border: 1px solid #555; background: rgba(255, 255, 255, 0.9); overflow: auto; font-size: 10px;';
+  document.body.appendChild(loggerEl);
+  var clearEl = document.createElement('a');
+  clearEl.style.cssText = 'position: absolute; left: 222px; bottom: 198px; z-index: 9999; font-size: 20px; ' + 'cursor: pointer;';
+  clearEl.innerText = '🔄';
+  clearEl.addEventListener('click', function () {
+    counters = {};
+    renderCountersThrottled();
+  });
+  document.body.appendChild(clearEl);
+}
+
+function factorToHex(factor) {
+  return Math.round(255 * factor).toString(16).padStart(2, '0');
+}
 
 /***/ }),
 
@@ -1616,6 +2385,39 @@ function unique(array) {
 
 /***/ }),
 
+/***/ "./src/util/safeExec.ts":
+/*!******************************!*\
+  !*** ./src/util/safeExec.ts ***!
+  \******************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ safeExec)
+/* harmony export */ });
+/* harmony import */ var _config__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../config */ "./src/config.ts");
+/* harmony import */ var _handleError__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./handleError */ "./src/util/handleError.ts");
+
+
+var SAFE_EXEC_ENABLED = !_config__WEBPACK_IMPORTED_MODULE_0__.DEBUG_MORE;
+function safeExec(cb, rescue, always) {
+  if (!SAFE_EXEC_ENABLED) {
+    return cb();
+  }
+
+  try {
+    return cb();
+  } catch (err) {
+    rescue === null || rescue === void 0 ? void 0 : rescue(err);
+    (0,_handleError__WEBPACK_IMPORTED_MODULE_1__.handleError)(err);
+    return undefined;
+  } finally {
+    always === null || always === void 0 ? void 0 : always();
+  }
+}
+
+/***/ }),
+
 /***/ "./src/util/schedulers.ts":
 /*!********************************!*\
   !*** ./src/util/schedulers.ts ***!
@@ -1625,13 +2427,11 @@ function unique(array) {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "fastRaf": () => (/* binding */ fastRaf),
-/* harmony export */   "fastRafPrimary": () => (/* binding */ fastRafPrimary),
 /* harmony export */   "onBeforeUnload": () => (/* binding */ onBeforeUnload),
+/* harmony export */   "onIdle": () => (/* binding */ onIdle),
 /* harmony export */   "onTickEnd": () => (/* binding */ onTickEnd),
-/* harmony export */   "onTickEndPrimary": () => (/* binding */ onTickEndPrimary),
+/* harmony export */   "throttle": () => (/* binding */ throttle),
 /* harmony export */   "throttleWith": () => (/* binding */ throttleWith),
-/* harmony export */   "throttleWithPrimaryRaf": () => (/* binding */ throttleWithPrimaryRaf),
-/* harmony export */   "throttleWithRaf": () => (/* binding */ throttleWithRaf),
 /* harmony export */   "throttleWithTickEnd": () => (/* binding */ throttleWithTickEnd)
 /* harmony export */ });
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
@@ -1646,11 +2446,40 @@ function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToAr
 
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
-function throttleWithRaf(fn) {
-  return throttleWith(fastRaf, fn);
-}
-function throttleWithPrimaryRaf(fn) {
-  return throttleWith(fastRafPrimary, fn);
+function throttle(fn, ms) {
+  var shouldRunFirst = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
+  var interval;
+  var isPending;
+  var args;
+  return function () {
+    isPending = true;
+
+    for (var _len = arguments.length, _args = new Array(_len), _key = 0; _key < _len; _key++) {
+      _args[_key] = arguments[_key];
+    }
+
+    args = _args;
+
+    if (!interval) {
+      if (shouldRunFirst) {
+        isPending = false;
+        fn.apply(void 0, _toConsumableArray(args));
+      } // eslint-disable-next-line no-restricted-globals
+
+
+      interval = self.setInterval(function () {
+        if (!isPending) {
+          // eslint-disable-next-line no-restricted-globals
+          self.clearInterval(interval);
+          interval = undefined;
+          return;
+        }
+
+        isPending = false;
+        fn.apply(void 0, _toConsumableArray(args));
+      }, ms);
+    }
+  };
 }
 function throttleWithTickEnd(fn) {
   return throttleWith(onTickEnd, fn);
@@ -1659,8 +2488,8 @@ function throttleWith(schedulerFn, fn) {
   var waiting = false;
   var args;
   return function () {
-    for (var _len = arguments.length, _args = new Array(_len), _key = 0; _key < _len; _key++) {
-      _args[_key] = arguments[_key];
+    for (var _len2 = arguments.length, _args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+      _args[_key2] = arguments[_key2];
     }
 
     args = _args;
@@ -1674,64 +2503,89 @@ function throttleWith(schedulerFn, fn) {
     }
   };
 }
-var fastRafCallbacks;
-var fastRafPrimaryCallbacks; // May result in an immediate execution if called from another `requestAnimationFrame` callback
-
-function fastRaf(callback) {
-  var isPrimary = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-
-  if (!fastRafCallbacks) {
-    fastRafCallbacks = isPrimary ? [] : [callback];
-    fastRafPrimaryCallbacks = isPrimary ? [callback] : [];
-    requestAnimationFrame(function () {
-      var currentCallbacks = fastRafCallbacks;
-      var currentPrimaryCallbacks = fastRafPrimaryCallbacks;
-      fastRafCallbacks = undefined;
-      fastRafPrimaryCallbacks = undefined;
-      currentPrimaryCallbacks.forEach(function (cb) {
-        return cb();
-      });
-      currentCallbacks.forEach(function (cb) {
-        return cb();
-      });
+function onIdle(cb, timeout) {
+  // eslint-disable-next-line no-restricted-globals
+  if (self.requestIdleCallback) {
+    // eslint-disable-next-line no-restricted-globals
+    self.requestIdleCallback(cb, {
+      timeout: timeout
     });
-  } else if (isPrimary) {
-    fastRafPrimaryCallbacks.push(callback);
   } else {
-    fastRafCallbacks.push(callback);
+    onTickEnd(cb);
   }
 }
-function fastRafPrimary(callback) {
-  fastRaf(callback, true);
-}
-var onTickEndCallbacks;
-var onTickEndPrimaryCallbacks;
-function onTickEnd(callback) {
-  var isPrimary = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+var FAST_RAF_TIMEOUT_FALLBACK_MS = 300;
+var fastRafCallbacks;
+var fastRafFallbackCallbacks;
+var fastRafFallbackTimeout; // May result in an immediate execution if called from another RAF callback which was scheduled
+// (and therefore is executed) earlier than RAF callback scheduled by `fastRaf`
 
-  if (!onTickEndCallbacks) {
-    onTickEndCallbacks = isPrimary ? [] : [callback];
-    onTickEndPrimaryCallbacks = isPrimary ? [callback] : [];
-    Promise.resolve().then(function () {
-      var currentCallbacks = onTickEndCallbacks;
-      var currentPrimaryCallbacks = onTickEndPrimaryCallbacks;
-      onTickEndCallbacks = undefined;
-      onTickEndPrimaryCallbacks = undefined;
-      currentPrimaryCallbacks.forEach(function (cb) {
-        return cb();
-      });
+function fastRaf(callback) {
+  var withTimeoutFallback = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+
+  if (!fastRafCallbacks) {
+    fastRafCallbacks = new Set([callback]);
+    requestAnimationFrame(function () {
+      var currentCallbacks = fastRafCallbacks;
+      fastRafCallbacks = undefined;
+      fastRafFallbackCallbacks = undefined;
+
+      if (fastRafFallbackTimeout) {
+        clearTimeout(fastRafFallbackTimeout);
+        fastRafFallbackTimeout = undefined;
+      }
+
       currentCallbacks.forEach(function (cb) {
         return cb();
       });
     });
-  } else if (isPrimary) {
-    onTickEndPrimaryCallbacks.push(callback);
+  } else {
+    fastRafCallbacks.add(callback);
+  }
+
+  if (withTimeoutFallback) {
+    if (!fastRafFallbackCallbacks) {
+      fastRafFallbackCallbacks = new Set([callback]);
+    } else {
+      fastRafFallbackCallbacks.add(callback);
+    }
+
+    if (!fastRafFallbackTimeout) {
+      fastRafFallbackTimeout = window.setTimeout(function () {
+        var currentTimeoutCallbacks = fastRafFallbackCallbacks;
+
+        if (fastRafCallbacks) {
+          currentTimeoutCallbacks.forEach(fastRafCallbacks["delete"], fastRafCallbacks);
+        }
+
+        fastRafFallbackCallbacks = undefined;
+
+        if (fastRafFallbackTimeout) {
+          clearTimeout(fastRafFallbackTimeout);
+          fastRafFallbackTimeout = undefined;
+        }
+
+        currentTimeoutCallbacks.forEach(function (cb) {
+          return cb();
+        });
+      }, FAST_RAF_TIMEOUT_FALLBACK_MS);
+    }
+  }
+}
+var onTickEndCallbacks;
+function onTickEnd(callback) {
+  if (!onTickEndCallbacks) {
+    onTickEndCallbacks = [callback];
+    Promise.resolve().then(function () {
+      var currentCallbacks = onTickEndCallbacks;
+      onTickEndCallbacks = undefined;
+      currentCallbacks.forEach(function (cb) {
+        return cb();
+      });
+    });
   } else {
     onTickEndCallbacks.push(callback);
   }
-}
-function onTickEndPrimary(callback) {
-  onTickEnd(callback, true);
 }
 var beforeUnloadCallbacks;
 function onBeforeUnload(callback) {
@@ -1758,6 +2612,88 @@ function onBeforeUnload(callback) {
       return cb !== callback;
     });
   };
+}
+
+/***/ }),
+
+/***/ "./src/util/signals.ts":
+/*!*****************************!*\
+  !*** ./src/util/signals.ts ***!
+  \*****************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "cleanupEffect": () => (/* binding */ cleanupEffect),
+/* harmony export */   "createSignal": () => (/* binding */ createSignal),
+/* harmony export */   "isSignal": () => (/* binding */ isSignal)
+/* harmony export */ });
+/* harmony import */ var _callbacks__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./callbacks */ "./src/util/callbacks.ts");
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+
+var SIGNAL_MARK = Symbol('SIGNAL_MARK');
+function isSignal(obj) {
+  return typeof obj === 'function' && SIGNAL_MARK in obj;
+} // A shorthand to unsubscribe effect from all signals
+
+var unsubscribesByEffect = new Map();
+var currentEffect;
+function createSignal(defaultValue) {
+  var _Object$assign;
+
+  var state = {
+    value: defaultValue,
+    effects: (0,_callbacks__WEBPACK_IMPORTED_MODULE_0__.createCallbackManager)()
+  };
+
+  function subscribe(effect) {
+    var unsubscribe = state.effects.addCallback(effect);
+
+    if (!unsubscribesByEffect.has(effect)) {
+      unsubscribesByEffect.set(effect, new Set([unsubscribe]));
+    } else {
+      unsubscribesByEffect.get(effect).add(unsubscribe);
+    }
+
+    return function () {
+      unsubscribe();
+      var unsubscribes = unsubscribesByEffect.get(effect);
+      unsubscribes["delete"](unsubscribe);
+
+      if (!unsubscribes.size) {
+        unsubscribesByEffect["delete"](effect);
+      }
+    };
+  }
+
+  function getter() {
+    if (currentEffect) {
+      subscribe(currentEffect);
+    }
+
+    return state.value;
+  }
+
+  function setter(newValue) {
+    if (state.value === newValue) {
+      return;
+    }
+
+    state.value = newValue;
+    state.effects.runCallbacks();
+  }
+
+  var signal = Object.assign(getter, (_Object$assign = {}, _defineProperty(_Object$assign, SIGNAL_MARK, SIGNAL_MARK), _defineProperty(_Object$assign, "subscribe", subscribe), _Object$assign));
+  return [signal, setter];
+}
+function cleanupEffect(effect) {
+  var _unsubscribesByEffect;
+
+  (_unsubscribesByEffect = unsubscribesByEffect.get(effect)) === null || _unsubscribesByEffect === void 0 ? void 0 : _unsubscribesByEffect.forEach(function (unsubscribe) {
+    unsubscribe();
+  });
+  unsubscribesByEffect["delete"](effect);
 }
 
 /***/ })
@@ -1873,4 +2809,4 @@ function Checkbox() {
 
 /******/ })()
 ;
-//# sourceMappingURL=main.16c32c1ba43ea117e20c.js.map
+//# sourceMappingURL=main.f0bd21f7d107f7ff4df8.js.map
