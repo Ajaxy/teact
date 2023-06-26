@@ -23,8 +23,8 @@ import {
   unmountComponent,
 } from './teact';
 import { DEBUG } from '../config';
-import { unique } from '../util/iteratees';
 import { addEventListener, removeAllDelegatedListeners, removeEventListener } from './dom-events';
+import { unique } from '../util/iteratees';
 
 interface VirtualDomHead {
   children: [VirtualElement] | [];
