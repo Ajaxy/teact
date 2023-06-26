@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Benchmark</title>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/preact@10"></script>
+  <script src="https://unpkg.com/preact@10/hooks/dist/hooks.umd.js"></script>
+  <script src="../dist/umd/teact.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+
+    #table {
+      border-spacing: 0;
+      border-collapse: collapse;
+      margin-bottom: 40px;
+    }
+
+    #table td, #table th {
+      height: 32px;
+      width: 175px;
+      border: 1px solid #AAAAAA;
+      text-align: center;
+    }
+
+    td span.best {
+      color: mediumseagreen;
+      font-weight: bold;
+    }
+
+    #running {
+      margin-bottom: 40px;
+    }
+
+    #tools {
+      margin-top: 40px;
+    }
+  </style>
+</head>
+<body>
+
+<table id="table" style="display: none;">
+  <tr>
+    <th>Name</th>
+    <th>Teact</th>
+    <th>React v18</th>
+    <th>Preact v10</th>
+  </tr>
+</table>
+
+<div id="running">Running benchmarks (~30s)...</div>
+
+<div id="tools" style="display: none;">
+  <button id="teactButton">Re-run for Teact</button>
+  <button id="reactButton">Re-run for React v18</button>
+  <button id="preactButton">Re-run for Preact v10</button>
+</div>
+
+<div id="root"></div>
+
+<script>
+  const PAUSE = 1000;
+  const SHORT_PAUSE = 100;
+
+  const BENCHMARK_JSX = {};
+
+  BENCHMARK_JSX.elements = (items) => `(library) => {
+    const App = () => (
+      <div>
+        <h2>Title</h2>
+        <div>Hello world</div>
+        <ul>
+          ${'<li><b>1</b></li>'.repeat(items)}
+        </ul>
+      </div>
+    );
+    return App;
+  }`;
+
+  BENCHMARK_JSX.components = (items) => `(library) => {
+    const Button = ({onClick, children}) => (
+      <button onClick={onClick}>{children}</button>
+    );
+
+    const Product = ({product, onAddToCart}) => (
+      <li className="product">
+        <h2>{product.name}</h2>
+        <p>{product.description}</p>
+        <h3>{product.price}</h3>
+        <Button onClick={() => onAddToCart(product)}>Add to Cart</Button>
+      </li>
+    );
+
+    const ProductList = ({products, onAddToCart}) => (
+      <ul className="product-list">
+        {products.map((product, index) =>
+          <Product
+            key={index}
+            product={product}
+            onAddToCart={onAddToCart}
+          />
+        )}
+      </ul>
+    );
+
+    const App = () => {
+      const products = Array.from({ length: ${items} }, (_, i) => ({
+        name: 'Product ' + i,
+        description: 'Description ' + i,
+        price: '$' + i,
+      }));
+      const [cart, setCart] = library.useState([]);
+
+      const handleAddToCart = (product) => {
+        setCart([...cart, product]);
+      }
+
+      return (
+        <div className="app">
+          <ProductList products={products} onAddToCart={handleAddToCart}/>
+        </div>
+      );
+    }
+
+    return App;
+  }`;
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    Object.assign(preact, preactHooks);
+    Object.assign(window, teact);
+
+    await runAndOutputBenchmarks('elements', 30000, 30);
+    await runAndOutputBenchmarks('components', 10000, 50);
+
+    const running = document.querySelector('#running');
+    running.style.display = 'none';
+    const tools = document.querySelector('#tools');
+    tools.style.display = '';
+  });
+
+  document.getElementById('teactButton').addEventListener('click', () => {
+    runBenchmark('Teact', TeactDOM, 'components', 10000, 50);
+  });
+
+  document.getElementById('reactButton').addEventListener('click', () => {
+    runBenchmark('React', ReactDOM, 'components', 10000, 50);
+  });
+
+  document.getElementById('preactButton').addEventListener('click', () => {
+    runBenchmark('preact', preact, 'components', 10000, 50);
+  });
+
+  function transformCode(code, pragma) {
+    return Babel.transform(code, {
+      presets: [['react', {
+        pragma: pragma,
+        pragmaFrag: pragma + '.Fragment',
+      }]],
+    }).code;
+  }
+
+  async function runBenchmark(libraryName, domLibrary, benchmark, items, iterations) {
+    const library = window[libraryName];
+    const root = document.getElementById('root');
+    const jsxWithItems = BENCHMARK_JSX[benchmark](items);
+    const transformed = transformCode(jsxWithItems, `${libraryName}.createElement`);
+    const App = eval(transformed)(library);
+    const times = [];
+    let totalCount = 0;
+
+    for (let i = 0; i < iterations; i++) {
+      if (i % 5 === 0) {
+        await pause(SHORT_PAUSE);
+        await whenRaf();
+      }
+
+      const start = performance.now();
+      const appElement = library.createElement(App);
+      domLibrary.render(appElement, root);
+      times.push(performance.now() - start);
+
+      totalCount += root.querySelectorAll('li').length;
+      domLibrary.render(null, root);
+      // root.innerHTML = '';
+    }
+
+    times.sort();
+    const meanTime = times[Math.floor(times.length / 2)];
+    console.log(libraryName, 'mean:', meanTime.toFixed(2), 'ms');
+    console.log(libraryName, 'items rendered:', totalCount);
+    return meanTime;
+  }
+
+  async function runAndOutputBenchmarks(benchmark, items, iterations) {
+    await pause(PAUSE);
+    console.log('Teact...');
+    console.time('Teact');
+    const teactMean = await runBenchmark('Teact', TeactDOM, benchmark, items, iterations);
+    console.timeEnd('Teact');
+
+    await pause(PAUSE);
+    console.log('React...');
+    console.time('React');
+    const reactMean = await runBenchmark('React', ReactDOM, benchmark, items, iterations);
+    console.timeEnd('React');
+
+    await pause(PAUSE);
+    console.log('preact...');
+    console.time('preact');
+    const preactMean = await runBenchmark('preact', preact, benchmark, items, iterations);
+    console.timeEnd('preact');
+
+    const table = document.querySelector('#table');
+    table.style.display = '';
+
+    const baseline = reactMean;
+    const teactPercent = Math.round(((teactMean - baseline) / reactMean) * 100);
+    const reactPercent = Math.round(((reactMean - baseline) / reactMean) * 100);
+    const preactPercent = Math.round(((preactMean - baseline) / reactMean) * 100);
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${items / 1000}K ${benchmark}</td>
+      <td>${Math.round(teactMean)}ms · <span>${teactPercent}%</span></td>
+      <td>${Math.round(reactMean)}ms · <span>${reactPercent}%</span></td>
+      <td>${Math.round(preactMean)}ms · <span>${preactPercent}%</span></td>
+    `;
+    table.appendChild(tr);
+
+    const all = [teactMean, reactMean, preactMean];
+    const bestIndex = all.indexOf(Math.min(...all));
+    tr.children[bestIndex + 1].firstElementChild.classList.add('best');
+  }
+
+  function pause(ms) {
+    return new Promise((resolve) => {
+      setTimeout(resolve, ms);
+    });
+  }
+
+  function whenRaf(ms) {
+    return new Promise((resolve) => {
+      requestAnimationFrame(resolve);
+    });
+  }
+</script>
+</body>
+</html>

@@ -4,8 +4,10 @@
   "description": "Tiny and fast alternative for React",
   "main": "index.js",
   "scripts": {
-    "demo:dev": "webpack serve --config demo/webpack.config.js --mode development",
-    "demo:build": "webpack --config demo/webpack.config.js  --mode development",
+    "dev:benchmark": "webpack serve --mode development",
+    "build": "webpack",
+    "dev:demo": "webpack serve --config demo/webpack.config.js --mode development",
+    "build:demo": "webpack --config demo/webpack.config.js  --mode development",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -34,9 +36,10 @@
     "@types/react": "^18.0.21",
     "babel-loader": "^8.2.5",
     "html-webpack-plugin": "^5.5.0",
-    "typescript": "^4.8.3",
-    "webpack": "^5.74.0",
-    "webpack-cli": "^4.10.0",
+    "ts-loader": "^9.4.3",
+    "typescript": "^5.1.3",
+    "webpack": "^5.88.0",
+    "webpack-cli": "^5.1.4",
     "webpack-dev-server": "^4.11.1"
   }
 }
