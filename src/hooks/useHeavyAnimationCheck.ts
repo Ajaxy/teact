@@ -1,36 +1,43 @@
 import { useEffect } from '../teact/teact';
 
-const ANIMATION_START_EVENT = 'tt-event-heavy-animation-start';
-const ANIMATION_END_EVENT = 'tt-event-heavy-animation-end';
+import { createCallbackManager } from '../util/callbacks';
 
-let timeout: number | undefined;
-let isAnimating = false;
+import useLastCallback from './useLastCallback';
 
 // Make sure to end even if end callback was not called (which was some hardly-reproducible bug)
 const AUTO_END_TIMEOUT = 1000;
 
+const startCallbacks = createCallbackManager();
+const endCallbacks = createCallbackManager();
+
+let timeout: number | undefined;
+let isAnimating = false;
+
 const useHeavyAnimationCheck = (
-  handleAnimationStart: AnyToVoidFunction,
-  handleAnimationEnd: AnyToVoidFunction,
+  onStart?: AnyToVoidFunction,
+  onEnd?: AnyToVoidFunction,
   isDisabled = false,
 ) => {
+  const lastOnStart = useLastCallback(onStart);
+  const lastOnEnd = useLastCallback(onEnd);
+
   useEffect(() => {
     if (isDisabled) {
       return undefined;
     }
 
     if (isAnimating) {
-      handleAnimationStart();
+      lastOnStart();
     }
 
-    document.addEventListener(ANIMATION_START_EVENT, handleAnimationStart);
-    document.addEventListener(ANIMATION_END_EVENT, handleAnimationEnd);
+    startCallbacks.addCallback(lastOnStart);
+    endCallbacks.addCallback(lastOnEnd);
 
     return () => {
-      document.removeEventListener(ANIMATION_END_EVENT, handleAnimationEnd);
-      document.removeEventListener(ANIMATION_START_EVENT, handleAnimationStart);
+      endCallbacks.removeCallback(lastOnEnd);
+      startCallbacks.removeCallback(lastOnStart);
     };
-  }, [isDisabled, handleAnimationEnd, handleAnimationStart]);
+  }, [isDisabled, lastOnEnd, lastOnStart]);
 };
 
 export function isHeavyAnimating() {
@@ -40,7 +47,7 @@ export function isHeavyAnimating() {
 export function dispatchHeavyAnimationEvent(duration = AUTO_END_TIMEOUT) {
   if (!isAnimating) {
     isAnimating = true;
-    document.dispatchEvent(new Event(ANIMATION_START_EVENT));
+    startCallbacks.runCallbacks();
   }
 
   if (timeout) {
@@ -56,7 +63,7 @@ export function dispatchHeavyAnimationEvent(duration = AUTO_END_TIMEOUT) {
     }
 
     isAnimating = false;
-    document.dispatchEvent(new Event(ANIMATION_END_EVENT));
+    endCallbacks.runCallbacks();
   }
 
   timeout = window.setTimeout(onEnd, duration);

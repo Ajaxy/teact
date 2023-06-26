@@ -1,14 +1,15 @@
-import type { FC, FC_withDebug, Props } from './teact';
-import React, { useEffect, useState } from './teact';
-
 import { DEBUG, DEBUG_MORE } from '../config';
-import useForceUpdate from '../hooks/useForceUpdate';
-import generateIdFor from '../util/generateIdFor';
-import { fastRaf, throttleWithTickEnd } from '../util/schedulers';
-import arePropsShallowEqual, { getUnequalProps } from '../util/arePropsShallowEqual';
-import { orderBy } from '../util/iteratees';
+import arePropsShallowEqual, { logUnequalProps } from '../util/arePropsShallowEqual';
 import { handleError } from '../util/handleError';
+import { orderBy } from '../util/iteratees';
+import { throttleWithTickEnd } from '../util/schedulers';
+import { requestMeasure } from '../lib/fasterdom/fasterdom';
+import type { FC, FC_withDebug, Props } from './teact';
+import React, { DEBUG_resolveComponentName, useEffect } from './teact';
+
+import useForceUpdate from '../hooks/useForceUpdate';
 import { isHeavyAnimating } from '../hooks/useHeavyAnimationCheck';
+import useUniqueId from '../hooks/useUniqueId';
 
 export default React;
 
@@ -18,10 +19,11 @@ type GlobalState =
 type ActionNames = string;
 type ActionPayload = any;
 
-interface ActionOptions {
+export interface ActionOptions {
   forceOnHeavyAnimation?: boolean;
   // Workaround for iOS gesture history navigation
   forceSyncOnIOs?: boolean;
+  noUpdate?: boolean;
 }
 
 type Actions = Record<ActionNames, (payload?: ActionPayload, options?: ActionOptions) => void>;
@@ -35,7 +37,7 @@ type ActionHandler = (
 type DetachWhenChanged = (current: any) => void;
 type MapStateToProps<OwnProps = undefined> = (
   (global: GlobalState, ownProps: OwnProps, detachWhenChanged: DetachWhenChanged) => AnyLiteral
-);
+  );
 
 let currentGlobal = {} as GlobalState;
 
@@ -48,13 +50,13 @@ const DEBUG_releaseCapturedIdThrottled = throttleWithTickEnd(() => {
 
 const actionHandlers: Record<string, ActionHandler[]> = {};
 const callbacks: Function[] = [updateContainers];
+const immediateCallbacks: Function[] = [];
 const actions = {} as Actions;
 const containers = new Map<string, {
   mapStateToProps: MapStateToProps<any>;
   ownProps: Props;
   mappedProps?: Props;
   forceUpdate: Function;
-  areMappedPropsChanged: boolean;
   isDetached: boolean;
   detachReason: any;
   detachWhenChanged: DetachWhenChanged;
@@ -64,9 +66,17 @@ const containers = new Map<string, {
 
 const runCallbacksThrottled = throttleWithTickEnd(runCallbacks);
 
-function runCallbacks(forceOnHeavyAnimation = false) {
-  if (!forceOnHeavyAnimation && isHeavyAnimating()) {
-    fastRaf(runCallbacksThrottled);
+let forceOnHeavyAnimation = true;
+
+function runImmediateCallbacks() {
+  immediateCallbacks.forEach((cb) => cb(currentGlobal));
+}
+
+function runCallbacks() {
+  if (forceOnHeavyAnimation) {
+    forceOnHeavyAnimation = false;
+  } else if (isHeavyAnimating()) {
+    requestMeasure(runCallbacksThrottled);
     return;
   }
 
@@ -84,10 +94,18 @@ export function setGlobal(newGlobal?: GlobalState, options?: ActionOptions) {
     }
 
     currentGlobal = newGlobal;
+
+    if (!options?.noUpdate) runImmediateCallbacks();
+
     if (options?.forceSyncOnIOs) {
-      runCallbacks(true);
+      forceOnHeavyAnimation = true;
+      runCallbacks();
     } else {
-      runCallbacksThrottled(options?.forceOnHeavyAnimation);
+      if (options?.forceOnHeavyAnimation) {
+        forceOnHeavyAnimation = true;
+      }
+
+      runCallbacksThrottled();
     }
   }
 }
@@ -178,17 +196,14 @@ function updateContainers() {
 
     if (Object.keys(newMappedProps).length && !arePropsShallowEqual(mappedProps!, newMappedProps)) {
       if (DEBUG_MORE) {
-        // eslint-disable-next-line no-console
-        console.log(
-          '[TeactN] Will update',
-          container.DEBUG_componentName,
-          'caused by',
-          getUnequalProps(mappedProps!, newMappedProps).join(', '),
+        logUnequalProps(
+          mappedProps!,
+          newMappedProps,
+          `[TeactN] Will update ${container.DEBUG_componentName} caused by:`,
         );
       }
 
       container.mappedProps = newMappedProps;
-      container.areMappedPropsChanged = true;
       container.DEBUG_updates++;
 
       forceUpdate();
@@ -216,14 +231,14 @@ export function addActionHandler(name: ActionNames, handler: ActionHandler) {
   actionHandlers[name].push(handler);
 }
 
-export function addCallback(cb: Function) {
-  callbacks.push(cb);
+export function addCallback(cb: Function, isImmediate = false) {
+  (isImmediate ? immediateCallbacks : callbacks).push(cb);
 }
 
-export function removeCallback(cb: Function) {
-  const index = callbacks.indexOf(cb);
+export function removeCallback(cb: Function, isImmediate = false) {
+  const index = (isImmediate ? immediateCallbacks : callbacks).indexOf(cb);
   if (index !== -1) {
-    callbacks.splice(index, 1);
+    (isImmediate ? immediateCallbacks : callbacks).splice(index, 1);
   }
 }
 
@@ -231,10 +246,8 @@ export function withGlobal<OwnProps extends AnyLiteral>(
   mapStateToProps: MapStateToProps<OwnProps> = () => ({}),
 ) {
   return (Component: FC) => {
-    return function TeactNContainer(props: OwnProps) {
-      (TeactNContainer as FC_withDebug).DEBUG_contentComponentName = Component.name;
-
-      const [id] = useState(generateIdFor(containers));
+    function TeactNContainer(props: OwnProps) {
+      const id = useUniqueId();
       const forceUpdate = useForceUpdate();
 
       useEffect(() => {
@@ -248,7 +261,6 @@ export function withGlobal<OwnProps extends AnyLiteral>(
         container = {
           mapStateToProps,
           ownProps: props,
-          areMappedPropsChanged: false,
           forceUpdate,
           isDetached: false,
           detachReason: undefined,
@@ -269,54 +281,54 @@ export function withGlobal<OwnProps extends AnyLiteral>(
         containers.set(id, container);
       }
 
-      if (container.areMappedPropsChanged) {
-        container.areMappedPropsChanged = false;
-      }
-
       if (!container.mappedProps || !arePropsShallowEqual(container.ownProps, props)) {
         container.ownProps = props;
 
-        try {
-          container.mappedProps = mapStateToProps(currentGlobal, props, container.detachWhenChanged);
-        } catch (err: any) {
-          handleError(err);
+        if (!container.isDetached) {
+          try {
+            container.mappedProps = mapStateToProps(currentGlobal, props, container.detachWhenChanged);
+          } catch (err: any) {
+            handleError(err);
+          }
         }
       }
 
       // eslint-disable-next-line react/jsx-props-no-spreading
       return <Component {...container.mappedProps} {...props} />;
-    };
+    }
+
+    (TeactNContainer as FC_withDebug).DEBUG_contentComponentName = DEBUG_resolveComponentName(Component);
+
+    return TeactNContainer;
   };
 }
 
-export function typify<ProjectGlobalState, ActionPayloads, NonTypedActionNames extends string = never>() {
-  type NonTypedActionPayloads = {
-    [ActionName in NonTypedActionNames]: ActionPayload;
-  };
+export function typify<
+  ProjectGlobalState,
+  ActionPayloads,
+>() {
+  type ProjectActionNames = keyof ActionPayloads;
 
-  type ProjectActionTypes =
-    ActionPayloads
-    & NonTypedActionPayloads;
-
-  type ProjectActionNames = keyof ProjectActionTypes;
-
+  // When payload is allowed to be `undefined` we consider it optional
   type ProjectActions = {
-    [ActionName in ProjectActionNames]: (
-      payload?: ProjectActionTypes[ActionName],
-      options?: ActionOptions,
-    ) => void;
+    [ActionName in ProjectActionNames]:
+    (undefined extends ActionPayloads[ActionName] ? (
+      (payload?: ActionPayloads[ActionName], options?: ActionOptions) => void
+      ) : (
+      (payload: ActionPayloads[ActionName], options?: ActionOptions) => void
+      ))
   };
 
   type ActionHandlers = {
-    [ActionName in keyof ProjectActionTypes]: (
+    [ActionName in keyof ActionPayloads]: (
       global: ProjectGlobalState,
       actions: ProjectActions,
-      payload: ProjectActionTypes[ActionName],
+      payload: ActionPayloads[ActionName],
     ) => ProjectGlobalState | void | Promise<void>;
   };
 
   return {
-    getGlobal: getGlobal as () => ProjectGlobalState,
+    getGlobal: getGlobal as <T extends ProjectGlobalState>() => T,
     setGlobal: setGlobal as (state: ProjectGlobalState, options?: ActionOptions) => void,
     getActions: getActions as () => ProjectActions,
     addActionHandler: addActionHandler as <ActionName extends ProjectActionNames>(
@@ -332,6 +344,7 @@ export function typify<ProjectGlobalState, ActionPayloads, NonTypedActionNames e
 
 if (DEBUG) {
   (window as any).getGlobal = getGlobal;
+  (window as any).setGlobal = setGlobal;
 
   document.addEventListener('dblclick', () => {
     // eslint-disable-next-line no-console
