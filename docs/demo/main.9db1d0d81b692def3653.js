@@ -10,10 +10,10 @@
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "DEBUG": () => (/* binding */ DEBUG),
-/* harmony export */   "DEBUG_MORE": () => (/* binding */ DEBUG_MORE)
+/* harmony export */   DEBUG: () => (/* binding */ DEBUG),
+/* harmony export */   DEBUG_MORE: () => (/* binding */ DEBUG_MORE)
 /* harmony export */ });
-var DEBUG = true;
+var DEBUG = false;
 var DEBUG_MORE = false;
 
 /***/ }),
@@ -26,16 +26,16 @@ var DEBUG_MORE = false;
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "disableStrict": () => (/* reexport safe */ _stricterdom__WEBPACK_IMPORTED_MODULE_2__.disableStrict),
-/* harmony export */   "enableStrict": () => (/* reexport safe */ _stricterdom__WEBPACK_IMPORTED_MODULE_2__.enableStrict),
-/* harmony export */   "forceMeasure": () => (/* reexport safe */ _stricterdom__WEBPACK_IMPORTED_MODULE_2__.forceMeasure),
-/* harmony export */   "getPhase": () => (/* reexport safe */ _stricterdom__WEBPACK_IMPORTED_MODULE_2__.getPhase),
-/* harmony export */   "requestForcedReflow": () => (/* binding */ requestForcedReflow),
-/* harmony export */   "requestMeasure": () => (/* binding */ requestMeasure),
-/* harmony export */   "requestMutation": () => (/* binding */ requestMutation),
-/* harmony export */   "requestNextMutation": () => (/* binding */ requestNextMutation),
-/* harmony export */   "setHandler": () => (/* reexport safe */ _stricterdom__WEBPACK_IMPORTED_MODULE_2__.setHandler),
-/* harmony export */   "setPhase": () => (/* reexport safe */ _stricterdom__WEBPACK_IMPORTED_MODULE_2__.setPhase)
+/* harmony export */   disableStrict: () => (/* reexport safe */ _stricterdom__WEBPACK_IMPORTED_MODULE_2__.disableStrict),
+/* harmony export */   enableStrict: () => (/* reexport safe */ _stricterdom__WEBPACK_IMPORTED_MODULE_2__.enableStrict),
+/* harmony export */   forceMeasure: () => (/* reexport safe */ _stricterdom__WEBPACK_IMPORTED_MODULE_2__.forceMeasure),
+/* harmony export */   getPhase: () => (/* reexport safe */ _stricterdom__WEBPACK_IMPORTED_MODULE_2__.getPhase),
+/* harmony export */   requestForcedReflow: () => (/* binding */ requestForcedReflow),
+/* harmony export */   requestMeasure: () => (/* binding */ requestMeasure),
+/* harmony export */   requestMutation: () => (/* binding */ requestMutation),
+/* harmony export */   requestNextMutation: () => (/* binding */ requestNextMutation),
+/* harmony export */   setHandler: () => (/* reexport safe */ _stricterdom__WEBPACK_IMPORTED_MODULE_2__.setHandler),
+/* harmony export */   setPhase: () => (/* reexport safe */ _stricterdom__WEBPACK_IMPORTED_MODULE_2__.setPhase)
 /* harmony export */ });
 /* harmony import */ var _util_schedulers__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../util/schedulers */ "./src/util/schedulers.ts");
 /* harmony import */ var _util_safeExec__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../util/safeExec */ "./src/util/safeExec.ts");
@@ -196,12 +196,12 @@ __webpack_require__.r(__webpack_exports__);
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "disableStrict": () => (/* binding */ disableStrict),
-/* harmony export */   "enableStrict": () => (/* binding */ enableStrict),
-/* harmony export */   "forceMeasure": () => (/* binding */ forceMeasure),
-/* harmony export */   "getPhase": () => (/* binding */ getPhase),
-/* harmony export */   "setHandler": () => (/* binding */ setHandler),
-/* harmony export */   "setPhase": () => (/* binding */ setPhase)
+/* harmony export */   disableStrict: () => (/* binding */ disableStrict),
+/* harmony export */   enableStrict: () => (/* binding */ enableStrict),
+/* harmony export */   forceMeasure: () => (/* binding */ forceMeasure),
+/* harmony export */   getPhase: () => (/* binding */ getPhase),
+/* harmony export */   setHandler: () => (/* binding */ setHandler),
+/* harmony export */   setPhase: () => (/* binding */ setPhase)
 /* harmony export */ });
 /* harmony import */ var _layoutCauses__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./layoutCauses */ "./src/lib/fasterdom/layoutCauses.ts");
 function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
@@ -265,6 +265,7 @@ function setupLayoutDetectors() {
         causes = _ref2[1];
 
     var entity = window[name];
+    if (!entity) return;
     var prototype = _typeof(entity) === 'object' ? entity : entity.prototype;
 
     if ('props' in causes) {
@@ -313,6 +314,7 @@ function clearLayoutDetectors() {
         causes = _ref4[1];
 
     var entity = window[name];
+    if (!entity) return;
     var prototype = _typeof(entity) === 'object' ? entity : entity.prototype;
 
     if ('props' in causes) {
@@ -394,9 +396,9 @@ function onMeasure(propName) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "addEventListener": () => (/* binding */ addEventListener),
-/* harmony export */   "removeAllDelegatedListeners": () => (/* binding */ removeAllDelegatedListeners),
-/* harmony export */   "removeEventListener": () => (/* binding */ removeEventListener)
+/* harmony export */   addEventListener: () => (/* binding */ addEventListener),
+/* harmony export */   removeAllDelegatedListeners: () => (/* binding */ removeAllDelegatedListeners),
+/* harmony export */   removeEventListener: () => (/* binding */ removeEventListener)
 /* harmony export */ });
 /* harmony import */ var _config__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../config */ "./src/config.ts");
 
@@ -598,10 +600,10 @@ if (_config__WEBPACK_IMPORTED_MODULE_0__.DEBUG) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "addExtraClass": () => (/* binding */ addExtraClass),
+/* harmony export */   addExtraClass: () => (/* binding */ addExtraClass),
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__),
-/* harmony export */   "removeExtraClass": () => (/* binding */ removeExtraClass),
-/* harmony export */   "toggleExtraClass": () => (/* binding */ toggleExtraClass)
+/* harmony export */   removeExtraClass: () => (/* binding */ removeExtraClass),
+/* harmony export */   toggleExtraClass: () => (/* binding */ toggleExtraClass)
 /* harmony export */ });
 /* harmony import */ var _teact__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./teact */ "./src/teact/teact.ts");
 /* harmony import */ var _config__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../config */ "./src/config.ts");
@@ -611,15 +613,17 @@ function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArra
 
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
 function _iterableToArrayLimit(arr, i) { var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]; if (_i == null) return; var _arr = []; var _n = true; var _d = false; var _s, _e; try { for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
 
 function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
 function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
+
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e2) { throw _e2; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e3) { didErr = true; err = _e3; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
 
 
@@ -645,13 +649,10 @@ function render($element, parentEl) {
     });
   }
 
+  var runImmediateEffects = (0,_teact__WEBPACK_IMPORTED_MODULE_0__.captureImmediateEffects)();
   var $head = headsByElement.get(parentEl);
   var $newElement = renderWithVirtual(parentEl, $head.children[0], $element, $head, 0);
-
-  if (!(0,_teact__WEBPACK_IMPORTED_MODULE_0__.willRunImmediateEffects)()) {
-    (0,_teact__WEBPACK_IMPORTED_MODULE_0__.runImmediateEffects)();
-  }
-
+  runImmediateEffects === null || runImmediateEffects === void 0 ? void 0 : runImmediateEffects();
   $head.children = $newElement ? [$newElement] : [];
   return undefined;
 }
@@ -672,7 +673,7 @@ function renderWithVirtual(parentEl, $current, $new, $parent, index) {
   } // Parent element may have changed, so we need to update the listener closure.
 
 
-  if (!skipComponentUpdate && isNewComponent && $new.componentInstance.isMounted) {
+  if (!skipComponentUpdate && isNewComponent && $new.componentInstance.mountState === _teact__WEBPACK_IMPORTED_MODULE_0__.MountState.Mounted) {
     setupComponentUpdateListener(parentEl, $new, $parent, index);
   }
 
@@ -699,9 +700,18 @@ function renderWithVirtual(parentEl, $current, $new, $parent, index) {
         fragment: fragment
       });
     } else {
-      var node = createNode($newAsReal);
-      $newAsReal.target = node;
-      insertBefore(fragment || parentEl, node, nextSibling);
+      if ($parent.children.length === 1 && ((0,_teact__WEBPACK_IMPORTED_MODULE_0__.isTextElement)($newAsReal) || (0,_teact__WEBPACK_IMPORTED_MODULE_0__.isEmptyElement)($newAsReal))) {
+        parentEl.textContent = 'value' in $newAsReal ? $newAsReal.value : '';
+        $newAsReal.target = parentEl.firstChild;
+      } else {
+        var node = createNode($newAsReal);
+        $newAsReal.target = node;
+        insertBefore(fragment || parentEl, node, nextSibling);
+
+        if ((0,_teact__WEBPACK_IMPORTED_MODULE_0__.isTagElement)($newAsReal)) {
+          setElementRef($newAsReal, node);
+        }
+      }
     }
   } else if ($current && !$new) {
     remount(parentEl, $current, undefined);
@@ -722,17 +732,35 @@ function renderWithVirtual(parentEl, $current, $new, $parent, index) {
           fragment: fragment
         });
       } else {
-        var _node = createNode($newAsReal);
+        var canSetText = $parent.children.length === 1 && ((0,_teact__WEBPACK_IMPORTED_MODULE_0__.isTextElement)($newAsReal) || (0,_teact__WEBPACK_IMPORTED_MODULE_0__.isEmptyElement)($newAsReal)) && ((0,_teact__WEBPACK_IMPORTED_MODULE_0__.isTextElement)($current) || (0,_teact__WEBPACK_IMPORTED_MODULE_0__.isEmptyElement)($current)) && (!parentEl.firstChild || parentEl.firstChild === $current.target);
 
-        $newAsReal.target = _node;
-        remount(parentEl, $current, _node, nextSibling);
+        if (canSetText) {
+          var value = 'value' in $newAsReal ? $newAsReal.value : '';
+
+          if (parentEl.firstChild) {
+            parentEl.firstChild.nodeValue = value;
+          } else {
+            parentEl.textContent = value;
+          }
+
+          $newAsReal.target = parentEl.firstChild;
+        } else {
+          var _node = createNode($newAsReal);
+
+          $newAsReal.target = _node;
+          remount(parentEl, $current, _node, nextSibling);
+
+          if ((0,_teact__WEBPACK_IMPORTED_MODULE_0__.isTagElement)($newAsReal)) {
+            setElementRef($newAsReal, _node);
+          }
+        }
       }
     } else {
       var isComponent = isCurrentComponent && isNewComponent;
       var isFragment = isCurrentFragment && isNewFragment;
 
       if (isComponent || isFragment) {
-        $new.children = renderChildren($current, $new, parentEl, nextSibling);
+        $new.children = renderChildren($current, $new, parentEl, nextSibling, options.forceMoveToEnd);
       } else {
         var $currentAsReal = $current;
         var currentTarget = $currentAsReal.target;
@@ -743,14 +771,15 @@ function renderWithVirtual(parentEl, $current, $new, $parent, index) {
 
         if (isTag) {
           var $newAsTag = $new;
-          $newAsTag.props.ref = $current.props.ref;
+          setElementRef($current, undefined);
+          setElementRef($newAsTag, currentTarget);
 
-          if (nextSibling) {
+          if (nextSibling || options.forceMoveToEnd) {
             insertBefore(parentEl, currentTarget, nextSibling);
           }
 
           updateAttributes($current, $newAsTag, currentTarget);
-          $newAsTag.children = renderChildren($current, $newAsTag, currentTarget);
+          renderChildren($current, $newAsTag, currentTarget);
         }
       }
     }
@@ -763,16 +792,14 @@ function initComponent(parentEl, $element, $parent, index) {
   var _$element = $element,
       componentInstance = _$element.componentInstance;
 
-  if (!componentInstance.isMounted) {
+  if (componentInstance.mountState === _teact__WEBPACK_IMPORTED_MODULE_0__.MountState.New) {
     $element = (0,_teact__WEBPACK_IMPORTED_MODULE_0__.mountComponent)(componentInstance);
     setupComponentUpdateListener(parentEl, $element, $parent, index);
     var $firstChild = $element.children[0];
 
     if ((0,_teact__WEBPACK_IMPORTED_MODULE_0__.isComponentElement)($firstChild)) {
-      $element.children = [initComponent(parentEl, $firstChild, $element, 0)];
+      $element.children[0] = initComponent(parentEl, $firstChild, $element, 0);
     }
-
-    componentInstance.isMounted = true;
   }
 
   return $element;
@@ -794,15 +821,32 @@ function setupComponentUpdateListener(parentEl, $element, $parent, index) {
 }
 
 function mountChildren(parentEl, $element, options) {
-  $element.children = $element.children.map(function ($child, i) {
-    return renderWithVirtual(parentEl, undefined, $child, $element, i, options);
-  });
+  var children = $element.children;
+
+  for (var i = 0, l = children.length; i < l; i++) {
+    var $child = children[i];
+    var $newChild = renderWithVirtual(parentEl, undefined, $child, $element, i, options);
+
+    if ($newChild !== $child) {
+      children.splice(i, 1, $newChild);
+    }
+  }
 }
 
 function unmountChildren(parentEl, $element) {
-  $element.children.forEach(function ($child) {
-    renderWithVirtual(parentEl, $child, undefined, $element, -1);
-  });
+  var _iterator = _createForOfIteratorHelper($element.children),
+      _step;
+
+  try {
+    for (_iterator.s(); !(_step = _iterator.n()).done;) {
+      var $child = _step.value;
+      renderWithVirtual(parentEl, $child, undefined, $element, -1);
+    }
+  } catch (err) {
+    _iterator.e(err);
+  } finally {
+    _iterator.f();
+  }
 }
 
 function createNode($element) {
@@ -816,30 +860,29 @@ function createNode($element) {
 
   var tag = $element.tag,
       props = $element.props,
-      _$element$children = $element.children,
-      children = _$element$children === void 0 ? [] : _$element$children;
+      children = $element.children;
   var element = document.createElement(tag);
-
-  if (_typeof(props.ref) === 'object') {
-    props.ref.current = element;
-  } else if (typeof props.ref === 'function') {
-    props.ref(element);
-  }
-
   processControlled(tag, props);
-  Object.entries(props).forEach(function (_ref) {
-    var _ref2 = _slicedToArray(_ref, 2),
-        key = _ref2[0],
-        value = _ref2[1];
+
+  for (var key in props) {
+    if (!props.hasOwnProperty(key)) continue;
 
     if (props[key] !== undefined) {
-      setAttribute(element, key, value);
+      setAttribute(element, key, props[key]);
     }
-  });
+  }
+
   processUncontrolledOnMount(element, props);
-  $element.children = children.map(function ($child, i) {
-    return renderWithVirtual(element, undefined, $child, $element, i);
-  });
+
+  for (var i = 0, l = children.length; i < l; i++) {
+    var $current = children[i];
+    var $new = renderWithVirtual(element, undefined, $current, $element, i);
+
+    if ($new !== $current) {
+      children.splice(i, 1, $new);
+    }
+  }
+
   return element;
 }
 
@@ -873,30 +916,31 @@ function unmountRealTree($element) {
     (0,_teact__WEBPACK_IMPORTED_MODULE_0__.unmountComponent)($element.componentInstance);
   } else if (!(0,_teact__WEBPACK_IMPORTED_MODULE_0__.isFragmentElement)($element)) {
     if ((0,_teact__WEBPACK_IMPORTED_MODULE_0__.isTagElement)($element)) {
-      var target = $element.target;
-
-      if (target) {
-        var _$element$props$ref;
-
-        extraClasses["delete"](target);
-        (0,_dom_events__WEBPACK_IMPORTED_MODULE_2__.removeAllDelegatedListeners)(target);
-
-        if (((_$element$props$ref = $element.props.ref) === null || _$element$props$ref === void 0 ? void 0 : _$element$props$ref.current) === target) {
-          $element.props.ref.current = undefined;
-        }
-      }
+      extraClasses["delete"]($element.target);
+      (0,_dom_events__WEBPACK_IMPORTED_MODULE_2__.removeAllDelegatedListeners)($element.target);
+      setElementRef($element, undefined);
     }
 
-    if ($element.target) {
-      $element.target = undefined; // Help GC
-    }
+    $element.target = undefined; // Help GC
 
     if (!(0,_teact__WEBPACK_IMPORTED_MODULE_0__.isParentElement)($element)) {
       return;
     }
   }
 
-  $element.children.forEach(unmountRealTree);
+  var _iterator2 = _createForOfIteratorHelper($element.children),
+      _step2;
+
+  try {
+    for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+      var $child = _step2.value;
+      unmountRealTree($child);
+    }
+  } catch (err) {
+    _iterator2.e(err);
+  } finally {
+    _iterator2.f();
+  }
 }
 
 function insertBefore(parentEl, node, nextSibling) {
@@ -913,12 +957,12 @@ function getNextSibling($current) {
     return getNextSibling(lastChild);
   }
 
-  var target = $current.target;
-  var nextSibling = target.nextSibling;
-  return nextSibling || undefined;
+  return $current.target.nextSibling || undefined;
 }
 
 function renderChildren($current, $new, currentEl, nextSibling) {
+  var forceMoveToEnd = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : false;
+
   if (_config__WEBPACK_IMPORTED_MODULE_1__.DEBUG) {
     DEBUG_checkKeyUniqueness($new.children);
   }
@@ -927,23 +971,25 @@ function renderChildren($current, $new, currentEl, nextSibling) {
     return renderFastListChildren($current, $new, currentEl);
   }
 
-  var currentChildrenLength = $current.children.length;
-  var newChildrenLength = $new.children.length;
+  var currentChildren = $current.children;
+  var newChildren = $new.children;
+  var currentChildrenLength = currentChildren.length;
+  var newChildrenLength = newChildren.length;
   var maxLength = Math.max(currentChildrenLength, newChildrenLength);
-  var newChildren = [];
   var fragment = newChildrenLength > currentChildrenLength ? document.createDocumentFragment() : undefined;
   var lastCurrentChild = $current.children[currentChildrenLength - 1];
-  var fragmentNextSibling = nextSibling || (newChildrenLength > currentChildrenLength && lastCurrentChild ? getNextSibling(lastCurrentChild) : undefined);
+  var fragmentNextSibling = fragment && (nextSibling || (lastCurrentChild ? getNextSibling(lastCurrentChild) : undefined));
 
   for (var i = 0; i < maxLength; i++) {
-    var $newChild = renderWithVirtual(currentEl, $current.children[i], $new.children[i], $new, i, i >= currentChildrenLength ? {
+    var $newChild = renderWithVirtual(currentEl, currentChildren[i], newChildren[i], $new, i, i >= currentChildrenLength ? {
       fragment: fragment
     } : {
-      nextSibling: nextSibling
+      nextSibling: nextSibling,
+      forceMoveToEnd: forceMoveToEnd
     });
 
-    if ($newChild) {
-      newChildren.push($newChild);
+    if ($newChild && $newChild !== newChildren[i]) {
+      newChildren.splice(i, 1, $newChild);
     }
   }
 
@@ -1032,17 +1078,20 @@ function renderFastListChildren($current, $new, currentEl) {
 
     var newOrderKey = 'props' in $newChild ? $newChild.props.teactOrderKey : undefined; // That is indicated by a changed `teactOrderKey` value
 
-    var shouldMoveNode = currentChildInfo.index !== currentPreservedIndex && currentChildInfo.orderKey !== newOrderKey;
+    var shouldMoveNode = currentChildInfo.index !== currentPreservedIndex && (!newOrderKey || currentChildInfo.orderKey !== newOrderKey);
     var isMovingDown = shouldMoveNode && currentPreservedIndex > currentChildInfo.index;
 
     if (!shouldMoveNode || isMovingDown) {
       currentPreservedIndex++;
     }
 
-    newChildren.push(renderWithVirtual(currentEl, currentChildInfo.$element, $newChild, $new, i, {
-      // `+ 1` is needed because before moving down the node still takes place above
-      nextSibling: shouldMoveNode ? currentEl.childNodes[isMovingDown ? i + 1 : i] : undefined
-    }));
+    var nextSibling = currentEl.childNodes[isMovingDown ? i + 1 : i];
+    var options = shouldMoveNode ? nextSibling ? {
+      nextSibling: nextSibling
+    } : {
+      forceMoveToEnd: true
+    } : undefined;
+    newChildren.push(renderWithVirtual(currentEl, currentChildInfo.$element, $newChild, $new, i, options));
   }); // This appends new children to the bottom
 
   if (fragmentElements) {
@@ -1069,6 +1118,16 @@ function renderFragment(elements, fragmentIndex, parentEl, $parent) {
   });
   insertBefore(parentEl, fragment, nextSibling);
   return newChildren;
+}
+
+function setElementRef($element, htmlElement) {
+  var ref = $element.props.ref;
+
+  if (_typeof(ref) === 'object') {
+    ref.current = htmlElement;
+  } else if (typeof ref === 'function') {
+    ref(htmlElement);
+  }
 }
 
 function processControlled(tag, props) {
@@ -1133,10 +1192,10 @@ function updateAttributes($current, $new, element) {
   processControlled(element.tagName, $new.props);
   var currentEntries = Object.entries($current.props);
   var newEntries = Object.entries($new.props);
-  currentEntries.forEach(function (_ref3) {
-    var _ref4 = _slicedToArray(_ref3, 2),
-        key = _ref4[0],
-        currentValue = _ref4[1];
+  currentEntries.forEach(function (_ref) {
+    var _ref2 = _slicedToArray(_ref, 2),
+        key = _ref2[0],
+        currentValue = _ref2[1];
 
     var newValue = $new.props[key];
 
@@ -1144,10 +1203,10 @@ function updateAttributes($current, $new, element) {
       removeAttribute(element, key, currentValue);
     }
   });
-  newEntries.forEach(function (_ref5) {
-    var _ref6 = _slicedToArray(_ref5, 2),
-        key = _ref6[0],
-        newValue = _ref6[1];
+  newEntries.forEach(function (_ref3) {
+    var _ref4 = _slicedToArray(_ref3, 2),
+        key = _ref4[0],
+        newValue = _ref4[1];
 
     var currentValue = $current.props[key];
 
@@ -1169,10 +1228,10 @@ function setAttribute(element, key, value) {
       var selectionStateJson = inputEl.dataset.__teactSelectionState;
 
       if (selectionStateJson) {
-        var _ref7 = JSON.parse(selectionStateJson),
-            selectionStart = _ref7.selectionStart,
-            selectionEnd = _ref7.selectionEnd,
-            isCaretAtEnd = _ref7.isCaretAtEnd;
+        var _ref5 = JSON.parse(selectionStateJson),
+            selectionStart = _ref5.selectionStart,
+            selectionEnd = _ref5.selectionEnd,
+            isCaretAtEnd = _ref5.isCaretAtEnd;
 
         if (isCaretAtEnd) {
           var length = inputEl.value.length;
@@ -1337,36 +1396,39 @@ var TeactDOM = {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "VirtualElementTypesEnum": () => (/* binding */ VirtualElementTypesEnum),
+/* harmony export */   DEBUG_resolveComponentName: () => (/* binding */ DEBUG_resolveComponentName),
+/* harmony export */   MountState: () => (/* binding */ MountState),
+/* harmony export */   VirtualElementTypesEnum: () => (/* binding */ VirtualElementTypesEnum),
+/* harmony export */   captureImmediateEffects: () => (/* binding */ captureImmediateEffects),
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__),
-/* harmony export */   "hasElementChanged": () => (/* binding */ hasElementChanged),
-/* harmony export */   "isComponentElement": () => (/* binding */ isComponentElement),
-/* harmony export */   "isEmptyElement": () => (/* binding */ isEmptyElement),
-/* harmony export */   "isFragmentElement": () => (/* binding */ isFragmentElement),
-/* harmony export */   "isParentElement": () => (/* binding */ isParentElement),
-/* harmony export */   "isTagElement": () => (/* binding */ isTagElement),
-/* harmony export */   "isTextElement": () => (/* binding */ isTextElement),
-/* harmony export */   "memo": () => (/* binding */ memo),
-/* harmony export */   "mountComponent": () => (/* binding */ mountComponent),
-/* harmony export */   "renderComponent": () => (/* binding */ renderComponent),
-/* harmony export */   "runImmediateEffects": () => (/* binding */ runImmediateEffects),
-/* harmony export */   "unmountComponent": () => (/* binding */ unmountComponent),
-/* harmony export */   "useCallback": () => (/* binding */ useCallback),
-/* harmony export */   "useEffect": () => (/* binding */ useEffect),
-/* harmony export */   "useLayoutEffect": () => (/* binding */ useLayoutEffect),
-/* harmony export */   "useMemo": () => (/* binding */ useMemo),
-/* harmony export */   "useRef": () => (/* binding */ useRef),
-/* harmony export */   "useState": () => (/* binding */ useState),
-/* harmony export */   "willRunImmediateEffects": () => (/* binding */ willRunImmediateEffects)
+/* harmony export */   hasElementChanged: () => (/* binding */ hasElementChanged),
+/* harmony export */   isComponentElement: () => (/* binding */ isComponentElement),
+/* harmony export */   isEmptyElement: () => (/* binding */ isEmptyElement),
+/* harmony export */   isFragmentElement: () => (/* binding */ isFragmentElement),
+/* harmony export */   isParentElement: () => (/* binding */ isParentElement),
+/* harmony export */   isTagElement: () => (/* binding */ isTagElement),
+/* harmony export */   isTextElement: () => (/* binding */ isTextElement),
+/* harmony export */   memo: () => (/* binding */ memo),
+/* harmony export */   mountComponent: () => (/* binding */ mountComponent),
+/* harmony export */   renderComponent: () => (/* binding */ renderComponent),
+/* harmony export */   unmountComponent: () => (/* binding */ unmountComponent),
+/* harmony export */   useCallback: () => (/* binding */ useCallback),
+/* harmony export */   useEffect: () => (/* binding */ useEffect),
+/* harmony export */   useLayoutEffect: () => (/* binding */ useLayoutEffect),
+/* harmony export */   useMemo: () => (/* binding */ useMemo),
+/* harmony export */   useRef: () => (/* binding */ useRef),
+/* harmony export */   useState: () => (/* binding */ useState)
 /* harmony export */ });
-/* harmony import */ var _lib_fasterdom_fasterdom__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../lib/fasterdom/fasterdom */ "./src/lib/fasterdom/fasterdom.ts");
-/* harmony import */ var _config__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../config */ "./src/config.ts");
-/* harmony import */ var _util_schedulers__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../util/schedulers */ "./src/util/schedulers.ts");
+/* harmony import */ var _config__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../config */ "./src/config.ts");
+/* harmony import */ var _util_arePropsShallowEqual__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../util/arePropsShallowEqual */ "./src/util/arePropsShallowEqual.ts");
+/* harmony import */ var _util_debugOverlay__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../util/debugOverlay */ "./src/util/debugOverlay.ts");
 /* harmony import */ var _util_iteratees__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../util/iteratees */ "./src/util/iteratees.ts");
-/* harmony import */ var _util_arePropsShallowEqual__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../util/arePropsShallowEqual */ "./src/util/arePropsShallowEqual.ts");
-/* harmony import */ var _util_debugOverlay__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../util/debugOverlay */ "./src/util/debugOverlay.ts");
+/* harmony import */ var _util_safeExec__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../util/safeExec */ "./src/util/safeExec.ts");
+/* harmony import */ var _util_schedulers__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../util/schedulers */ "./src/util/schedulers.ts");
 /* harmony import */ var _util_signals__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../util/signals */ "./src/util/signals.ts");
-/* harmony import */ var _util_safeExec__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../util/safeExec */ "./src/util/safeExec.ts");
+/* harmony import */ var _lib_fasterdom_fasterdom__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../lib/fasterdom/fasterdom */ "./src/lib/fasterdom/fasterdom.ts");
+var _excluded = ["avgRenderTime"];
+
 function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
 
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
@@ -1375,17 +1437,21 @@ function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { va
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
-function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
+function _objectWithoutProperties(source, excluded) { if (source == null) return {}; var target = _objectWithoutPropertiesLoose(source, excluded); var key, i; if (Object.getOwnPropertySymbols) { var sourceSymbolKeys = Object.getOwnPropertySymbols(source); for (i = 0; i < sourceSymbolKeys.length; i++) { key = sourceSymbolKeys[i]; if (excluded.indexOf(key) >= 0) continue; if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue; target[key] = source[key]; } } return target; }
 
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _objectWithoutPropertiesLoose(source, excluded) { if (source == null) return {}; var target = {}; var sourceKeys = Object.keys(source); var key, i; for (i = 0; i < sourceKeys.length; i++) { key = sourceKeys[i]; if (excluded.indexOf(key) >= 0) continue; target[key] = source[key]; } return target; }
+
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 
 function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
 
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
+
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
-function _iterableToArrayLimit(arr, i) { var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]; if (_i == null) return; var _arr = []; var _n = true; var _d = false; var _s, _e; try { for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
-
-function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
 
 
@@ -1404,6 +1470,14 @@ var VirtualElementTypesEnum;
   VirtualElementTypesEnum[VirtualElementTypesEnum["Component"] = 3] = "Component";
   VirtualElementTypesEnum[VirtualElementTypesEnum["Fragment"] = 4] = "Fragment";
 })(VirtualElementTypesEnum || (VirtualElementTypesEnum = {}));
+
+var MountState;
+
+(function (MountState) {
+  MountState[MountState["New"] = 0] = "New";
+  MountState[MountState["Mounted"] = 1] = "Mounted";
+  MountState[MountState["Unmounted"] = 2] = "Unmounted";
+})(MountState || (MountState = {}));
 
 var Fragment = Symbol('Fragment');
 var DEBUG_RENDER_THRESHOLD = 7;
@@ -1435,8 +1509,6 @@ function createElement(source, props) {
     children[_key - 2] = arguments[_key];
   }
 
-  children = children.flat();
-
   if (source === Fragment) {
     return buildFragmentElement(children);
   } else if (typeof source === 'function') {
@@ -1449,62 +1521,33 @@ function createElement(source, props) {
 function buildFragmentElement(children) {
   return {
     type: VirtualElementTypesEnum.Fragment,
-    children: dropEmptyTail(children, true).map(buildChildElement)
+    children: buildChildren(children, true)
   };
 }
 
 function createComponentInstance(Component, props, children) {
-  var parsedChildren;
-
-  if (children.length === 0) {
-    parsedChildren = undefined;
-  } else if (children.length === 1) {
-    var _children = _slicedToArray(children, 1);
-
-    parsedChildren = _children[0];
-  } else {
-    parsedChildren = children;
+  if (children !== null && children !== void 0 && children.length) {
+    props.children = children.length === 1 ? children[0] : children;
   }
 
   var componentInstance = {
     id: ++lastComponentId,
-    $element: {},
+    $element: undefined,
     Component: Component,
     name: Component.name,
-    props: _objectSpread(_objectSpread({}, props), parsedChildren && {
-      children: parsedChildren
-    }),
-    isMounted: false,
-    hooks: {
-      state: {
-        cursor: 0,
-        byCursor: []
-      },
-      effects: {
-        cursor: 0,
-        byCursor: []
-      },
-      memos: {
-        cursor: 0,
-        byCursor: []
-      },
-      refs: {
-        cursor: 0,
-        byCursor: []
-      }
-    }
+    props: props,
+    mountState: MountState.New
   };
   componentInstance.$element = buildComponentElement(componentInstance);
   return componentInstance.$element;
 }
 
-function buildComponentElement(componentInstance) {
-  var children = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
+function buildComponentElement(componentInstance, children) {
   return {
     type: VirtualElementTypesEnum.Component,
     componentInstance: componentInstance,
     props: componentInstance.props,
-    children: dropEmptyTail(children, true).map(buildChildElement)
+    children: children ? buildChildren(children, true) : []
   };
 }
 
@@ -1513,8 +1556,26 @@ function buildTagElement(tag, props, children) {
     type: VirtualElementTypesEnum.Tag,
     tag: tag,
     props: props,
-    children: dropEmptyTail(children).map(buildChildElement)
+    children: buildChildren(children)
   };
+}
+
+function buildChildren(children) {
+  var noEmpty = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+  var cleanChildren = dropEmptyTail(children, noEmpty);
+  var newChildren = [];
+
+  for (var i = 0, l = cleanChildren.length; i < l; i++) {
+    var child = cleanChildren[i];
+
+    if (Array.isArray(child)) {
+      newChildren.push.apply(newChildren, _toConsumableArray(buildChildren(child, noEmpty)));
+    } else {
+      newChildren.push(buildChildElement(child));
+    }
+  }
+
+  return newChildren;
 } // We only need placeholders in the middle of collection (to ensure other elements order).
 
 
@@ -1540,43 +1601,53 @@ function dropEmptyTail(children) {
 }
 
 function isEmptyPlaceholder(child) {
-  // eslint-disable-next-line no-null/no-null
-  return child === false || child === null || child === undefined;
+  return !child && child !== 0;
 }
 
 function buildChildElement(child) {
   if (isEmptyPlaceholder(child)) {
-    return buildEmptyElement();
+    return {
+      type: VirtualElementTypesEnum.Empty
+    };
   } else if (isParentElement(child)) {
     return child;
   } else {
-    return buildTextElement(child);
+    return {
+      type: VirtualElementTypesEnum.Text,
+      value: String(child)
+    };
   }
-}
-
-function buildTextElement(value) {
-  return {
-    type: VirtualElementTypesEnum.Text,
-    value: String(value)
-  };
-}
-
-function buildEmptyElement() {
-  return {
-    type: VirtualElementTypesEnum.Empty
-  };
 } // eslint-disable-next-line @typescript-eslint/naming-convention
 
 
 var DEBUG_components = {
   TOTAL: {
-    componentName: 'TOTAL',
-    renderCount: 0
+    name: 'TOTAL',
+    renders: 0
   }
-};
+}; // eslint-disable-next-line @typescript-eslint/naming-convention
+
+var DEBUG_memos = {};
+var DEBUG_MEMOS_CALLS_THRESHOLD = 20;
 document.addEventListener('dblclick', function () {
   // eslint-disable-next-line no-console
-  console.warn('COMPONENTS', (0,_util_iteratees__WEBPACK_IMPORTED_MODULE_3__.orderBy)(Object.values(DEBUG_components), 'renderCount', 'desc'));
+  console.warn('COMPONENTS', (0,_util_iteratees__WEBPACK_IMPORTED_MODULE_3__.orderBy)(Object.values(DEBUG_components).map(function (_ref) {
+    var avgRenderTime = _ref.avgRenderTime,
+        state = _objectWithoutProperties(_ref, _excluded);
+
+    return _objectSpread(_objectSpread({}, state), avgRenderTime !== undefined && {
+      avgRenderTime: Number(avgRenderTime.toFixed(2))
+    });
+  }), 'renders', 'desc')); // eslint-disable-next-line no-console
+
+  console.warn('MEMOS', (0,_util_iteratees__WEBPACK_IMPORTED_MODULE_3__.orderBy)(Object.values(DEBUG_memos).filter(function (_ref2) {
+    var calls = _ref2.calls;
+    return calls >= DEBUG_MEMOS_CALLS_THRESHOLD;
+  }).map(function (state) {
+    return _objectSpread(_objectSpread({}, state), {}, {
+      hitRate: Number(state.hitRate.toFixed(2))
+    });
+  }), 'hitRate', 'asc'));
 });
 var instancesPendingUpdate = new Set();
 var idsToExcludeFromUpdate = new Set();
@@ -1584,7 +1655,7 @@ var pendingEffects = new Map();
 var pendingCleanups = new Map();
 var pendingLayoutEffects = new Map();
 var pendingLayoutCleanups = new Map();
-var areImmediateEffectsPending = false;
+var areImmediateEffectsCaptured = false;
 /*
   Order:
   - component effect cleanups
@@ -1598,8 +1669,8 @@ var areImmediateEffectsPending = false;
   - forced layout mutation tasks
  */
 
-var runUpdatePassOnRaf = (0,_util_schedulers__WEBPACK_IMPORTED_MODULE_2__.throttleWith)(_lib_fasterdom_fasterdom__WEBPACK_IMPORTED_MODULE_0__.requestMeasure, function () {
-  areImmediateEffectsPending = true;
+var runUpdatePassOnRaf = (0,_util_schedulers__WEBPACK_IMPORTED_MODULE_5__.throttleWith)(_lib_fasterdom_fasterdom__WEBPACK_IMPORTED_MODULE_7__.requestMeasure, function () {
+  var runImmediateEffects = captureImmediateEffects();
   idsToExcludeFromUpdate = new Set();
   var instancesToUpdate = Array.from(instancesPendingUpdate).sort(function (a, b) {
     return a.id - b.id;
@@ -1615,7 +1686,7 @@ var runUpdatePassOnRaf = (0,_util_schedulers__WEBPACK_IMPORTED_MODULE_2__.thrott
   currentEffects.forEach(function (cb) {
     return cb();
   });
-  (0,_lib_fasterdom_fasterdom__WEBPACK_IMPORTED_MODULE_0__.requestMutation)(function () {
+  (0,_lib_fasterdom_fasterdom__WEBPACK_IMPORTED_MODULE_7__.requestMutation)(function () {
     instancesToUpdate.forEach(prepareComponentForFrame);
     instancesToUpdate.forEach(function (instance) {
       if (idsToExcludeFromUpdate.has(instance.id)) {
@@ -1624,14 +1695,19 @@ var runUpdatePassOnRaf = (0,_util_schedulers__WEBPACK_IMPORTED_MODULE_2__.thrott
 
       forceUpdateComponent(instance);
     });
-    areImmediateEffectsPending = false;
-    runImmediateEffects();
+    runImmediateEffects === null || runImmediateEffects === void 0 ? void 0 : runImmediateEffects();
   });
 });
-function willRunImmediateEffects() {
-  return areImmediateEffectsPending;
+function captureImmediateEffects() {
+  if (areImmediateEffectsCaptured) {
+    return undefined;
+  }
+
+  areImmediateEffectsCaptured = true;
+  return runCapturedImmediateEffects;
 }
-function runImmediateEffects() {
+
+function runCapturedImmediateEffects() {
   var currentLayoutCleanups = pendingLayoutCleanups;
   pendingLayoutCleanups = new Map();
   currentLayoutCleanups.forEach(function (cb) {
@@ -1642,33 +1718,50 @@ function runImmediateEffects() {
   currentLayoutEffects.forEach(function (cb) {
     return cb();
   });
+  areImmediateEffectsCaptured = false;
 }
+
 function renderComponent(componentInstance) {
   idsToExcludeFromUpdate.add(componentInstance.id);
   var Component = componentInstance.Component,
       props = componentInstance.props;
   var newRenderedValue;
-  (0,_util_safeExec__WEBPACK_IMPORTED_MODULE_7__["default"])(function () {
+  (0,_util_safeExec__WEBPACK_IMPORTED_MODULE_4__["default"])(function () {
     renderingInstance = componentInstance;
-    componentInstance.hooks.state.cursor = 0;
-    componentInstance.hooks.effects.cursor = 0;
-    componentInstance.hooks.memos.cursor = 0;
-    componentInstance.hooks.refs.cursor = 0; // eslint-disable-next-line @typescript-eslint/naming-convention
+
+    if (componentInstance.hooks) {
+      if (componentInstance.hooks.state) {
+        componentInstance.hooks.state.cursor = 0;
+      }
+
+      if (componentInstance.hooks.effects) {
+        componentInstance.hooks.effects.cursor = 0;
+      }
+
+      if (componentInstance.hooks.memos) {
+        componentInstance.hooks.memos.cursor = 0;
+      }
+
+      if (componentInstance.hooks.refs) {
+        componentInstance.hooks.refs.cursor = 0;
+      }
+    } // eslint-disable-next-line @typescript-eslint/naming-convention
+
 
     var DEBUG_startAt;
 
-    if (_config__WEBPACK_IMPORTED_MODULE_1__.DEBUG) {
-      var componentName = componentInstance.name;
+    if (_config__WEBPACK_IMPORTED_MODULE_0__.DEBUG) {
+      var componentName = DEBUG_resolveComponentName(Component);
 
       if (!DEBUG_components[componentName]) {
         DEBUG_components[componentName] = {
-          componentName: componentName,
-          renderCount: 0,
-          renderTimes: []
+          name: componentName,
+          renders: 0,
+          avgRenderTime: 0
         };
       }
 
-      if (_config__WEBPACK_IMPORTED_MODULE_1__.DEBUG_MORE) {
+      if (_config__WEBPACK_IMPORTED_MODULE_0__.DEBUG_MORE) {
         if (!DEBUG_SILENT_RENDERS_FOR.has(componentName)) {
           // eslint-disable-next-line no-console
           console.log("[Teact] Render ".concat(componentName));
@@ -1680,23 +1773,26 @@ function renderComponent(componentInstance) {
 
     newRenderedValue = Component(props);
 
-    if (_config__WEBPACK_IMPORTED_MODULE_1__.DEBUG) {
+    if (_config__WEBPACK_IMPORTED_MODULE_0__.DEBUG) {
       var duration = performance.now() - DEBUG_startAt;
-      var _componentName = componentInstance.name;
+
+      var _componentName = DEBUG_resolveComponentName(Component);
 
       if (duration > DEBUG_RENDER_THRESHOLD) {
         // eslint-disable-next-line no-console
         console.warn("[Teact] Slow component render: ".concat(_componentName, ", ").concat(Math.round(duration), " ms"));
       }
 
-      DEBUG_components[_componentName].renderTimes.push(duration);
+      var _DEBUG_components$_co = DEBUG_components[_componentName],
+          renders = _DEBUG_components$_co.renders,
+          avgRenderTime = _DEBUG_components$_co.avgRenderTime;
+      DEBUG_components[_componentName].avgRenderTime = (avgRenderTime * renders + duration) / (renders + 1);
+      DEBUG_components[_componentName].renders++;
+      DEBUG_components.TOTAL.renders++;
 
-      DEBUG_components[_componentName].renderCount++;
-      DEBUG_components.TOTAL.renderCount++;
-
-      if (_config__WEBPACK_IMPORTED_MODULE_1__.DEBUG_MORE) {
-        (0,_util_debugOverlay__WEBPACK_IMPORTED_MODULE_5__.incrementOverlayCounter)("".concat(_componentName, " renders"));
-        (0,_util_debugOverlay__WEBPACK_IMPORTED_MODULE_5__.incrementOverlayCounter)("".concat(_componentName, " duration"), duration);
+      if (_config__WEBPACK_IMPORTED_MODULE_0__.DEBUG_MORE) {
+        (0,_util_debugOverlay__WEBPACK_IMPORTED_MODULE_2__.incrementOverlayCounter)("".concat(_componentName, " renders"));
+        (0,_util_debugOverlay__WEBPACK_IMPORTED_MODULE_2__.incrementOverlayCounter)("".concat(_componentName, " duration"), duration);
       }
     }
   }, function () {
@@ -1705,13 +1801,19 @@ function renderComponent(componentInstance) {
     newRenderedValue = componentInstance.renderedValue;
   });
 
-  if (componentInstance.isMounted && newRenderedValue === componentInstance.renderedValue) {
+  if (componentInstance.mountState === MountState.Mounted && newRenderedValue === componentInstance.renderedValue) {
     return componentInstance.$element;
   }
 
   componentInstance.renderedValue = newRenderedValue;
   var children = Array.isArray(newRenderedValue) ? newRenderedValue : [newRenderedValue];
-  componentInstance.$element = buildComponentElement(componentInstance, children);
+
+  if (componentInstance.mountState === MountState.New) {
+    componentInstance.$element.children = buildChildren(children, true);
+  } else {
+    componentInstance.$element = buildComponentElement(componentInstance, children);
+  }
+
   return componentInstance.$element;
 }
 function hasElementChanged($old, $new) {
@@ -1731,46 +1833,50 @@ function hasElementChanged($old, $new) {
 }
 function mountComponent(componentInstance) {
   renderComponent(componentInstance);
-  componentInstance.isMounted = true;
+  componentInstance.mountState = MountState.Mounted;
   return componentInstance.$element;
 }
 function unmountComponent(componentInstance) {
-  if (!componentInstance.isMounted) {
+  var _componentInstance$ho, _componentInstance$ho2;
+
+  if (componentInstance.mountState !== MountState.Mounted) {
     return;
   }
 
   idsToExcludeFromUpdate.add(componentInstance.id);
-  componentInstance.hooks.effects.byCursor.forEach(function (effect) {
+  (_componentInstance$ho = componentInstance.hooks) === null || _componentInstance$ho === void 0 ? void 0 : (_componentInstance$ho2 = _componentInstance$ho.effects) === null || _componentInstance$ho2 === void 0 ? void 0 : _componentInstance$ho2.byCursor.forEach(function (effect) {
     var _effect$releaseSignal;
 
     if (effect.cleanup) {
-      (0,_util_safeExec__WEBPACK_IMPORTED_MODULE_7__["default"])(effect.cleanup);
+      (0,_util_safeExec__WEBPACK_IMPORTED_MODULE_4__["default"])(effect.cleanup);
     }
 
     effect.cleanup = undefined;
     (_effect$releaseSignal = effect.releaseSignals) === null || _effect$releaseSignal === void 0 ? void 0 : _effect$releaseSignal.call(effect);
   });
-  componentInstance.isMounted = false;
+  componentInstance.mountState = MountState.Unmounted;
   helpGc(componentInstance);
 } // We need to remove all references to DOM objects. We also clean all other references, just in case
 
 function helpGc(componentInstance) {
-  componentInstance.hooks.effects.byCursor.forEach(function (hook) {
+  var _componentInstance$ho3, _componentInstance$ho4, _componentInstance$ho5, _componentInstance$ho6, _componentInstance$ho7, _componentInstance$ho8, _componentInstance$ho9, _componentInstance$ho10;
+
+  (_componentInstance$ho3 = componentInstance.hooks) === null || _componentInstance$ho3 === void 0 ? void 0 : (_componentInstance$ho4 = _componentInstance$ho3.effects) === null || _componentInstance$ho4 === void 0 ? void 0 : _componentInstance$ho4.byCursor.forEach(function (hook) {
     hook.schedule = undefined;
     hook.cleanup = undefined;
     hook.releaseSignals = undefined;
     hook.dependencies = undefined;
   });
-  componentInstance.hooks.state.byCursor.forEach(function (hook) {
+  (_componentInstance$ho5 = componentInstance.hooks) === null || _componentInstance$ho5 === void 0 ? void 0 : (_componentInstance$ho6 = _componentInstance$ho5.state) === null || _componentInstance$ho6 === void 0 ? void 0 : _componentInstance$ho6.byCursor.forEach(function (hook) {
     hook.value = undefined;
     hook.nextValue = undefined;
     hook.setter = undefined;
   });
-  componentInstance.hooks.memos.byCursor.forEach(function (hook) {
+  (_componentInstance$ho7 = componentInstance.hooks) === null || _componentInstance$ho7 === void 0 ? void 0 : (_componentInstance$ho8 = _componentInstance$ho7.memos) === null || _componentInstance$ho8 === void 0 ? void 0 : _componentInstance$ho8.byCursor.forEach(function (hook) {
     hook.value = undefined;
     hook.dependencies = undefined;
   });
-  componentInstance.hooks.refs.byCursor.forEach(function (hook) {
+  (_componentInstance$ho9 = componentInstance.hooks) === null || _componentInstance$ho9 === void 0 ? void 0 : (_componentInstance$ho10 = _componentInstance$ho9.refs) === null || _componentInstance$ho10 === void 0 ? void 0 : _componentInstance$ho10.byCursor.forEach(function (hook) {
     hook.current = undefined;
   });
   componentInstance.hooks = undefined;
@@ -1782,17 +1888,19 @@ function helpGc(componentInstance) {
 }
 
 function prepareComponentForFrame(componentInstance) {
-  if (!componentInstance.isMounted) {
+  var _componentInstance$ho11, _componentInstance$ho12;
+
+  if (componentInstance.mountState !== MountState.Mounted) {
     return;
   }
 
-  componentInstance.hooks.state.byCursor.forEach(function (hook) {
+  (_componentInstance$ho11 = componentInstance.hooks) === null || _componentInstance$ho11 === void 0 ? void 0 : (_componentInstance$ho12 = _componentInstance$ho11.state) === null || _componentInstance$ho12 === void 0 ? void 0 : _componentInstance$ho12.byCursor.forEach(function (hook) {
     hook.value = hook.nextValue;
   });
 }
 
 function forceUpdateComponent(componentInstance) {
-  if (!componentInstance.isMounted || !componentInstance.onUpdate) {
+  if (componentInstance.mountState !== MountState.Mounted || !componentInstance.onUpdate) {
     return;
   }
 
@@ -1805,37 +1913,48 @@ function forceUpdateComponent(componentInstance) {
 }
 
 function useState(initial, debugKey) {
+  if (!renderingInstance.hooks) {
+    renderingInstance.hooks = {};
+  }
+
+  if (!renderingInstance.hooks.state) {
+    renderingInstance.hooks.state = {
+      cursor: 0,
+      byCursor: []
+    };
+  }
+
   var _renderingInstance$ho = renderingInstance.hooks.state,
       cursor = _renderingInstance$ho.cursor,
       byCursor = _renderingInstance$ho.byCursor;
+  var componentInstance = renderingInstance;
 
   if (byCursor[cursor] === undefined) {
     byCursor[cursor] = {
       value: initial,
       nextValue: initial,
-      setter: function (componentInstance) {
-        return function (newValue) {
-          if (typeof newValue === 'function') {
-            newValue = newValue(byCursor[cursor].value);
-          }
+      setter: function setter(newValue) {
+        if (componentInstance.mountState === MountState.Unmounted) {
+          return;
+        }
 
-          if (byCursor[cursor].nextValue === newValue) {
-            return;
-          }
+        if (typeof newValue === 'function') {
+          newValue = newValue(byCursor[cursor].nextValue);
+        }
 
-          byCursor[cursor].nextValue = newValue;
-          instancesPendingUpdate.add(componentInstance);
-          runUpdatePassOnRaf();
+        if (byCursor[cursor].nextValue === newValue) {
+          return;
+        }
 
-          if (_config__WEBPACK_IMPORTED_MODULE_1__.DEBUG_MORE) {
-            if (componentInstance.name !== 'TeactNContainer') {
-              // eslint-disable-next-line no-console
-              console.log('[Teact.useState]', componentInstance.name, // `componentInstance.Component` may be set to `null` by GC helper
-              componentInstance.Component && componentInstance.Component.DEBUG_contentComponentName ? "> ".concat(componentInstance.Component.DEBUG_contentComponentName) : '', "State update at cursor #".concat(cursor).concat(debugKey ? " (".concat(debugKey, ")") : '', ", next value: "), byCursor[cursor].nextValue);
-            }
-          }
-        };
-      }(renderingInstance)
+        byCursor[cursor].nextValue = newValue;
+        instancesPendingUpdate.add(componentInstance);
+        runUpdatePassOnRaf();
+
+        if (_config__WEBPACK_IMPORTED_MODULE_0__.DEBUG_MORE) {
+          // eslint-disable-next-line no-console
+          console.log('[Teact.useState]', DEBUG_resolveComponentName(componentInstance.Component), "State update at cursor #".concat(cursor).concat(debugKey ? " (".concat(debugKey, ")") : '', ", next value: "), byCursor[cursor].nextValue);
+        }
+      }
     };
   }
 
@@ -1846,13 +1965,24 @@ function useState(initial, debugKey) {
 function useEffectBase(isLayout, effect, dependencies, debugKey) {
   var _byCursor$cursor;
 
+  if (!renderingInstance.hooks) {
+    renderingInstance.hooks = {};
+  }
+
+  if (!renderingInstance.hooks.effects) {
+    renderingInstance.hooks.effects = {
+      cursor: 0,
+      byCursor: []
+    };
+  }
+
   var _renderingInstance$ho2 = renderingInstance.hooks.effects,
       cursor = _renderingInstance$ho2.cursor,
       byCursor = _renderingInstance$ho2.byCursor;
   var componentInstance = renderingInstance;
 
   var runEffectCleanup = function runEffectCleanup() {
-    return (0,_util_safeExec__WEBPACK_IMPORTED_MODULE_7__["default"])(function () {
+    return (0,_util_safeExec__WEBPACK_IMPORTED_MODULE_4__["default"])(function () {
       var cleanup = byCursor[cursor].cleanup;
 
       if (!cleanup) {
@@ -1862,15 +1992,15 @@ function useEffectBase(isLayout, effect, dependencies, debugKey) {
 
       var DEBUG_startAt;
 
-      if (_config__WEBPACK_IMPORTED_MODULE_1__.DEBUG) {
+      if (_config__WEBPACK_IMPORTED_MODULE_0__.DEBUG) {
         DEBUG_startAt = performance.now();
       }
 
       cleanup();
 
-      if (_config__WEBPACK_IMPORTED_MODULE_1__.DEBUG) {
+      if (_config__WEBPACK_IMPORTED_MODULE_0__.DEBUG) {
         var duration = performance.now() - DEBUG_startAt;
-        var componentName = componentInstance.name;
+        var componentName = DEBUG_resolveComponentName(componentInstance.Component);
 
         if (duration > DEBUG_EFFECT_THRESHOLD) {
           // eslint-disable-next-line no-console
@@ -1886,15 +2016,15 @@ function useEffectBase(isLayout, effect, dependencies, debugKey) {
   };
 
   var runEffect = function runEffect() {
-    return (0,_util_safeExec__WEBPACK_IMPORTED_MODULE_7__["default"])(function () {
-      if (!componentInstance.isMounted) {
+    return (0,_util_safeExec__WEBPACK_IMPORTED_MODULE_4__["default"])(function () {
+      if (componentInstance.mountState === MountState.Unmounted) {
         return;
       } // eslint-disable-next-line @typescript-eslint/naming-convention
 
 
       var DEBUG_startAt;
 
-      if (_config__WEBPACK_IMPORTED_MODULE_1__.DEBUG) {
+      if (_config__WEBPACK_IMPORTED_MODULE_0__.DEBUG) {
         DEBUG_startAt = performance.now();
       }
 
@@ -1904,9 +2034,9 @@ function useEffectBase(isLayout, effect, dependencies, debugKey) {
         byCursor[cursor].cleanup = result;
       }
 
-      if (_config__WEBPACK_IMPORTED_MODULE_1__.DEBUG) {
+      if (_config__WEBPACK_IMPORTED_MODULE_0__.DEBUG) {
         var duration = performance.now() - DEBUG_startAt;
-        var componentName = componentInstance.name;
+        var componentName = DEBUG_resolveComponentName(componentInstance.Component);
 
         if (duration > DEBUG_EFFECT_THRESHOLD) {
           // eslint-disable-next-line no-console
@@ -1999,20 +2129,71 @@ function useEffect(effect, dependencies, debugKey) {
 function useLayoutEffect(effect, dependencies, debugKey) {
   return useEffectBase(true, effect, dependencies, debugKey);
 }
-function useMemo(resolver, dependencies, debugKey) {
+function useMemo(resolver, dependencies, debugKey, debugHitRateKey) {
+  if (!renderingInstance.hooks) {
+    renderingInstance.hooks = {};
+  }
+
+  if (!renderingInstance.hooks.memos) {
+    renderingInstance.hooks.memos = {
+      cursor: 0,
+      byCursor: []
+    };
+  }
+
   var _renderingInstance$ho3 = renderingInstance.hooks.memos,
       cursor = _renderingInstance$ho3.cursor,
       byCursor = _renderingInstance$ho3.byCursor;
 
-  var _ref = byCursor[cursor] || {},
-      value = _ref.value;
+  var _ref3 = byCursor[cursor] || {},
+      value = _ref3.value; // eslint-disable-next-line @typescript-eslint/naming-convention
+
+
+  var DEBUG_state;
+
+  if (_config__WEBPACK_IMPORTED_MODULE_0__.DEBUG && debugHitRateKey) {
+    var instanceKey = "".concat(debugHitRateKey, "#").concat(renderingInstance.id);
+    DEBUG_state = DEBUG_memos[instanceKey];
+
+    if (!DEBUG_state) {
+      DEBUG_state = {
+        key: instanceKey,
+        calls: 0,
+        misses: 0,
+        hitRate: 0
+      };
+      DEBUG_memos[instanceKey] = DEBUG_state;
+    }
+
+    DEBUG_state.calls++;
+    DEBUG_state.hitRate = (DEBUG_state.calls - DEBUG_state.misses) / DEBUG_state.calls;
+  }
 
   if (byCursor[cursor] === undefined || dependencies.length !== byCursor[cursor].dependencies.length || dependencies.some(function (dependency, i) {
     return dependency !== byCursor[cursor].dependencies[i];
   })) {
-    if (_config__WEBPACK_IMPORTED_MODULE_1__.DEBUG && debugKey) {
-      // eslint-disable-next-line no-console
-      console.log("[Teact.useMemo] ".concat(renderingInstance.name, " (").concat(debugKey, "): Update is caused by:"), byCursor[cursor] ? (0,_util_arePropsShallowEqual__WEBPACK_IMPORTED_MODULE_4__.getUnequalProps)(byCursor[cursor].dependencies, dependencies).join(', ') : '[first render]');
+    if (_config__WEBPACK_IMPORTED_MODULE_0__.DEBUG) {
+      if (debugKey) {
+        var msg = "[Teact.useMemo] ".concat(renderingInstance.name, " (").concat(debugKey, "): Update is caused by:");
+
+        if (!byCursor[cursor]) {
+          // eslint-disable-next-line no-console
+          console.log("".concat(msg, " [first render]"));
+        } else {
+          (0,_util_arePropsShallowEqual__WEBPACK_IMPORTED_MODULE_1__.logUnequalProps)(byCursor[cursor].dependencies, dependencies, msg, debugKey);
+        }
+      }
+
+      if (DEBUG_state) {
+        DEBUG_state.misses++;
+        DEBUG_state.hitRate = (DEBUG_state.calls - DEBUG_state.misses) / DEBUG_state.calls;
+
+        if (DEBUG_state.calls % 10 === 0 && DEBUG_state.calls >= DEBUG_MEMOS_CALLS_THRESHOLD && DEBUG_state.hitRate < 0.25) {
+          // eslint-disable-next-line no-console
+          console.warn( // eslint-disable-next-line max-len
+          "[Teact] ".concat(DEBUG_state.key, ": Hit rate is ").concat(DEBUG_state.hitRate.toFixed(2), " for ").concat(DEBUG_state.calls, " calls"));
+        }
+      }
     }
 
     value = resolver();
@@ -2026,7 +2207,7 @@ function useMemo(resolver, dependencies, debugKey) {
   return value;
 }
 function useCallback(newCallback, dependencies, debugKey) {
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
   return useMemo(function () {
     return newCallback;
   }, dependencies, debugKey);
@@ -2034,6 +2215,17 @@ function useCallback(newCallback, dependencies, debugKey) {
 // React way (empty is `null`)
 // eslint-disable-next-line no-null/no-null
 function useRef(initial) {
+  if (!renderingInstance.hooks) {
+    renderingInstance.hooks = {};
+  }
+
+  if (!renderingInstance.hooks.refs) {
+    renderingInstance.hooks.refs = {
+      cursor: 0,
+      byCursor: []
+    };
+  }
+
   var _renderingInstance$ho4 = renderingInstance.hooks.refs,
       cursor = _renderingInstance$ho4.cursor,
       byCursor = _renderingInstance$ho4.byCursor;
@@ -2048,12 +2240,31 @@ function useRef(initial) {
   return byCursor[cursor];
 }
 function memo(Component, debugKey) {
-  return function TeactMemoWrapper(props) {
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  function TeactMemoWrapper(props) {
     return useMemo(function () {
       return createElement(Component, props);
-    }, Object.values(props), debugKey);
-  };
+    }, // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
+    Object.values(props), debugKey, _config__WEBPACK_IMPORTED_MODULE_0__.DEBUG_MORE ? DEBUG_resolveComponentName(renderingInstance.Component) : undefined);
+  }
+
+  TeactMemoWrapper.DEBUG_contentComponentName = DEBUG_resolveComponentName(Component);
+  return TeactMemoWrapper;
+} // eslint-disable-next-line @typescript-eslint/naming-convention
+
+function DEBUG_resolveComponentName(Component) {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  var name = Component.name,
+      DEBUG_contentComponentName = Component.DEBUG_contentComponentName;
+
+  if (name === 'TeactNContainer') {
+    return "container>".concat(DEBUG_contentComponentName);
+  }
+
+  if (name === 'TeactMemoWrapper') {
+    return "memo>".concat(DEBUG_contentComponentName);
+  }
+
+  return name + (DEBUG_contentComponentName ? ">".concat(DEBUG_contentComponentName) : '');
 }
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   createElement: createElement,
@@ -2071,7 +2282,7 @@ function memo(Component, debugKey) {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (/* binding */ arePropsShallowEqual),
-/* harmony export */   "getUnequalProps": () => (/* binding */ getUnequalProps)
+/* harmony export */   logUnequalProps: () => (/* binding */ logUnequalProps)
 /* harmony export */ });
 function arePropsShallowEqual(currentProps, newProps) {
   if (currentProps === newProps) {
@@ -2100,22 +2311,26 @@ function arePropsShallowEqual(currentProps, newProps) {
 
   return true;
 }
-function getUnequalProps(currentProps, newProps) {
+function logUnequalProps(currentProps, newProps, msg) {
+  var debugKey = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : '';
   var currentKeys = Object.keys(currentProps);
   var currentKeysLength = currentKeys.length;
   var newKeysLength = Object.keys(newProps).length;
 
   if (currentKeysLength !== newKeysLength) {
-    return ['%LENGTH%'];
-  }
+    // eslint-disable-next-line no-console
+    console.log("".concat(msg, " LENGTH"));
+    return;
+  } // eslint-disable-next-line no-console
 
-  return currentKeys.reduce(function (res, prop) {
+
+  console.log(msg);
+  currentKeys.forEach(function (res, prop) {
     if (currentProps[prop] !== newProps[prop]) {
-      res.push("".concat(prop, ": ").concat(currentProps[prop], " => ").concat(newProps[prop]));
+      // eslint-disable-next-line no-console
+      console.log(debugKey, prop, ':', currentProps[prop], '=>', newProps[prop]);
     }
-
-    return res;
-  }, []);
+  });
 }
 
 /***/ }),
@@ -2128,7 +2343,7 @@ function getUnequalProps(currentProps, newProps) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "createCallbackManager": () => (/* binding */ createCallbackManager)
+/* harmony export */   createCallbackManager: () => (/* binding */ createCallbackManager)
 /* harmony export */ });
 function createCallbackManager() {
   var callbacks = new Set();
@@ -2176,9 +2391,9 @@ function createCallbackManager() {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "debugToOverlay": () => (/* binding */ debugToOverlay),
-/* harmony export */   "incrementOverlayCounter": () => (/* binding */ incrementOverlayCounter),
-/* harmony export */   "renderCounters": () => (/* binding */ renderCounters)
+/* harmony export */   debugToOverlay: () => (/* binding */ debugToOverlay),
+/* harmony export */   incrementOverlayCounter: () => (/* binding */ incrementOverlayCounter),
+/* harmony export */   renderCounters: () => (/* binding */ renderCounters)
 /* harmony export */ });
 /* harmony import */ var _schedulers__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./schedulers */ "./src/util/schedulers.ts");
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
@@ -2308,14 +2523,19 @@ function factorToHex(factor) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "handleError": () => (/* binding */ handleError)
+/* harmony export */   handleError: () => (/* binding */ handleError)
 /* harmony export */ });
 window.addEventListener('error', handleErrorEvent);
 window.addEventListener('unhandledrejection', handleErrorEvent);
 
 function handleErrorEvent(e) {
+  // https://stackoverflow.com/questions/49384120/resizeobserver-loop-limit-exceeded
+  if (e instanceof ErrorEvent && e.message === 'ResizeObserver loop limit exceeded') {
+    return;
+  }
+
   e.preventDefault();
-  handleError(e instanceof ErrorEvent ? e.error : e.reason);
+  handleError(e instanceof ErrorEvent ? e.error || e.message : e.reason);
 }
 
 function handleError(err) {
@@ -2333,8 +2553,8 @@ function handleError(err) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "orderBy": () => (/* binding */ orderBy),
-/* harmony export */   "unique": () => (/* binding */ unique)
+/* harmony export */   orderBy: () => (/* binding */ orderBy),
+/* harmony export */   unique: () => (/* binding */ unique)
 /* harmony export */ });
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
 
@@ -2426,13 +2646,13 @@ function safeExec(cb, rescue, always) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "fastRaf": () => (/* binding */ fastRaf),
-/* harmony export */   "onBeforeUnload": () => (/* binding */ onBeforeUnload),
-/* harmony export */   "onIdle": () => (/* binding */ onIdle),
-/* harmony export */   "onTickEnd": () => (/* binding */ onTickEnd),
-/* harmony export */   "throttle": () => (/* binding */ throttle),
-/* harmony export */   "throttleWith": () => (/* binding */ throttleWith),
-/* harmony export */   "throttleWithTickEnd": () => (/* binding */ throttleWithTickEnd)
+/* harmony export */   fastRaf: () => (/* binding */ fastRaf),
+/* harmony export */   onBeforeUnload: () => (/* binding */ onBeforeUnload),
+/* harmony export */   onIdle: () => (/* binding */ onIdle),
+/* harmony export */   onTickEnd: () => (/* binding */ onTickEnd),
+/* harmony export */   throttle: () => (/* binding */ throttle),
+/* harmony export */   throttleWith: () => (/* binding */ throttleWith),
+/* harmony export */   throttleWithTickEnd: () => (/* binding */ throttleWithTickEnd)
 /* harmony export */ });
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
 
@@ -2624,9 +2844,9 @@ function onBeforeUnload(callback) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "cleanupEffect": () => (/* binding */ cleanupEffect),
-/* harmony export */   "createSignal": () => (/* binding */ createSignal),
-/* harmony export */   "isSignal": () => (/* binding */ isSignal)
+/* harmony export */   cleanupEffect: () => (/* binding */ cleanupEffect),
+/* harmony export */   createSignal: () => (/* binding */ createSignal),
+/* harmony export */   isSignal: () => (/* binding */ isSignal)
 /* harmony export */ });
 /* harmony import */ var _callbacks__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./callbacks */ "./src/util/callbacks.ts");
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
@@ -2809,4 +3029,4 @@ function Checkbox() {
 
 /******/ })()
 ;
-//# sourceMappingURL=main.f0bd21f7d107f7ff4df8.js.map
+//# sourceMappingURL=main.9db1d0d81b692def3653.js.map

@@ -5,7 +5,7 @@ module.exports = {
   mode: 'production',
   entry: './src/teact/index.ts',
   output: {
-    path: path.resolve(__dirname, 'dist', 'umd'),
+    path: path.resolve(__dirname, 'dist'),
     filename: 'teact.js',
     libraryTarget: 'umd2',
     library: 'teact',
@@ -26,7 +26,7 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: './benchmark/index.html',
+      template: './docs/benchmark/index.html',
     }),
   ],
   devtool: false,
