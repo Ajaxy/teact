@@ -11,16 +11,12 @@ import type {
 import {
   captureImmediateEffects,
   hasElementChanged,
-  isComponentElement,
-  isEmptyElement,
-  isFragmentElement,
   isParentElement,
-  isTagElement,
-  isTextElement,
   mountComponent,
   MountState,
   renderComponent,
   unmountComponent,
+  VirtualType,
 } from './teact';
 import { DEBUG } from '../config';
 import { addEventListener, removeAllDelegatedListeners, removeEventListener } from './dom-events';
@@ -80,12 +76,12 @@ function renderWithVirtual<T extends VirtualElement | undefined>(
   const { skipComponentUpdate, fragment } = options;
   let { nextSibling } = options;
 
-  const isCurrentComponent = $current && isComponentElement($current);
-  const isNewComponent = $new && isComponentElement($new);
+  const isCurrentComponent = $current && $current.type === VirtualType.Component;
+  const isNewComponent = $new && $new.type === VirtualType.Component;
   const $newAsReal = $new as VirtualElementReal;
 
-  const isCurrentFragment = $current && !isCurrentComponent && isFragmentElement($current);
-  const isNewFragment = $new && !isNewComponent && isFragmentElement($new);
+  const isCurrentFragment = $current && !isCurrentComponent && $current.type === VirtualType.Fragment;
+  const isNewFragment = $new && !isNewComponent && $new.type === VirtualType.Fragment;
 
   if (
     !skipComponentUpdate
@@ -123,7 +119,7 @@ function renderWithVirtual<T extends VirtualElement | undefined>(
 
       mountChildren(parentEl, $new as VirtualElementComponent | VirtualElementFragment, { nextSibling, fragment });
     } else {
-      const canSetText = $parent.children.length === 1 && isTextElement($newAsReal);
+      const canSetText = $parent.children.length === 1 && $newAsReal.type === VirtualType.Text;
 
       if (canSetText) {
         parentEl.textContent = 'value' in $newAsReal ? $newAsReal.value : '';
@@ -133,7 +129,7 @@ function renderWithVirtual<T extends VirtualElement | undefined>(
         $newAsReal.target = node;
         insertBefore(fragment || parentEl, node, nextSibling);
 
-        if (isTagElement($newAsReal)) {
+        if ($newAsReal.type === VirtualType.Tag) {
           setElementRef($newAsReal, node as HTMLElement);
         }
       }
@@ -155,8 +151,8 @@ function renderWithVirtual<T extends VirtualElement | undefined>(
         mountChildren(parentEl, $new as VirtualElementComponent | VirtualElementFragment, { nextSibling, fragment });
       } else {
         const canSetText = $parent.children.length === 1
-          && isTextElement($newAsReal)
-          && (isTextElement($current) || isEmptyElement($current))
+          && $newAsReal.type === VirtualType.Text
+          && ($current.type === VirtualType.Text || $current.type === VirtualType.Empty)
           && (!parentEl.firstChild || parentEl.firstChild === $current.target);
 
         if (canSetText) {
@@ -172,7 +168,7 @@ function renderWithVirtual<T extends VirtualElement | undefined>(
           $newAsReal.target = node;
           remount(parentEl, $current, node, nextSibling);
 
-          if (isTagElement($newAsReal)) {
+          if ($newAsReal.type === VirtualType.Tag) {
             setElementRef($newAsReal, node as HTMLElement);
           }
         }
@@ -196,7 +192,7 @@ function renderWithVirtual<T extends VirtualElement | undefined>(
         $newAsReal.target = currentTarget;
         $currentAsReal.target = undefined; // Help GC
 
-        const isTag = isTagElement($current);
+        const isTag = $current.type === VirtualType.Tag;
         if (isTag) {
           const $newAsTag = $new as VirtualElementTag;
 
@@ -230,7 +226,7 @@ function initComponent(
     setupComponentUpdateListener(parentEl, $element, $parent, index);
 
     const $firstChild = $element.children[0];
-    if (isComponentElement($firstChild)) {
+    if ($firstChild.type === VirtualType.Component) {
       $element.children[0] = initComponent(parentEl, $firstChild, $element, 0);
     }
   }
@@ -276,9 +272,8 @@ function mountChildren(
   for (let i = 0, l = children.length; i < l; i++) {
     const $child = children[i];
     const $renderedChild = renderWithVirtual(parentEl, undefined, $child, $element, i, options);
-
     if ($renderedChild !== $child) {
-      children.splice(i, 1, $renderedChild);
+      children[i] = $renderedChild;
     }
   }
 }
@@ -290,11 +285,11 @@ function unmountChildren(parentEl: HTMLElement, $element: VirtualElementComponen
 }
 
 function createNode($element: VirtualElementReal): Node {
-  if (isEmptyElement($element)) {
+  if ($element.type === VirtualType.Empty) {
     return document.createTextNode('');
   }
 
-  if (isTextElement($element)) {
+  if ($element.type === VirtualType.Text) {
     return document.createTextNode($element.value);
   }
 
@@ -317,9 +312,8 @@ function createNode($element: VirtualElementReal): Node {
   for (let i = 0, l = children.length; i < l; i++) {
     const $child = children[i];
     const $renderedChild = renderWithVirtual(element, undefined, $child, $element, i);
-
     if ($renderedChild !== $child) {
-      children.splice(i, 1, $renderedChild);
+      children[i] = $renderedChild;
     }
   }
 
@@ -332,8 +326,8 @@ function remount(
   node: Node | undefined,
   componentNextSibling?: ChildNode,
 ) {
-  const isComponent = isComponentElement($current);
-  const isFragment = !isComponent && isFragmentElement($current);
+  const isComponent = $current.type === VirtualType.Component;
+  const isFragment = !isComponent && $current.type === VirtualType.Fragment;
 
   if (isComponent || isFragment) {
     if (isComponent) {
@@ -357,18 +351,18 @@ function remount(
 }
 
 function unmountRealTree($element: VirtualElement) {
-  if (isComponentElement($element)) {
+  if ($element.type === VirtualType.Component) {
     unmountComponent($element.componentInstance);
-  } else if (!isFragmentElement($element)) {
-    if (isTagElement($element)) {
+  } else if ($element.type !== VirtualType.Fragment) {
+    if ($element.type === VirtualType.Tag) {
       extraClasses.delete($element.target!);
-      removeAllDelegatedListeners($element.target!);
       setElementRef($element, undefined);
+      removeAllDelegatedListeners($element.target!);
     }
 
     $element.target = undefined; // Help GC
 
-    if (!isParentElement($element)) {
+    if ($element.type !== VirtualType.Tag) {
       return;
     }
   }
@@ -387,7 +381,7 @@ function insertBefore(parentEl: HTMLElement | DocumentFragment, node: Node, next
 }
 
 function getNextSibling($current: VirtualElement): ChildNode | undefined {
-  if (isComponentElement($current) || isFragmentElement($current)) {
+  if ($current.type === VirtualType.Component || $current.type === VirtualType.Fragment) {
     const lastChild = $current.children[$current.children.length - 1];
     return getNextSibling(lastChild);
   }
@@ -435,7 +429,7 @@ function renderChildren(
     );
 
     if ($renderedChild && $renderedChild !== newChildren[i]) {
-      newChildren.splice(i, 1, $renderedChild);
+      newChildren[i] = $renderedChild;
     }
   }
 
@@ -461,7 +455,7 @@ function renderFastListChildren($current: VirtualElementParent, $new: VirtualEle
         console.warn('Missing `key` in `teactFastList`');
       }
 
-      if (isFragmentElement($newChild)) {
+      if ($newChild.type === VirtualType.Fragment) {
         throw new Error('[Teact] Fragment can not be child of container with `teactFastList`');
       }
     }
@@ -550,7 +544,7 @@ function renderFastListChildren($current: VirtualElementParent, $new: VirtualEle
 
     const $renderedChild = renderWithVirtual(currentEl, currentChildInfo.$element, $newChild, $new, i, options);
     if ($renderedChild !== $newChild) {
-      newChildren.splice(i, 1, $renderedChild);
+      newChildren[i] = $renderedChild;
     }
   }
 
@@ -569,7 +563,7 @@ function renderFragment(
     const $child = $parent.children[fragmentIndex];
     const $renderedChild = renderWithVirtual(parentEl, undefined, $child, $parent, fragmentIndex, { nextSibling });
     if ($renderedChild !== $child) {
-      $parent.children.splice(fragmentIndex, 1, $renderedChild);
+      $parent.children[fragmentIndex] = $renderedChild;
     }
 
     return;
@@ -581,7 +575,7 @@ function renderFragment(
     const $child = $parent.children[i];
     const $renderedChild = renderWithVirtual(parentEl, undefined, $child, $parent, i, { fragment });
     if ($renderedChild !== $child) {
-      $parent.children.splice(i, 1, $renderedChild);
+      $parent.children[i] = $renderedChild;
     }
   }
 

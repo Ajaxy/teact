@@ -83,7 +83,7 @@ function removeDelegatedListener(eventType: string, element: HTMLElement) {
   }
 
   delegationRegistryByEventType[eventType].delete(element);
-  delegatedEventTypesByElement.get(element)!.delete(eventType);
+  delegatedEventTypesByElement.get(element)?.delete(eventType);
 }
 
 export function removeAllDelegatedListeners(element: HTMLElement) {
@@ -92,8 +92,8 @@ export function removeAllDelegatedListeners(element: HTMLElement) {
     return;
   }
 
-  eventTypes.forEach((eventType) => removeDelegatedListener(eventType, element));
   delegatedEventTypesByElement.delete(element);
+  eventTypes.forEach((eventType) => removeDelegatedListener(eventType, element));
 }
 
 function handleEvent(realEvent: Event) {

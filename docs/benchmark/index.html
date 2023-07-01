@@ -143,15 +143,15 @@
   });
 
   document.getElementById('teactButton').addEventListener('click', () => {
-    runBenchmark('Teact', TeactDOM, 'components', 10000, 50);
+    runBenchmark('Teact', TeactDOM, 'components', 10000, 1);
   });
 
   document.getElementById('reactButton').addEventListener('click', () => {
-    runBenchmark('React', ReactDOM, 'components', 10000, 50);
+    runBenchmark('React', ReactDOM, 'components', 10000, 1);
   });
 
   document.getElementById('preactButton').addEventListener('click', () => {
-    runBenchmark('preact', preact, 'components', 10000, 50);
+    runBenchmark('preact', preact, 'components', 10000, 1);
   });
 
   function transformCode(code, pragma) {

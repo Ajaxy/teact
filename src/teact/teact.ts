@@ -16,7 +16,7 @@ export type FC_withDebug =
   FC
   & { DEBUG_contentComponentName?: string };
 
-export enum VirtualElementTypesEnum {
+export enum VirtualType {
   Empty,
   Text,
   Tag,
@@ -25,18 +25,18 @@ export enum VirtualElementTypesEnum {
 }
 
 interface VirtualElementEmpty {
-  type: VirtualElementTypesEnum.Empty;
+  type: VirtualType.Empty;
   target?: Node;
 }
 
 interface VirtualElementText {
-  type: VirtualElementTypesEnum.Text;
+  type: VirtualType.Text;
   target?: Node;
   value: string;
 }
 
 export interface VirtualElementTag {
-  type: VirtualElementTypesEnum.Tag;
+  type: VirtualType.Tag;
   target?: HTMLElement;
   tag: string;
   props: Props;
@@ -44,14 +44,14 @@ export interface VirtualElementTag {
 }
 
 export interface VirtualElementComponent {
-  type: VirtualElementTypesEnum.Component;
+  type: VirtualType.Component;
   componentInstance: ComponentInstance;
   props: Props;
   children: VirtualElementChildren;
 }
 
 export interface VirtualElementFragment {
-  type: VirtualElementTypesEnum.Fragment;
+  type: VirtualType.Fragment;
   children: VirtualElementChildren;
 }
 
@@ -141,28 +141,8 @@ const DEBUG_SILENT_RENDERS_FOR = new Set(['TeactMemoWrapper', 'TeactNContainer',
 let lastComponentId = 0;
 let renderingInstance: ComponentInstance;
 
-export function isEmptyElement($element: VirtualElement): $element is VirtualElementEmpty {
-  return $element.type === VirtualElementTypesEnum.Empty;
-}
-
-export function isTextElement($element: VirtualElement): $element is VirtualElementText {
-  return $element.type === VirtualElementTypesEnum.Text;
-}
-
-export function isTagElement($element: VirtualElement): $element is VirtualElementTag {
-  return $element.type === VirtualElementTypesEnum.Tag;
-}
-
-export function isComponentElement($element: VirtualElement): $element is VirtualElementComponent {
-  return $element.type === VirtualElementTypesEnum.Component;
-}
-
-export function isFragmentElement($element: VirtualElement): $element is VirtualElementFragment {
-  return $element.type === VirtualElementTypesEnum.Fragment;
-}
-
 export function isParentElement($element: VirtualElement): $element is VirtualElementParent {
-  return isTagElement($element) || isComponentElement($element) || isFragmentElement($element);
+  return $element.type === VirtualType.Tag || $element.type === VirtualType.Component || $element.type === VirtualType.Fragment;
 }
 
 function createElement(
@@ -181,7 +161,7 @@ function createElement(
 
 function buildFragmentElement(children: any[]): VirtualElementFragment {
   return {
-    type: VirtualElementTypesEnum.Fragment,
+    type: VirtualType.Fragment,
     children: buildChildren(children, true),
   };
 }
@@ -210,7 +190,7 @@ function buildComponentElement(
   children?: VirtualElementChildren,
 ): VirtualElementComponent {
   return {
-    type: VirtualElementTypesEnum.Component,
+    type: VirtualType.Component,
     componentInstance,
     props: componentInstance.props,
     children: children ? buildChildren(children, true) : [],
@@ -219,7 +199,7 @@ function buildComponentElement(
 
 function buildTagElement(tag: string, props: Props, children: any[]): VirtualElementTag {
   return {
-    type: VirtualElementTypesEnum.Tag,
+    type: VirtualType.Tag,
     tag,
     props,
     children: buildChildren(children),
@@ -269,12 +249,12 @@ function isEmptyPlaceholder(child: any) {
 
 function buildChildElement(child: any): VirtualElement {
   if (isEmptyPlaceholder(child)) {
-    return { type: VirtualElementTypesEnum.Empty };
+    return { type: VirtualType.Empty };
   } else if (isParentElement(child)) {
     return child;
   } else {
     return {
-      type: VirtualElementTypesEnum.Text,
+      type: VirtualType.Text,
       value: String(child),
     };
   }
@@ -476,11 +456,11 @@ export function hasElementChanged($old: VirtualElement, $new: VirtualElement) {
     return true;
   } else if ($old.type !== $new.type) {
     return true;
-  } else if (isTextElement($old) && isTextElement($new)) {
+  } else if ($old.type === VirtualType.Text && $new.type === VirtualType.Text) {
     return $old.value !== $new.value;
-  } else if (isTagElement($old) && isTagElement($new)) {
+  } else if ($old.type === VirtualType.Tag && $new.type === VirtualType.Tag) {
     return ($old.tag !== $new.tag) || ($old.props.key !== $new.props.key);
-  } else if (isComponentElement($old) && isComponentElement($new)) {
+  } else if ($old.type === VirtualType.Component && $new.type === VirtualType.Component) {
     return (
       $old.componentInstance.Component !== $new.componentInstance.Component
     ) || (
