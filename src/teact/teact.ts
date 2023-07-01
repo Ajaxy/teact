@@ -504,14 +504,16 @@ export function unmountComponent(componentInstance: ComponentInstance) {
 
   idsToExcludeFromUpdate.add(componentInstance.id);
 
-  componentInstance.hooks?.effects?.byCursor.forEach((effect) => {
-    if (effect.cleanup) {
-      safeExec(effect.cleanup);
-    }
+  if (componentInstance.hooks?.effects) {
+    for (const effect of componentInstance.hooks.effects.byCursor) {
+      if (effect.cleanup) {
+        safeExec(effect.cleanup);
+      }
 
-    effect.cleanup = undefined;
-    effect.releaseSignals?.();
-  });
+      effect.cleanup = undefined;
+      effect.releaseSignals?.();
+    }
+  }
 
   componentInstance.mountState = MountState.Unmounted;
 
@@ -520,27 +522,39 @@ export function unmountComponent(componentInstance: ComponentInstance) {
 
 // We need to remove all references to DOM objects. We also clean all other references, just in case
 function helpGc(componentInstance: ComponentInstance) {
-  componentInstance.hooks?.effects?.byCursor.forEach((hook) => {
-    hook.schedule = undefined as any;
-    hook.cleanup = undefined as any;
-    hook.releaseSignals = undefined as any;
-    hook.dependencies = undefined;
-  });
+  const {
+    effects, state, memos, refs,
+  } = componentInstance.hooks || {};
 
-  componentInstance.hooks?.state?.byCursor.forEach((hook) => {
-    hook.value = undefined;
-    hook.nextValue = undefined;
-    hook.setter = undefined as any;
-  });
+  if (effects) {
+    for (const hook of effects.byCursor) {
+      hook.schedule = undefined as any;
+      hook.cleanup = undefined as any;
+      hook.releaseSignals = undefined as any;
+      hook.dependencies = undefined;
+    }
+  }
 
-  componentInstance.hooks?.memos?.byCursor.forEach((hook) => {
-    hook.value = undefined as any;
-    hook.dependencies = undefined as any;
-  });
+  if (state) {
+    for (const hook of state.byCursor) {
+      hook.value = undefined;
+      hook.nextValue = undefined;
+      hook.setter = undefined as any;
+    }
+  }
 
-  componentInstance.hooks?.refs?.byCursor.forEach((hook) => {
-    hook.current = undefined as any;
-  });
+  if (memos) {
+    for (const hook of memos.byCursor) {
+      hook.value = undefined as any;
+      hook.dependencies = undefined as any;
+    }
+  }
+
+  if (refs) {
+    for (const hook of refs.byCursor) {
+      hook.current = undefined as any;
+    }
+  }
 
   componentInstance.hooks = undefined as any;
   componentInstance.$element = undefined as any;
@@ -555,9 +569,11 @@ function prepareComponentForFrame(componentInstance: ComponentInstance) {
     return;
   }
 
-  componentInstance.hooks?.state?.byCursor.forEach((hook) => {
-    hook.value = hook.nextValue;
-  });
+  if (componentInstance.hooks?.state) {
+    for (const hook of componentInstance.hooks.state.byCursor) {
+      hook.value = hook.nextValue;
+    }
+  }
 }
 
 function forceUpdateComponent(componentInstance: ComponentInstance) {
@@ -722,7 +738,7 @@ function useEffectBase(
 
   if (dependencies && byCursor[cursor]?.dependencies) {
     if (dependencies.some((dependency, i) => dependency !== byCursor[cursor].dependencies![i])) {
-      if (debugKey) {
+      if (DEBUG && debugKey) {
         const causedBy = dependencies.reduce((res, newValue, i) => {
           const prevValue = byCursor[cursor].dependencies![i];
           if (newValue !== prevValue) {
@@ -770,7 +786,9 @@ function useEffectBase(
     }
 
     return () => {
-      cleanups.forEach((cleanup) => cleanup());
+      for (const cleanup of cleanups) {
+        cleanup();
+      }
     };
   }
 
