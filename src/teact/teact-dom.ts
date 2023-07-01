@@ -125,12 +125,17 @@ function renderWithVirtual<T extends VirtualElement | undefined>(
 
       mountChildren(parentEl, $new as VirtualElementComponent | VirtualElementFragment, { nextSibling, fragment });
     } else {
-      const node = createNode($newAsReal);
-      $newAsReal.target = node;
-      insertBefore(fragment || parentEl, node, nextSibling);
+      if ($parent.children.length === 1 && (isTextElement($newAsReal) || isEmptyElement($newAsReal))) {
+        parentEl.textContent = 'value' in $newAsReal ? $newAsReal.value : '';
+        $newAsReal.target = parentEl.firstChild!;
+      } else {
+        const node = createNode($newAsReal);
+        $newAsReal.target = node;
+        insertBefore(fragment || parentEl, node, nextSibling);
 
-      if (isTagElement($newAsReal)) {
-        setElementRef($newAsReal, node as HTMLElement);
+        if (isTagElement($newAsReal)) {
+          setElementRef($newAsReal, node as HTMLElement);
+        }
       }
     }
   } else if ($current && !$new) {
@@ -149,12 +154,27 @@ function renderWithVirtual<T extends VirtualElement | undefined>(
         remount(parentEl, $current, undefined);
         mountChildren(parentEl, $new as VirtualElementComponent | VirtualElementFragment, { nextSibling, fragment });
       } else {
-        const node = createNode($newAsReal);
-        $newAsReal.target = node;
-        remount(parentEl, $current, node, nextSibling);
+        const canSetText = $parent.children.length === 1
+          && (isTextElement($newAsReal) || isEmptyElement($newAsReal))
+          && (isTextElement($current) || isEmptyElement($current))
+          && (!parentEl.firstChild || parentEl.firstChild === $current.target);
 
-        if (isTagElement($newAsReal)) {
-          setElementRef($newAsReal, node as HTMLElement);
+        if (canSetText) {
+          const value = 'value' in $newAsReal ? $newAsReal.value : '';
+          if (parentEl.firstChild) {
+            parentEl.firstChild.nodeValue = value;
+          } else {
+            parentEl.textContent = value;
+          }
+          $newAsReal.target = parentEl.firstChild!;
+        } else {
+          const node = createNode($newAsReal);
+          $newAsReal.target = node;
+          remount(parentEl, $current, node, nextSibling);
+
+          if (isTagElement($newAsReal)) {
+            setElementRef($newAsReal, node as HTMLElement);
+          }
         }
       }
     } else {
