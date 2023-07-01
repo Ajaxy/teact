@@ -71,8 +71,8 @@ interface ComponentInstance {
   props: Props;
   renderedValue?: any;
   mountState: MountState;
-  hooks: {
-    state: {
+  hooks?: {
+    state?: {
       cursor: number;
       byCursor: {
         value: any;
@@ -80,7 +80,7 @@ interface ComponentInstance {
         setter: StateHookSetter<any>;
       }[];
     };
-    effects: {
+    effects?: {
       cursor: number;
       byCursor: {
         dependencies?: readonly any[];
@@ -89,14 +89,14 @@ interface ComponentInstance {
         releaseSignals?: NoneToVoidFunction;
       }[];
     };
-    memos: {
+    memos?: {
       cursor: number;
       byCursor: {
         value: any;
         dependencies: any[];
       }[];
     };
-    refs: {
+    refs?: {
       cursor: number;
       byCursor: {
         current: any;
@@ -193,29 +193,11 @@ function createComponentInstance(Component: FC, props: Props, children: any[]): 
 
   const componentInstance: ComponentInstance = {
     id: ++lastComponentId,
-    $element: {} as VirtualElementComponent,
+    $element: undefined as unknown as VirtualElementComponent,
     Component,
     name: Component.name,
     props,
     mountState: MountState.New,
-    hooks: {
-      state: {
-        cursor: 0,
-        byCursor: [],
-      },
-      effects: {
-        cursor: 0,
-        byCursor: [],
-      },
-      memos: {
-        cursor: 0,
-        byCursor: [],
-      },
-      refs: {
-        cursor: 0,
-        byCursor: [],
-      },
-    },
   };
 
   componentInstance.$element = buildComponentElement(componentInstance);
@@ -408,10 +390,20 @@ export function renderComponent(componentInstance: ComponentInstance) {
 
   safeExec(() => {
     renderingInstance = componentInstance;
-    componentInstance.hooks.state.cursor = 0;
-    componentInstance.hooks.effects.cursor = 0;
-    componentInstance.hooks.memos.cursor = 0;
-    componentInstance.hooks.refs.cursor = 0;
+    if (componentInstance.hooks) {
+      if (componentInstance.hooks.state) {
+        componentInstance.hooks.state.cursor = 0;
+      }
+      if (componentInstance.hooks.effects) {
+        componentInstance.hooks.effects.cursor = 0;
+      }
+      if (componentInstance.hooks.memos) {
+        componentInstance.hooks.memos.cursor = 0;
+      }
+      if (componentInstance.hooks.refs) {
+        componentInstance.hooks.refs.cursor = 0;
+      }
+    }
 
     // eslint-disable-next-line @typescript-eslint/naming-convention
     let DEBUG_startAt: number | undefined;
@@ -469,7 +461,12 @@ export function renderComponent(componentInstance: ComponentInstance) {
   componentInstance.renderedValue = newRenderedValue;
 
   const children = Array.isArray(newRenderedValue) ? newRenderedValue : [newRenderedValue];
-  componentInstance.$element = buildComponentElement(componentInstance, children);
+
+  if (componentInstance.mountState === MountState.New) {
+    componentInstance.$element.children = buildChildren(children, true);
+  } else {
+    componentInstance.$element = buildComponentElement(componentInstance, children);
+  }
 
   return componentInstance.$element;
 }
@@ -507,7 +504,7 @@ export function unmountComponent(componentInstance: ComponentInstance) {
 
   idsToExcludeFromUpdate.add(componentInstance.id);
 
-  componentInstance.hooks.effects.byCursor.forEach((effect) => {
+  componentInstance.hooks?.effects?.byCursor.forEach((effect) => {
     if (effect.cleanup) {
       safeExec(effect.cleanup);
     }
@@ -523,25 +520,25 @@ export function unmountComponent(componentInstance: ComponentInstance) {
 
 // We need to remove all references to DOM objects. We also clean all other references, just in case
 function helpGc(componentInstance: ComponentInstance) {
-  componentInstance.hooks.effects.byCursor.forEach((hook) => {
+  componentInstance.hooks?.effects?.byCursor.forEach((hook) => {
     hook.schedule = undefined as any;
     hook.cleanup = undefined as any;
     hook.releaseSignals = undefined as any;
     hook.dependencies = undefined;
   });
 
-  componentInstance.hooks.state.byCursor.forEach((hook) => {
+  componentInstance.hooks?.state?.byCursor.forEach((hook) => {
     hook.value = undefined;
     hook.nextValue = undefined;
     hook.setter = undefined as any;
   });
 
-  componentInstance.hooks.memos.byCursor.forEach((hook) => {
+  componentInstance.hooks?.memos?.byCursor.forEach((hook) => {
     hook.value = undefined as any;
     hook.dependencies = undefined as any;
   });
 
-  componentInstance.hooks.refs.byCursor.forEach((hook) => {
+  componentInstance.hooks?.refs?.byCursor.forEach((hook) => {
     hook.current = undefined as any;
   });
 
@@ -558,7 +555,7 @@ function prepareComponentForFrame(componentInstance: ComponentInstance) {
     return;
   }
 
-  componentInstance.hooks.state.byCursor.forEach((hook) => {
+  componentInstance.hooks?.state?.byCursor.forEach((hook) => {
     hook.value = hook.nextValue;
   });
 }
@@ -580,6 +577,13 @@ function forceUpdateComponent(componentInstance: ComponentInstance) {
 export function useState<T>(): [T | undefined, StateHookSetter<T | undefined>];
 export function useState<T>(initial: T, debugKey?: string): [T, StateHookSetter<T>];
 export function useState<T>(initial?: T, debugKey?: string): [T, StateHookSetter<T>] {
+  if (!renderingInstance.hooks) {
+    renderingInstance.hooks = {};
+  }
+  if (!renderingInstance.hooks.state) {
+    renderingInstance.hooks.state = { cursor: 0, byCursor: [] };
+  }
+
   const { cursor, byCursor } = renderingInstance.hooks.state;
   const componentInstance = renderingInstance;
 
@@ -632,6 +636,13 @@ function useEffectBase(
   dependencies?: readonly any[],
   debugKey?: string,
 ) {
+  if (!renderingInstance.hooks) {
+    renderingInstance.hooks = {};
+  }
+  if (!renderingInstance.hooks.effects) {
+    renderingInstance.hooks.effects = { cursor: 0, byCursor: [] };
+  }
+
   const { cursor, byCursor } = renderingInstance.hooks.effects;
   const componentInstance = renderingInstance;
 
@@ -779,6 +790,13 @@ export function useMemo<T extends any>(
   debugKey?: string,
   debugHitRateKey?: string,
 ): T {
+  if (!renderingInstance.hooks) {
+    renderingInstance.hooks = {};
+  }
+  if (!renderingInstance.hooks.memos) {
+    renderingInstance.hooks.memos = { cursor: 0, byCursor: [] };
+  }
+
   const { cursor, byCursor } = renderingInstance.hooks.memos;
   let { value } = byCursor[cursor] || {};
 
@@ -856,6 +874,13 @@ export function useRef<T>(): { current: T | undefined }; // TT way (empty is `un
 export function useRef<T>(initial: null): { current: T | null }; // React way (empty is `null`)
 // eslint-disable-next-line no-null/no-null
 export function useRef<T>(initial?: T | null) {
+  if (!renderingInstance.hooks) {
+    renderingInstance.hooks = {};
+  }
+  if (!renderingInstance.hooks.refs) {
+    renderingInstance.hooks.refs = { cursor: 0, byCursor: [] };
+  }
+
   const { cursor, byCursor } = renderingInstance.hooks.refs;
   if (!byCursor[cursor]) {
     byCursor[cursor] = {

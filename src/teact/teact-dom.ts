@@ -189,7 +189,7 @@ function renderWithVirtual<T extends VirtualElement | undefined>(
 
           updateAttributes($current, $newAsTag, currentTarget as HTMLElement);
 
-          $newAsTag.children = renderChildren(
+          renderChildren(
             $current,
             $newAsTag,
             currentTarget as HTMLElement,
@@ -216,7 +216,7 @@ function initComponent(
 
     const $firstChild = $element.children[0];
     if (isComponentElement($firstChild)) {
-      $element.children = [initComponent(parentEl, $firstChild, $element, 0)];
+      $element.children[0] = initComponent(parentEl, $firstChild, $element, 0);
     }
   }
 
@@ -257,15 +257,21 @@ function mountChildren(
     fragment?: DocumentFragment;
   },
 ) {
-  $element.children = $element.children.map(($child, i) => {
-    return renderWithVirtual(parentEl, undefined, $child, $element, i, options);
-  });
+  const { children } = $element;
+  for (let i = 0, l = children.length; i < l; i++) {
+    const $child = children[i];
+    const $newChild = renderWithVirtual(parentEl, undefined, $child, $element, i, options);
+
+    if ($newChild !== $child) {
+      children.splice(i, 1, $newChild);
+    }
+  }
 }
 
 function unmountChildren(parentEl: HTMLElement, $element: VirtualElementComponent | VirtualElementFragment) {
-  $element.children.forEach(($child) => {
+  for (const $child of $element.children) {
     renderWithVirtual(parentEl, $child, undefined, $element, -1);
-  });
+  }
 }
 
 function createNode($element: VirtualElementReal): Node {
@@ -277,22 +283,29 @@ function createNode($element: VirtualElementReal): Node {
     return document.createTextNode($element.value);
   }
 
-  const { tag, props, children = [] } = $element;
+  const { tag, props, children } = $element;
   const element = document.createElement(tag);
 
   processControlled(tag, props);
 
-  Object.entries(props).forEach(([key, value]) => {
+  for (const key in props) {
+    if (!props.hasOwnProperty(key)) continue;
+
     if (props[key] !== undefined) {
-      setAttribute(element, key, value);
+      setAttribute(element, key, props[key]);
     }
-  });
+  }
 
   processUncontrolledOnMount(element, props);
 
-  $element.children = children.map(($child, i) => (
-    renderWithVirtual(element, undefined, $child, $element, i)
-  ));
+  for (let i = 0, l = children.length; i < l; i++) {
+    const $current = children[i];
+    const $new = renderWithVirtual(element, undefined, $current, $element, i);
+
+    if ($new !== $current) {
+      children.splice(i, 1, $new);
+    }
+  }
 
   return element;
 }
@@ -344,7 +357,9 @@ function unmountRealTree($element: VirtualElement) {
     }
   }
 
-  $element.children.forEach(unmountRealTree);
+  for (const $child of $element.children) {
+    unmountRealTree($child);
+  }
 }
 
 function insertBefore(parentEl: HTMLElement | DocumentFragment, node: Node, nextSibling?: ChildNode) {
@@ -379,10 +394,12 @@ function renderChildren(
     return renderFastListChildren($current, $new, currentEl);
   }
 
-  const currentChildrenLength = $current.children.length;
-  const newChildrenLength = $new.children.length;
+  const currentChildren = $current.children;
+  const newChildren = $new.children;
+
+  const currentChildrenLength = currentChildren.length;
+  const newChildrenLength = newChildren.length;
   const maxLength = Math.max(currentChildrenLength, newChildrenLength);
-  const newChildren = [];
 
   const fragment = newChildrenLength > currentChildrenLength ? document.createDocumentFragment() : undefined;
   const lastCurrentChild = $current.children[currentChildrenLength - 1];
@@ -393,15 +410,15 @@ function renderChildren(
   for (let i = 0; i < maxLength; i++) {
     const $newChild = renderWithVirtual(
       currentEl,
-      $current.children[i],
-      $new.children[i],
+      currentChildren[i],
+      newChildren[i],
       $new,
       i,
       i >= currentChildrenLength ? { fragment } : { nextSibling, forceMoveToEnd },
     );
 
-    if ($newChild) {
-      newChildren.push($newChild);
+    if ($newChild && $newChild !== newChildren[i]) {
+      newChildren.splice(i, 1, $newChild);
     }
   }
 
