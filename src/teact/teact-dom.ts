@@ -124,7 +124,7 @@ function renderWithVirtual<T extends VirtualElement | undefined>(
 
       mountChildren(parentEl, $new as VirtualElementComponent | VirtualElementFragment, { nextSibling, fragment });
     } else {
-      const canSetText = $parent.children.length === 1 && (isTextElement($newAsReal) || isEmptyElement($newAsReal));
+      const canSetText = $parent.children.length === 1 && isTextElement($newAsReal);
 
       if (canSetText) {
         parentEl.textContent = 'value' in $newAsReal ? $newAsReal.value : '';
@@ -156,7 +156,7 @@ function renderWithVirtual<T extends VirtualElement | undefined>(
         mountChildren(parentEl, $new as VirtualElementComponent | VirtualElementFragment, { nextSibling, fragment });
       } else {
         const canSetText = $parent.children.length === 1
-          && (isTextElement($newAsReal) || isEmptyElement($newAsReal))
+          && isTextElement($newAsReal)
           && (isTextElement($current) || isEmptyElement($current))
           && (!parentEl.firstChild || parentEl.firstChild === $current.target);
 
