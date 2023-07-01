@@ -700,7 +700,7 @@ function renderWithVirtual(parentEl, $current, $new, $parent, index) {
         fragment: fragment
       });
     } else {
-      var canSetText = $parent.children.length === 1 && ((0,_teact__WEBPACK_IMPORTED_MODULE_0__.isTextElement)($newAsReal) || (0,_teact__WEBPACK_IMPORTED_MODULE_0__.isEmptyElement)($newAsReal));
+      var canSetText = $parent.children.length === 1 && (0,_teact__WEBPACK_IMPORTED_MODULE_0__.isTextElement)($newAsReal);
 
       if (canSetText) {
         parentEl.textContent = 'value' in $newAsReal ? $newAsReal.value : '';
@@ -734,7 +734,7 @@ function renderWithVirtual(parentEl, $current, $new, $parent, index) {
           fragment: fragment
         });
       } else {
-        var _canSetText = $parent.children.length === 1 && ((0,_teact__WEBPACK_IMPORTED_MODULE_0__.isTextElement)($newAsReal) || (0,_teact__WEBPACK_IMPORTED_MODULE_0__.isEmptyElement)($newAsReal)) && ((0,_teact__WEBPACK_IMPORTED_MODULE_0__.isTextElement)($current) || (0,_teact__WEBPACK_IMPORTED_MODULE_0__.isEmptyElement)($current)) && (!parentEl.firstChild || parentEl.firstChild === $current.target);
+        var _canSetText = $parent.children.length === 1 && (0,_teact__WEBPACK_IMPORTED_MODULE_0__.isTextElement)($newAsReal) && ((0,_teact__WEBPACK_IMPORTED_MODULE_0__.isTextElement)($current) || (0,_teact__WEBPACK_IMPORTED_MODULE_0__.isEmptyElement)($current)) && (!parentEl.firstChild || parentEl.firstChild === $current.target);
 
         if (_canSetText) {
           var value = 'value' in $newAsReal ? $newAsReal.value : '';
@@ -3067,4 +3067,4 @@ function Checkbox() {
 
 /******/ })()
 ;
-//# sourceMappingURL=main.1f746d3a67c122ddbc26.js.map
+//# sourceMappingURL=main.2982a5fb670e54826e09.js.map
