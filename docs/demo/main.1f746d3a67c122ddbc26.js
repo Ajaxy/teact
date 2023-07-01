@@ -603,6 +603,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   addExtraClass: () => (/* binding */ addExtraClass),
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__),
 /* harmony export */   removeExtraClass: () => (/* binding */ removeExtraClass),
+/* harmony export */   setExtraStyles: () => (/* binding */ setExtraStyles),
 /* harmony export */   toggleExtraClass: () => (/* binding */ toggleExtraClass)
 /* harmony export */ });
 /* harmony import */ var _teact__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./teact */ "./src/teact/teact.ts");
@@ -638,9 +639,8 @@ var MAPPED_ATTRIBUTES = {
 };
 var INDEX_KEY_PREFIX = '__indexKey#';
 var headsByElement = new WeakMap();
-var extraClasses = new WeakMap(); // eslint-disable-next-line @typescript-eslint/naming-convention
-
-var DEBUG_virtualTreeSize = 1;
+var extraClasses = new WeakMap();
+var extraStyles = new WeakMap();
 
 function render($element, parentEl) {
   if (!headsByElement.has(parentEl)) {
@@ -700,7 +700,9 @@ function renderWithVirtual(parentEl, $current, $new, $parent, index) {
         fragment: fragment
       });
     } else {
-      if ($parent.children.length === 1 && ((0,_teact__WEBPACK_IMPORTED_MODULE_0__.isTextElement)($newAsReal) || (0,_teact__WEBPACK_IMPORTED_MODULE_0__.isEmptyElement)($newAsReal))) {
+      var canSetText = $parent.children.length === 1 && ((0,_teact__WEBPACK_IMPORTED_MODULE_0__.isTextElement)($newAsReal) || (0,_teact__WEBPACK_IMPORTED_MODULE_0__.isEmptyElement)($newAsReal));
+
+      if (canSetText) {
         parentEl.textContent = 'value' in $newAsReal ? $newAsReal.value : '';
         $newAsReal.target = parentEl.firstChild;
       } else {
@@ -732,9 +734,9 @@ function renderWithVirtual(parentEl, $current, $new, $parent, index) {
           fragment: fragment
         });
       } else {
-        var canSetText = $parent.children.length === 1 && ((0,_teact__WEBPACK_IMPORTED_MODULE_0__.isTextElement)($newAsReal) || (0,_teact__WEBPACK_IMPORTED_MODULE_0__.isEmptyElement)($newAsReal)) && ((0,_teact__WEBPACK_IMPORTED_MODULE_0__.isTextElement)($current) || (0,_teact__WEBPACK_IMPORTED_MODULE_0__.isEmptyElement)($current)) && (!parentEl.firstChild || parentEl.firstChild === $current.target);
+        var _canSetText = $parent.children.length === 1 && ((0,_teact__WEBPACK_IMPORTED_MODULE_0__.isTextElement)($newAsReal) || (0,_teact__WEBPACK_IMPORTED_MODULE_0__.isEmptyElement)($newAsReal)) && ((0,_teact__WEBPACK_IMPORTED_MODULE_0__.isTextElement)($current) || (0,_teact__WEBPACK_IMPORTED_MODULE_0__.isEmptyElement)($current)) && (!parentEl.firstChild || parentEl.firstChild === $current.target);
 
-        if (canSetText) {
+        if (_canSetText) {
           var value = 'value' in $newAsReal ? $newAsReal.value : '';
 
           if (parentEl.firstChild) {
@@ -862,7 +864,7 @@ function createNode($element) {
       props = $element.props,
       children = $element.children;
   var element = document.createElement(tag);
-  processControlled(tag, props);
+  processControlled(tag, props); // eslint-disable-next-line no-restricted-syntax
 
   for (var key in props) {
     if (!props.hasOwnProperty(key)) continue;
@@ -1242,7 +1244,7 @@ function setAttribute(element, key, value) {
       }
     }
   } else if (key === 'style') {
-    element.style.cssText = value;
+    updateStyle(element, value);
   } else if (key === 'dangerouslySetInnerHTML') {
     // eslint-disable-next-line no-underscore-dangle
     element.innerHTML = value.__html;
@@ -1261,7 +1263,7 @@ function removeAttribute(element, key, value) {
   } else if (key === 'value') {
     element.value = '';
   } else if (key === 'style') {
-    element.style.cssText = '';
+    updateStyle(element, '');
   } else if (key === 'dangerouslySetInnerHTML') {
     element.innerHTML = '';
   } else if (key.startsWith('on')) {
@@ -1286,6 +1288,15 @@ function updateClassName(element, value) {
   }
 
   element.className = extraArray.join(' ');
+}
+
+function updateStyle(element, value) {
+  element.style.cssText = value;
+  var extraObject = extraStyles.get(element);
+
+  if (extraObject) {
+    applyExtraStyles(element);
+  }
 }
 
 function addExtraClass(element, className) {
@@ -1357,7 +1368,29 @@ function toggleExtraClass(element, className, force) {
   } else {
     removeExtraClass(element, className);
   }
+}
+function setExtraStyles(element, styles) {
+  extraStyles.set(element, styles);
+  applyExtraStyles(element);
+}
+
+function applyExtraStyles(element) {
+  var standardStyles = Object.entries(extraStyles.get(element)).reduce(function (acc, _ref6) {
+    var _ref7 = _slicedToArray(_ref6, 2),
+        prop = _ref7[0],
+        value = _ref7[1];
+
+    if (prop.startsWith('--')) {
+      element.style.setProperty(prop, value);
+    } else {
+      acc[prop] = value;
+    }
+
+    return acc;
+  }, {});
+  Object.assign(element.style, standardStyles);
 } // eslint-disable-next-line @typescript-eslint/naming-convention
+
 
 function DEBUG_checkKeyUniqueness(children) {
   var firstChild = children[0];
@@ -2099,8 +2132,13 @@ function useEffectBase(isLayout, effect, dependencies, debugKey) {
   });
 
   function setupSignals() {
-    var cleanups = dependencies === null || dependencies === void 0 ? void 0 : dependencies.filter(_util_signals__WEBPACK_IMPORTED_MODULE_6__.isSignal).map(function (signal) {
+    var cleanups = dependencies === null || dependencies === void 0 ? void 0 : dependencies.filter(_util_signals__WEBPACK_IMPORTED_MODULE_6__.isSignal).map(function (signal, i) {
       return signal.subscribe(function () {
+        if (debugKey) {
+          // eslint-disable-next-line no-console
+          console.log("[Teact] Effect \"".concat(debugKey, "\" caused by signal #").concat(i, " new value:"), signal());
+        }
+
         byCursor[cursor].schedule();
       });
     });
@@ -3029,4 +3067,4 @@ function Checkbox() {
 
 /******/ })()
 ;
-//# sourceMappingURL=main.9db1d0d81b692def3653.js.map
+//# sourceMappingURL=main.1f746d3a67c122ddbc26.js.map

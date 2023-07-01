@@ -9,7 +9,7 @@
     "build:benchmark": "npm run build:demo && npm run build && cp ./dist/teact.js ./docs/benchmark",
     "dev:demo": "webpack serve --config demo/webpack.config.js --mode development",
     "build:demo": "webpack --config demo/webpack.config.js --mode development",
-    "build:docs": "npm run build:demo && npm run build:benchmark",
+    "build:docs": "npm run build:demo && npm run build:benchmark && git add -A && git commit -m \"[Build Docs]\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
