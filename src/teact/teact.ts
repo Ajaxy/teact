@@ -756,7 +756,12 @@ function useEffectBase(
   };
 
   function setupSignals() {
-    const cleanups = dependencies?.filter(isSignal).map((signal) => signal.subscribe(() => {
+    const cleanups = dependencies?.filter(isSignal).map((signal, i) => signal.subscribe(() => {
+      if (debugKey) {
+        // eslint-disable-next-line no-console
+        console.log(`[Teact] Effect "${debugKey}" caused by signal #${i} new value:`, signal());
+      }
+
       byCursor[cursor].schedule();
     }));
 
