@@ -6,7 +6,7 @@
   "scripts": {
     "build": "webpack",
     "dev:benchmark": "webpack serve --mode development",
-    "build:benchmark": "npm run build:demo && npm run build && cp ./dist/teact.js ./docs/benchmark",
+    "build:benchmark": "npm run build && cp ./dist/teact* ./docs/benchmark",
     "dev:demo": "webpack serve --config demo/webpack.config.js --mode development",
     "build:demo": "webpack --config demo/webpack.config.js --mode development",
     "build:docs": "npm run build:demo && npm run build:benchmark && git add -A && git commit -m \"[Build Docs]\"",

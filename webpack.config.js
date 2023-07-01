@@ -29,7 +29,7 @@ module.exports = {
       template: './docs/benchmark/index.html',
     }),
   ],
-  devtool: false,
+  devtool: 'source-map',
   devServer: {
     port: 1234,
     host: '0.0.0.0',
