@@ -702,10 +702,10 @@ function renderWithVirtual(parentEl, $current, $new, $parent, index) {
         fragment: fragment
       });
     } else {
-      var canSetText = $parent.children.length === 1 && $newAsReal.type === _teact__WEBPACK_IMPORTED_MODULE_0__.VirtualType.Text;
+      var canSetTextContent = !fragment && !nextSibling && $newAsReal.type === _teact__WEBPACK_IMPORTED_MODULE_0__.VirtualType.Text && $parent.children.length === 1 && !parentEl.firstChild;
 
-      if (canSetText) {
-        parentEl.textContent = 'value' in $newAsReal ? $newAsReal.value : '';
+      if (canSetTextContent) {
+        parentEl.textContent = $newAsReal.value;
         $newAsReal.target = parentEl.firstChild;
       } else {
         var node = createNode($newAsReal);
@@ -736,27 +736,13 @@ function renderWithVirtual(parentEl, $current, $new, $parent, index) {
           fragment: fragment
         });
       } else {
-        var _canSetText = $parent.children.length === 1 && $newAsReal.type === _teact__WEBPACK_IMPORTED_MODULE_0__.VirtualType.Text && ($current.type === _teact__WEBPACK_IMPORTED_MODULE_0__.VirtualType.Text || $current.type === _teact__WEBPACK_IMPORTED_MODULE_0__.VirtualType.Empty) && (!parentEl.firstChild || parentEl.firstChild === $current.target);
+        var _node = createNode($newAsReal);
 
-        if (_canSetText) {
-          var value = 'value' in $newAsReal ? $newAsReal.value : '';
+        $newAsReal.target = _node;
+        remount(parentEl, $current, _node, nextSibling);
 
-          if (parentEl.firstChild) {
-            parentEl.firstChild.nodeValue = value;
-          } else {
-            parentEl.textContent = value;
-          }
-
-          $newAsReal.target = parentEl.firstChild;
-        } else {
-          var _node = createNode($newAsReal);
-
-          $newAsReal.target = _node;
-          remount(parentEl, $current, _node, nextSibling);
-
-          if ($newAsReal.type === _teact__WEBPACK_IMPORTED_MODULE_0__.VirtualType.Tag) {
-            setElementRef($newAsReal, _node);
-          }
+        if ($newAsReal.type === _teact__WEBPACK_IMPORTED_MODULE_0__.VirtualType.Tag) {
+          setElementRef($newAsReal, _node);
         }
       }
     } else {
@@ -799,11 +785,6 @@ function initComponent(parentEl, $element, $parent, index) {
   if (componentInstance.mountState === _teact__WEBPACK_IMPORTED_MODULE_0__.MountState.New) {
     $element = (0,_teact__WEBPACK_IMPORTED_MODULE_0__.mountComponent)(componentInstance);
     setupComponentUpdateListener(parentEl, $element, $parent, index);
-    var $firstChild = $element.children[0];
-
-    if ($firstChild.type === _teact__WEBPACK_IMPORTED_MODULE_0__.VirtualType.Component) {
-      $element.children[0] = initComponent(parentEl, $firstChild, $element, 0);
-    }
   }
 
   return $element;
@@ -3217,4 +3198,4 @@ function Checkbox() {
 
 /******/ })()
 ;
-//# sourceMappingURL=main.60c5edb7efd8c41fb684.js.map
+//# sourceMappingURL=main.45c3a1089dbd4f33ecd4.js.map
