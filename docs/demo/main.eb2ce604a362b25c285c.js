@@ -468,8 +468,6 @@ function addDelegatedListener(eventType, element, handler) {
 }
 
 function removeDelegatedListener(eventType, element) {
-  var _delegatedEventTypesB;
-
   documentEventCounters[eventType]--;
 
   if (!documentEventCounters[eventType]) {
@@ -479,7 +477,7 @@ function removeDelegatedListener(eventType, element) {
   }
 
   delegationRegistryByEventType[eventType]["delete"](element);
-  (_delegatedEventTypesB = delegatedEventTypesByElement.get(element)) === null || _delegatedEventTypesB === void 0 ? void 0 : _delegatedEventTypesB["delete"](eventType);
+  delegatedEventTypesByElement.get(element)["delete"](eventType);
 }
 
 function removeAllDelegatedListeners(element) {
@@ -489,10 +487,10 @@ function removeAllDelegatedListeners(element) {
     return;
   }
 
-  delegatedEventTypesByElement["delete"](element);
   eventTypes.forEach(function (eventType) {
     return removeDelegatedListener(eventType, element);
   });
+  delegatedEventTypesByElement["delete"](element);
 }
 
 function handleEvent(realEvent) {
@@ -608,10 +606,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   setExtraStyles: () => (/* binding */ setExtraStyles),
 /* harmony export */   toggleExtraClass: () => (/* binding */ toggleExtraClass)
 /* harmony export */ });
-/* harmony import */ var _teact__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./teact */ "./src/teact/teact.ts");
-/* harmony import */ var _config__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../config */ "./src/config.ts");
+/* harmony import */ var _config__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../config */ "./src/config.ts");
+/* harmony import */ var _util_iteratees__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../util/iteratees */ "./src/util/iteratees.ts");
 /* harmony import */ var _dom_events__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./dom-events */ "./src/teact/dom-events.ts");
-/* harmony import */ var _util_iteratees__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../util/iteratees */ "./src/util/iteratees.ts");
+/* harmony import */ var _teact__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./teact */ "./src/teact/teact.ts");
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
 
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
@@ -651,39 +649,46 @@ function render($element, parentEl) {
     });
   }
 
-  var runImmediateEffects = (0,_teact__WEBPACK_IMPORTED_MODULE_0__.captureImmediateEffects)();
+  var runImmediateEffects = (0,_teact__WEBPACK_IMPORTED_MODULE_3__.captureImmediateEffects)();
   var $head = headsByElement.get(parentEl);
-  var $renderedChild = renderWithVirtual(parentEl, $head.children[0], $element, $head, 0);
+  var $renderedChild = renderWithVirtual(parentEl, $head.children[0], $element, $head, {}, 0);
   runImmediateEffects === null || runImmediateEffects === void 0 ? void 0 : runImmediateEffects();
   $head.children = $renderedChild ? [$renderedChild] : [];
   return undefined;
 }
 
-function renderWithVirtual(parentEl, $current, $new, $parent, index) {
-  var options = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : {};
+function renderWithVirtual(parentEl, $current, $new, $parent, currentContext, index) {
+  var _$new, _$new2, _$new3;
+
+  var options = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : {};
   var skipComponentUpdate = options.skipComponentUpdate,
       fragment = options.fragment;
-  var nextSibling = options.nextSibling;
-  var isCurrentComponent = $current && $current.type === _teact__WEBPACK_IMPORTED_MODULE_0__.VirtualType.Component;
-  var isNewComponent = $new && $new.type === _teact__WEBPACK_IMPORTED_MODULE_0__.VirtualType.Component;
+  var nextSibling = options.nextSibling,
+      isSvg = options.isSvg;
+  var isCurrentComponent = ($current === null || $current === void 0 ? void 0 : $current.type) === _teact__WEBPACK_IMPORTED_MODULE_3__.VirtualType.Component;
+  var isNewComponent = ((_$new = $new) === null || _$new === void 0 ? void 0 : _$new.type) === _teact__WEBPACK_IMPORTED_MODULE_3__.VirtualType.Component;
   var $newAsReal = $new;
-  var isCurrentFragment = $current && !isCurrentComponent && $current.type === _teact__WEBPACK_IMPORTED_MODULE_0__.VirtualType.Fragment;
-  var isNewFragment = $new && !isNewComponent && $new.type === _teact__WEBPACK_IMPORTED_MODULE_0__.VirtualType.Fragment;
+  var isCurrentFragment = !isCurrentComponent && ($current === null || $current === void 0 ? void 0 : $current.type) === _teact__WEBPACK_IMPORTED_MODULE_3__.VirtualType.Fragment;
+  var isNewFragment = !isNewComponent && ((_$new2 = $new) === null || _$new2 === void 0 ? void 0 : _$new2.type) === _teact__WEBPACK_IMPORTED_MODULE_3__.VirtualType.Fragment;
 
-  if (!skipComponentUpdate && isCurrentComponent && isNewComponent && !(0,_teact__WEBPACK_IMPORTED_MODULE_0__.hasElementChanged)($current, $new)) {
+  if (!isSvg && ((_$new3 = $new) === null || _$new3 === void 0 ? void 0 : _$new3.type) === _teact__WEBPACK_IMPORTED_MODULE_3__.VirtualType.Tag && $new.tag === 'svg') {
+    isSvg = true;
+  }
+
+  if (!skipComponentUpdate && isCurrentComponent && isNewComponent && !(0,_teact__WEBPACK_IMPORTED_MODULE_3__.hasElementChanged)($current, $new)) {
     $new = updateComponent($current, $new);
   } // Parent element may have changed, so we need to update the listener closure.
 
 
-  if (!skipComponentUpdate && isNewComponent && $new.componentInstance.mountState === _teact__WEBPACK_IMPORTED_MODULE_0__.MountState.Mounted) {
-    setupComponentUpdateListener(parentEl, $new, $parent, index);
+  if (!skipComponentUpdate && isNewComponent && $new.componentInstance.mountState === _teact__WEBPACK_IMPORTED_MODULE_3__.MountState.Mounted) {
+    setupComponentUpdateListener(parentEl, $new, $parent, currentContext, index);
   }
 
   if ($current === $new) {
     return $new;
   }
 
-  if (_config__WEBPACK_IMPORTED_MODULE_1__.DEBUG && $new) {
+  if (_config__WEBPACK_IMPORTED_MODULE_0__.DEBUG && $new) {
     var newTarget = 'target' in $new && $new.target;
 
     if (newTarget && (!$current || 'target' in $current && newTarget !== $current.target)) {
@@ -694,54 +699,62 @@ function renderWithVirtual(parentEl, $current, $new, $parent, index) {
   if (!$current && $new) {
     if (isNewComponent || isNewFragment) {
       if (isNewComponent) {
-        $new = initComponent(parentEl, $new, $parent, index);
+        var _componentInstance$co;
+
+        $new = initComponent(parentEl, $new, $parent, currentContext, index);
+        currentContext = (_componentInstance$co = $new.componentInstance.context) !== null && _componentInstance$co !== void 0 ? _componentInstance$co : currentContext;
       }
 
-      mountChildren(parentEl, $new, {
+      mountChildren(parentEl, $new, currentContext, {
         nextSibling: nextSibling,
-        fragment: fragment
+        fragment: fragment,
+        isSvg: isSvg
       });
     } else {
-      var canSetTextContent = !fragment && !nextSibling && $newAsReal.type === _teact__WEBPACK_IMPORTED_MODULE_0__.VirtualType.Text && $parent.children.length === 1 && !parentEl.firstChild;
+      var canSetTextContent = !fragment && !nextSibling && $newAsReal.type === _teact__WEBPACK_IMPORTED_MODULE_3__.VirtualType.Text && $parent.children.length === 1 && !parentEl.firstChild;
 
       if (canSetTextContent) {
         parentEl.textContent = $newAsReal.value;
         $newAsReal.target = parentEl.firstChild;
       } else {
-        var node = createNode($newAsReal);
+        var node = createNode($newAsReal, currentContext, isSvg);
         $newAsReal.target = node;
         insertBefore(fragment || parentEl, node, nextSibling);
 
-        if ($newAsReal.type === _teact__WEBPACK_IMPORTED_MODULE_0__.VirtualType.Tag) {
+        if ($newAsReal.type === _teact__WEBPACK_IMPORTED_MODULE_3__.VirtualType.Tag) {
           setElementRef($newAsReal, node);
         }
       }
     }
   } else if ($current && !$new) {
-    remount(parentEl, $current, undefined);
+    remount(parentEl, $current, currentContext, undefined);
   } else if ($current && $new) {
-    if ((0,_teact__WEBPACK_IMPORTED_MODULE_0__.hasElementChanged)($current, $new)) {
+    if ((0,_teact__WEBPACK_IMPORTED_MODULE_3__.hasElementChanged)($current, $new)) {
       if (!nextSibling) {
         nextSibling = getNextSibling($current);
       }
 
       if (isNewComponent || isNewFragment) {
         if (isNewComponent) {
-          $new = initComponent(parentEl, $new, $parent, index);
+          var _componentInstance$co2;
+
+          $new = initComponent(parentEl, $new, $parent, currentContext, index);
+          currentContext = (_componentInstance$co2 = $new.componentInstance.context) !== null && _componentInstance$co2 !== void 0 ? _componentInstance$co2 : currentContext;
         }
 
-        remount(parentEl, $current, undefined);
-        mountChildren(parentEl, $new, {
+        remount(parentEl, $current, currentContext, undefined);
+        mountChildren(parentEl, $new, currentContext, {
           nextSibling: nextSibling,
-          fragment: fragment
+          fragment: fragment,
+          isSvg: isSvg
         });
       } else {
-        var _node = createNode($newAsReal);
+        var _node = createNode($newAsReal, currentContext, isSvg);
 
         $newAsReal.target = _node;
-        remount(parentEl, $current, _node, nextSibling);
+        remount(parentEl, $current, currentContext, _node, nextSibling);
 
-        if ($newAsReal.type === _teact__WEBPACK_IMPORTED_MODULE_0__.VirtualType.Tag) {
+        if ($newAsReal.type === _teact__WEBPACK_IMPORTED_MODULE_3__.VirtualType.Tag) {
           setElementRef($newAsReal, _node);
         }
       }
@@ -750,14 +763,14 @@ function renderWithVirtual(parentEl, $current, $new, $parent, index) {
       var isFragment = isCurrentFragment && isNewFragment;
 
       if (isComponent || isFragment) {
-        renderChildren($current, $new, parentEl, nextSibling, options.forceMoveToEnd);
+        renderChildren($current, $new, currentContext, parentEl, nextSibling, options.forceMoveToEnd);
       } else {
         var $currentAsReal = $current;
         var currentTarget = $currentAsReal.target;
         $newAsReal.target = currentTarget;
         $currentAsReal.target = undefined; // Help GC
 
-        var isTag = $current.type === _teact__WEBPACK_IMPORTED_MODULE_0__.VirtualType.Tag;
+        var isTag = $current.type === _teact__WEBPACK_IMPORTED_MODULE_3__.VirtualType.Tag;
 
         if (isTag) {
           var $newAsTag = $new;
@@ -768,8 +781,8 @@ function renderWithVirtual(parentEl, $current, $new, $parent, index) {
             insertBefore(parentEl, currentTarget, nextSibling);
           }
 
-          updateAttributes($current, $newAsTag, currentTarget);
-          renderChildren($current, $newAsTag, currentTarget);
+          updateAttributes($current, $newAsTag, currentTarget, isSvg);
+          renderChildren($current, $newAsTag, currentContext, currentTarget, undefined, undefined, isSvg);
         }
       }
     }
@@ -778,13 +791,14 @@ function renderWithVirtual(parentEl, $current, $new, $parent, index) {
   return $new;
 }
 
-function initComponent(parentEl, $element, $parent, index) {
+function initComponent(parentEl, $element, $parent, currentContext, index) {
   var _$element = $element,
       componentInstance = _$element.componentInstance;
+  $element.componentInstance.context = currentContext;
 
-  if (componentInstance.mountState === _teact__WEBPACK_IMPORTED_MODULE_0__.MountState.New) {
-    $element = (0,_teact__WEBPACK_IMPORTED_MODULE_0__.mountComponent)(componentInstance);
-    setupComponentUpdateListener(parentEl, $element, $parent, index);
+  if (componentInstance.mountState === _teact__WEBPACK_IMPORTED_MODULE_3__.MountState.New) {
+    $element = (0,_teact__WEBPACK_IMPORTED_MODULE_3__.mountComponent)(componentInstance);
+    setupComponentUpdateListener(parentEl, $element, $parent, currentContext, index);
   }
 
   return $element;
@@ -792,25 +806,25 @@ function initComponent(parentEl, $element, $parent, index) {
 
 function updateComponent($current, $new) {
   $current.componentInstance.props = $new.componentInstance.props;
-  return (0,_teact__WEBPACK_IMPORTED_MODULE_0__.renderComponent)($current.componentInstance);
+  return (0,_teact__WEBPACK_IMPORTED_MODULE_3__.renderComponent)($current.componentInstance);
 }
 
-function setupComponentUpdateListener(parentEl, $element, $parent, index) {
+function setupComponentUpdateListener(parentEl, $element, $parent, currentContext, index) {
   var componentInstance = $element.componentInstance;
 
   componentInstance.onUpdate = function () {
-    $parent.children[index] = renderWithVirtual(parentEl, $parent.children[index], componentInstance.$element, $parent, index, {
+    $parent.children[index] = renderWithVirtual(parentEl, $parent.children[index], componentInstance.$element, $parent, currentContext, index, {
       skipComponentUpdate: true
     });
   };
 }
 
-function mountChildren(parentEl, $element, options) {
+function mountChildren(parentEl, $element, currentContext, options) {
   var children = $element.children;
 
   for (var i = 0, l = children.length; i < l; i++) {
     var $child = children[i];
-    var $renderedChild = renderWithVirtual(parentEl, undefined, $child, $element, i, options);
+    var $renderedChild = renderWithVirtual(parentEl, undefined, $child, $element, currentContext, i, options);
 
     if ($renderedChild !== $child) {
       children[i] = $renderedChild;
@@ -818,14 +832,14 @@ function mountChildren(parentEl, $element, options) {
   }
 }
 
-function unmountChildren(parentEl, $element) {
+function unmountChildren(parentEl, $element, currentContext) {
   var _iterator = _createForOfIteratorHelper($element.children),
       _step;
 
   try {
     for (_iterator.s(); !(_step = _iterator.n()).done;) {
       var $child = _step.value;
-      renderWithVirtual(parentEl, $child, undefined, $element, -1);
+      renderWithVirtual(parentEl, $child, undefined, $element, currentContext, -1);
     }
   } catch (err) {
     _iterator.e(err);
@@ -834,26 +848,26 @@ function unmountChildren(parentEl, $element) {
   }
 }
 
-function createNode($element) {
-  if ($element.type === _teact__WEBPACK_IMPORTED_MODULE_0__.VirtualType.Empty) {
+function createNode($element, currentContext, isSvg) {
+  if ($element.type === _teact__WEBPACK_IMPORTED_MODULE_3__.VirtualType.Empty) {
     return document.createTextNode('');
   }
 
-  if ($element.type === _teact__WEBPACK_IMPORTED_MODULE_0__.VirtualType.Text) {
+  if ($element.type === _teact__WEBPACK_IMPORTED_MODULE_3__.VirtualType.Text) {
     return document.createTextNode($element.value);
   }
 
   var tag = $element.tag,
       props = $element.props,
       children = $element.children;
-  var element = document.createElement(tag);
+  var element = isSvg ? document.createElementNS('http://www.w3.org/2000/svg', tag) : document.createElement(tag);
   processControlled(tag, props); // eslint-disable-next-line no-restricted-syntax
 
   for (var key in props) {
     if (!props.hasOwnProperty(key)) continue;
 
     if (props[key] !== undefined) {
-      setAttribute(element, key, props[key]);
+      setAttribute(element, key, props[key], isSvg);
     }
   }
 
@@ -861,7 +875,9 @@ function createNode($element) {
 
   for (var i = 0, l = children.length; i < l; i++) {
     var $child = children[i];
-    var $renderedChild = renderWithVirtual(element, undefined, $child, $element, i);
+    var $renderedChild = renderWithVirtual(element, undefined, $child, $element, currentContext, i, {
+      isSvg: isSvg
+    });
 
     if ($renderedChild !== $child) {
       children[i] = $renderedChild;
@@ -871,16 +887,16 @@ function createNode($element) {
   return element;
 }
 
-function remount(parentEl, $current, node, componentNextSibling) {
-  var isComponent = $current.type === _teact__WEBPACK_IMPORTED_MODULE_0__.VirtualType.Component;
-  var isFragment = !isComponent && $current.type === _teact__WEBPACK_IMPORTED_MODULE_0__.VirtualType.Fragment;
+function remount(parentEl, $current, currentContext, node, componentNextSibling) {
+  var isComponent = $current.type === _teact__WEBPACK_IMPORTED_MODULE_3__.VirtualType.Component;
+  var isFragment = !isComponent && $current.type === _teact__WEBPACK_IMPORTED_MODULE_3__.VirtualType.Fragment;
 
   if (isComponent || isFragment) {
     if (isComponent) {
-      (0,_teact__WEBPACK_IMPORTED_MODULE_0__.unmountComponent)($current.componentInstance);
+      (0,_teact__WEBPACK_IMPORTED_MODULE_3__.unmountComponent)($current.componentInstance);
     }
 
-    unmountChildren(parentEl, $current);
+    unmountChildren(parentEl, $current, currentContext);
 
     if (node) {
       insertBefore(parentEl, node, componentNextSibling);
@@ -897,10 +913,10 @@ function remount(parentEl, $current, node, componentNextSibling) {
 }
 
 function unmountRealTree($element) {
-  if ($element.type === _teact__WEBPACK_IMPORTED_MODULE_0__.VirtualType.Component) {
-    (0,_teact__WEBPACK_IMPORTED_MODULE_0__.unmountComponent)($element.componentInstance);
-  } else if ($element.type !== _teact__WEBPACK_IMPORTED_MODULE_0__.VirtualType.Fragment) {
-    if ($element.type === _teact__WEBPACK_IMPORTED_MODULE_0__.VirtualType.Tag) {
+  if ($element.type === _teact__WEBPACK_IMPORTED_MODULE_3__.VirtualType.Component) {
+    (0,_teact__WEBPACK_IMPORTED_MODULE_3__.unmountComponent)($element.componentInstance);
+  } else if ($element.type !== _teact__WEBPACK_IMPORTED_MODULE_3__.VirtualType.Fragment) {
+    if ($element.type === _teact__WEBPACK_IMPORTED_MODULE_3__.VirtualType.Tag) {
       extraClasses["delete"]($element.target);
       setElementRef($element, undefined);
       (0,_dom_events__WEBPACK_IMPORTED_MODULE_2__.removeAllDelegatedListeners)($element.target);
@@ -908,7 +924,7 @@ function unmountRealTree($element) {
 
     $element.target = undefined; // Help GC
 
-    if ($element.type !== _teact__WEBPACK_IMPORTED_MODULE_0__.VirtualType.Tag) {
+    if ($element.type !== _teact__WEBPACK_IMPORTED_MODULE_3__.VirtualType.Tag) {
       return;
     }
   }
@@ -937,7 +953,7 @@ function insertBefore(parentEl, node, nextSibling) {
 }
 
 function getNextSibling($current) {
-  if ($current.type === _teact__WEBPACK_IMPORTED_MODULE_0__.VirtualType.Component || $current.type === _teact__WEBPACK_IMPORTED_MODULE_0__.VirtualType.Fragment) {
+  if ($current.type === _teact__WEBPACK_IMPORTED_MODULE_3__.VirtualType.Component || $current.type === _teact__WEBPACK_IMPORTED_MODULE_3__.VirtualType.Fragment) {
     var lastChild = $current.children[$current.children.length - 1];
     return getNextSibling(lastChild);
   }
@@ -945,15 +961,16 @@ function getNextSibling($current) {
   return $current.target.nextSibling || undefined;
 }
 
-function renderChildren($current, $new, currentEl, nextSibling) {
-  var forceMoveToEnd = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : false;
+function renderChildren($current, $new, currentContext, currentEl, nextSibling) {
+  var forceMoveToEnd = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : false;
+  var isSvg = arguments.length > 6 ? arguments[6] : undefined;
 
-  if (_config__WEBPACK_IMPORTED_MODULE_1__.DEBUG) {
+  if (_config__WEBPACK_IMPORTED_MODULE_0__.DEBUG) {
     DEBUG_checkKeyUniqueness($new.children);
   }
 
   if ('props' in $new && $new.props.teactFastList) {
-    renderFastListChildren($current, $new, currentEl);
+    renderFastListChildren($current, $new, currentContext, currentEl);
     return;
   }
 
@@ -967,11 +984,13 @@ function renderChildren($current, $new, currentEl, nextSibling) {
   var fragmentNextSibling = fragment && (nextSibling || (lastCurrentChild ? getNextSibling(lastCurrentChild) : undefined));
 
   for (var i = 0; i < maxLength; i++) {
-    var $renderedChild = renderWithVirtual(currentEl, currentChildren[i], newChildren[i], $new, i, i >= currentChildrenLength ? {
-      fragment: fragment
+    var $renderedChild = renderWithVirtual(currentEl, currentChildren[i], newChildren[i], $new, currentContext, i, i >= currentChildrenLength ? {
+      fragment: fragment,
+      isSvg: isSvg
     } : {
       nextSibling: nextSibling,
-      forceMoveToEnd: forceMoveToEnd
+      forceMoveToEnd: forceMoveToEnd,
+      isSvg: isSvg
     });
 
     if ($renderedChild && $renderedChild !== newChildren[i]) {
@@ -986,7 +1005,7 @@ function renderChildren($current, $new, currentEl, nextSibling) {
 // It also allows to selectively move particular preserved nodes within their DOM list.
 
 
-function renderFastListChildren($current, $new, currentEl) {
+function renderFastListChildren($current, $new, currentContext, currentEl) {
   var currentChildren = $current.children;
   var newChildren = $new.children;
   var newKeys = new Set();
@@ -1000,14 +1019,14 @@ function renderFastListChildren($current, $new, currentEl) {
 
       var _key2 = 'props' in _$newChild2 ? _$newChild2.props.key : undefined;
 
-      if (_config__WEBPACK_IMPORTED_MODULE_1__.DEBUG && (0,_teact__WEBPACK_IMPORTED_MODULE_0__.isParentElement)(_$newChild2)) {
+      if (_config__WEBPACK_IMPORTED_MODULE_0__.DEBUG && (0,_teact__WEBPACK_IMPORTED_MODULE_3__.isParentElement)(_$newChild2)) {
         // eslint-disable-next-line no-null/no-null
         if (_key2 === undefined || _key2 === null) {
           // eslint-disable-next-line no-console
           console.warn('Missing `key` in `teactFastList`');
         }
 
-        if (_$newChild2.type === _teact__WEBPACK_IMPORTED_MODULE_0__.VirtualType.Fragment) {
+        if (_$newChild2.type === _teact__WEBPACK_IMPORTED_MODULE_3__.VirtualType.Fragment) {
           throw new Error('[Teact] Fragment can not be child of container with `teactFastList`');
         }
       }
@@ -1031,7 +1050,7 @@ function renderFastListChildren($current, $new, currentEl) {
     var isKeyPresent = key !== undefined && key !== null; // First we process removed children
 
     if (isKeyPresent && !newKeys.has(key)) {
-      renderWithVirtual(currentEl, $currentChild, undefined, $new, -1);
+      renderWithVirtual(currentEl, $currentChild, undefined, $new, currentContext, -1);
       continue;
     } else if (!isKeyPresent) {
       var $newChild = newChildren[i];
@@ -1040,7 +1059,7 @@ function renderFastListChildren($current, $new, currentEl) {
       if ($newChild && !newChildKey) {
         key = "".concat(INDEX_KEY_PREFIX).concat(i); // Otherwise, we just remove it
       } else {
-        renderWithVirtual(currentEl, $currentChild, undefined, $new, -1);
+        renderWithVirtual(currentEl, $currentChild, undefined, $new, currentContext, -1);
         continue;
       }
     } // Then we build up info about remaining children
@@ -1076,7 +1095,7 @@ function renderFastListChildren($current, $new, currentEl) {
 
 
     if (fragmentSize) {
-      renderFragment(fragmentIndex, fragmentSize, currentEl, $new);
+      renderFragment(fragmentIndex, fragmentSize, currentEl, $new, currentContext);
       fragmentSize = undefined;
       fragmentIndex = undefined;
     } // Now we check if a preserved node was moved within preserved list
@@ -1097,7 +1116,7 @@ function renderFastListChildren($current, $new, currentEl) {
     } : {
       forceMoveToEnd: true
     } : undefined;
-    var $renderedChild = renderWithVirtual(currentEl, currentChildInfo.$element, _$newChild, $new, _i, options);
+    var $renderedChild = renderWithVirtual(currentEl, currentChildInfo.$element, _$newChild, $new, currentContext, _i, options);
 
     if ($renderedChild !== _$newChild) {
       newChildren[_i] = $renderedChild;
@@ -1106,16 +1125,16 @@ function renderFastListChildren($current, $new, currentEl) {
 
 
   if (fragmentSize) {
-    renderFragment(fragmentIndex, fragmentSize, currentEl, $new);
+    renderFragment(fragmentIndex, fragmentSize, currentEl, $new, currentContext);
   }
 }
 
-function renderFragment(fragmentIndex, fragmentSize, parentEl, $parent) {
+function renderFragment(fragmentIndex, fragmentSize, parentEl, $parent, currentContext) {
   var nextSibling = parentEl.childNodes[fragmentIndex];
 
   if (fragmentSize === 1) {
     var $child = $parent.children[fragmentIndex];
-    var $renderedChild = renderWithVirtual(parentEl, undefined, $child, $parent, fragmentIndex, {
+    var $renderedChild = renderWithVirtual(parentEl, undefined, $child, $parent, currentContext, fragmentIndex, {
       nextSibling: nextSibling
     });
 
@@ -1131,7 +1150,7 @@ function renderFragment(fragmentIndex, fragmentSize, parentEl, $parent) {
   for (var i = fragmentIndex; i < fragmentIndex + fragmentSize; i++) {
     var _$child = $parent.children[i];
 
-    var _$renderedChild = renderWithVirtual(parentEl, undefined, _$child, $parent, i, {
+    var _$renderedChild = renderWithVirtual(parentEl, undefined, _$child, $parent, currentContext, i, {
       fragment: fragment
     });
 
@@ -1143,13 +1162,13 @@ function renderFragment(fragmentIndex, fragmentSize, parentEl, $parent) {
   insertBefore(parentEl, fragment, nextSibling);
 }
 
-function setElementRef($element, htmlElement) {
+function setElementRef($element, element) {
   var ref = $element.props.ref;
 
   if (_typeof(ref) === 'object') {
-    ref.current = htmlElement;
+    ref.current = element;
   } else if (typeof ref === 'function') {
-    ref(htmlElement);
+    ref(element);
   }
 }
 
@@ -1211,7 +1230,7 @@ function processUncontrolledOnMount(element, props) {
   }
 }
 
-function updateAttributes($current, $new, element) {
+function updateAttributes($current, $new, element, isSvg) {
   processControlled(element.tagName, $new.props);
   var currentEntries = Object.entries($current.props);
   var newEntries = Object.entries($new.props);
@@ -1236,14 +1255,14 @@ function updateAttributes($current, $new, element) {
     var _currentValue = $current.props[_key3];
 
     if (_newValue !== undefined && _newValue !== _currentValue) {
-      setAttribute(element, _key3, _newValue);
+      setAttribute(element, _key3, _newValue, isSvg);
     }
   }
 }
 
-function setAttribute(element, key, value) {
+function setAttribute(element, key, value, isSvg) {
   if (key === 'className') {
-    updateClassName(element, value);
+    updateClassName(element, value, isSvg);
   } else if (key === 'value') {
     var inputEl = element;
 
@@ -1273,7 +1292,7 @@ function setAttribute(element, key, value) {
     element.innerHTML = value.__html;
   } else if (key.startsWith('on')) {
     (0,_dom_events__WEBPACK_IMPORTED_MODULE_2__.addEventListener)(element, key, value, key.endsWith('Capture'));
-  } else if (key.startsWith('data-') || key.startsWith('aria-') || HTML_ATTRIBUTES.has(key)) {
+  } else if (isSvg || key.startsWith('data-') || key.startsWith('aria-') || HTML_ATTRIBUTES.has(key)) {
     element.setAttribute(key, value);
   } else if (!FILTERED_ATTRIBUTES.has(key)) {
     element[MAPPED_ATTRIBUTES[key] || key] = value;
@@ -1296,11 +1315,17 @@ function removeAttribute(element, key, value) {
   }
 }
 
-function updateClassName(element, value) {
+function updateClassName(element, value, isSvg) {
+  if (isSvg) {
+    element.setAttribute('class', value);
+    return;
+  }
+
+  var htmlElement = element;
   var extra = extraClasses.get(element);
 
   if (!extra) {
-    element.className = value;
+    htmlElement.className = value;
     return;
   }
 
@@ -1310,7 +1335,7 @@ function updateClassName(element, value) {
     extraArray.push(value);
   }
 
-  element.className = extraArray.join(' ');
+  htmlElement.className = extraArray.join(' ');
 }
 
 function updateStyle(element, value) {
@@ -1460,11 +1485,11 @@ function DEBUG_checkKeyUniqueness(children) {
       return acc;
     }, []);
 
-    if (keys.length !== (0,_util_iteratees__WEBPACK_IMPORTED_MODULE_3__.unique)(keys).length) {
+    if (keys.length !== (0,_util_iteratees__WEBPACK_IMPORTED_MODULE_1__.unique)(keys).length) {
       // eslint-disable-next-line no-console
       console.warn('[Teact] Duplicated keys:', keys.filter(function (e, i, a) {
         return a.indexOf(e) !== i;
-      }));
+      }), children);
       throw new Error('[Teact] Children keys are not unique');
     }
   }
@@ -1489,6 +1514,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   MountState: () => (/* binding */ MountState),
 /* harmony export */   VirtualType: () => (/* binding */ VirtualType),
 /* harmony export */   captureImmediateEffects: () => (/* binding */ captureImmediateEffects),
+/* harmony export */   createContext: () => (/* binding */ createContext),
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__),
 /* harmony export */   hasElementChanged: () => (/* binding */ hasElementChanged),
 /* harmony export */   isParentElement: () => (/* binding */ isParentElement),
@@ -1497,10 +1523,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   renderComponent: () => (/* binding */ renderComponent),
 /* harmony export */   unmountComponent: () => (/* binding */ unmountComponent),
 /* harmony export */   useCallback: () => (/* binding */ useCallback),
+/* harmony export */   useContextSignal: () => (/* binding */ useContextSignal),
 /* harmony export */   useEffect: () => (/* binding */ useEffect),
 /* harmony export */   useLayoutEffect: () => (/* binding */ useLayoutEffect),
 /* harmony export */   useMemo: () => (/* binding */ useMemo),
 /* harmony export */   useRef: () => (/* binding */ useRef),
+/* harmony export */   useSignal: () => (/* binding */ useSignal),
 /* harmony export */   useState: () => (/* binding */ useState)
 /* harmony export */ });
 /* harmony import */ var _config__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../config */ "./src/config.ts");
@@ -1513,7 +1541,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _lib_fasterdom_fasterdom__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../lib/fasterdom/fasterdom */ "./src/lib/fasterdom/fasterdom.ts");
 var _excluded = ["avgRenderTime"];
 
-function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _iterableToArrayLimit(arr, i) { var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]; if (_i == null) return; var _arr = []; var _n = true; var _d = false; var _s, _e; try { for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e2) { throw _e2; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e3) { didErr = true; err = _e3; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
 
 function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
 
@@ -1569,6 +1605,7 @@ var Fragment = Symbol('Fragment');
 var DEBUG_RENDER_THRESHOLD = 7;
 var DEBUG_EFFECT_THRESHOLD = 7;
 var DEBUG_SILENT_RENDERS_FOR = new Set(['TeactMemoWrapper', 'TeactNContainer', 'Button', 'ListItem', 'MenuItem']);
+var contextCounter = 0;
 var lastComponentId = 0;
 var renderingInstance;
 function isParentElement($element) {
@@ -1602,7 +1639,7 @@ function createComponentInstance(Component, props, children) {
   }
 
   var componentInstance = {
-    id: ++lastComponentId,
+    id: -1,
     $element: undefined,
     Component: Component,
     name: Component.name,
@@ -1903,6 +1940,7 @@ function hasElementChanged($old, $new) {
   return false;
 }
 function mountComponent(componentInstance) {
+  componentInstance.id = ++lastComponentId;
   renderComponent(componentInstance);
   componentInstance.mountState = MountState.Mounted;
   return componentInstance.$element;
@@ -2408,6 +2446,48 @@ function useRef(initial) {
   renderingInstance.hooks.refs.cursor++;
   return byCursor[cursor];
 }
+function createContext(defaultValue) {
+  var contextId = String(contextCounter++);
+
+  function TeactContextProvider(props) {
+    var _props$value;
+
+    var _useSignal = useSignal((_props$value = props.value) !== null && _props$value !== void 0 ? _props$value : defaultValue),
+        _useSignal2 = _slicedToArray(_useSignal, 2),
+        getValue = _useSignal2[0],
+        setValue = _useSignal2[1]; // Create a new object to avoid mutations in the parent context
+
+
+    renderingInstance.context = _objectSpread({}, renderingInstance.context);
+    renderingInstance.context[contextId] = getValue;
+    setValue(props.value);
+    return props.children;
+  }
+
+  TeactContextProvider.DEBUG_contentComponentName = contextId;
+  var context = {
+    defaultValue: defaultValue,
+    contextId: contextId,
+    Provider: TeactContextProvider
+  };
+  return context;
+}
+function useContextSignal(context) {
+  var _renderingInstance$co;
+
+  var _useSignal3 = useSignal(context.defaultValue),
+      _useSignal4 = _slicedToArray(_useSignal3, 1),
+      getDefaultValue = _useSignal4[0];
+
+  return ((_renderingInstance$co = renderingInstance.context) === null || _renderingInstance$co === void 0 ? void 0 : _renderingInstance$co[context.contextId]) || getDefaultValue;
+}
+function useSignal(initial) {
+  var _signalRef$current;
+
+  var signalRef = useRef();
+  (_signalRef$current = signalRef.current) !== null && _signalRef$current !== void 0 ? _signalRef$current : signalRef.current = (0,_util_signals__WEBPACK_IMPORTED_MODULE_6__.createSignal)(initial);
+  return signalRef.current;
+}
 function memo(Component, debugKey) {
   function TeactMemoWrapper(props) {
     return useMemo(function () {
@@ -2431,6 +2511,10 @@ function DEBUG_resolveComponentName(Component) {
 
   if (name === 'TeactMemoWrapper') {
     return "memo>".concat(DEBUG_contentComponentName);
+  }
+
+  if (name === 'TeactContextProvider') {
+    return "context>id".concat(DEBUG_contentComponentName);
   }
 
   return name + (DEBUG_contentComponentName ? ">".concat(DEBUG_contentComponentName) : '');
@@ -3198,4 +3282,4 @@ function Checkbox() {
 
 /******/ })()
 ;
-//# sourceMappingURL=main.45c3a1089dbd4f33ecd4.js.map
+//# sourceMappingURL=main.eb2ce604a362b25c285c.js.map
