@@ -185,7 +185,7 @@ function createComponentInstance(Component: FC, props: Props, children: any[]): 
   }
 
   const componentInstance: ComponentInstance = {
-    id: ++lastComponentId,
+    id: -1,
     $element: undefined as unknown as VirtualElementComponent,
     Component,
     name: Component.name,
@@ -485,6 +485,7 @@ export function hasElementChanged($old: VirtualElement, $new: VirtualElement) {
 }
 
 export function mountComponent(componentInstance: ComponentInstance) {
+  componentInstance.id = ++lastComponentId;
   renderComponent(componentInstance);
   componentInstance.mountState = MountState.Mounted;
   return componentInstance.$element;
