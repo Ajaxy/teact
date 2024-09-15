@@ -5,10 +5,9 @@ import { orderBy } from '../util/iteratees';
 import { throttleWithTickEnd } from '../util/schedulers';
 import { requestMeasure } from '../lib/fasterdom/fasterdom';
 import type { FC, FC_withDebug, Props } from './teact';
-import React, { DEBUG_resolveComponentName, useEffect } from './teact';
+import React, { DEBUG_resolveComponentName, useEffect, getIsHeavyAnimating, useUnmountCleanup } from './teact';
 
 import useForceUpdate from '../hooks/useForceUpdate';
-import { isHeavyAnimating } from '../hooks/useHeavyAnimationCheck';
 import useUniqueId from '../hooks/useUniqueId';
 
 export default React;
@@ -75,7 +74,7 @@ function runImmediateCallbacks() {
 function runCallbacks() {
   if (forceOnHeavyAnimation) {
     forceOnHeavyAnimation = false;
-  } else if (isHeavyAnimating()) {
+  } else if (getIsHeavyAnimating()) {
     requestMeasure(runCallbacksThrottled);
     return;
   }
@@ -250,11 +249,9 @@ export function withGlobal<OwnProps extends AnyLiteral>(
       const id = useUniqueId();
       const forceUpdate = useForceUpdate();
 
-      useEffect(() => {
-        return () => {
-          containers.delete(id);
-        };
-      }, [id]);
+      useUnmountCleanup(() => {
+        containers.delete(id);
+      });
 
       let container = containers.get(id)!;
       if (!container) {

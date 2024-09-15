@@ -9,6 +9,8 @@ import { throttleWith } from '../util/schedulers';
 import { createSignal, isSignal, type Signal } from '../util/signals';
 import { requestMeasure, requestMutation } from '../lib/fasterdom/fasterdom';
 
+export { getIsHeavyAnimating, beginHeavyAnimation, onFullyIdle } from './heavyAnimation';
+
 export type Props = AnyLiteral;
 export type FC<P extends Props = any> = (props: P) => any;
 // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -811,6 +813,26 @@ export function useEffect(effect: Effect, dependencies?: readonly any[], debugKe
 
 export function useLayoutEffect(effect: Effect, dependencies?: readonly any[], debugKey?: string) {
   return useEffectBase(true, effect, dependencies, debugKey);
+}
+
+export function useUnmountCleanup(cleanup: NoneToVoidFunction) {
+  if (!renderingInstance.hooks) {
+    renderingInstance.hooks = {};
+  }
+
+  if (!renderingInstance.hooks.effects) {
+    renderingInstance.hooks.effects = { cursor: 0, byCursor: [] };
+  }
+
+  const { cursor, byCursor } = renderingInstance.hooks.effects;
+
+  if (!byCursor[cursor]) {
+    byCursor[cursor] = {
+      cleanup,
+    };
+  }
+
+  renderingInstance.hooks.effects.cursor++;
 }
 
 export function useMemo<T extends any>(
