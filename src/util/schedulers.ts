@@ -57,17 +57,7 @@ export function throttleWith<F extends AnyToVoidFunction>(schedulerFn: Scheduler
   };
 }
 
-export function onIdle(cb: NoneToVoidFunction, timeout?: number) {
-  // eslint-disable-next-line no-restricted-globals
-  if (self.requestIdleCallback) {
-    // eslint-disable-next-line no-restricted-globals
-    self.requestIdleCallback(cb, { timeout });
-  } else {
-    onTickEnd(cb);
-  }
-}
-
-const FAST_RAF_TIMEOUT_FALLBACK_MS = 300;
+const FAST_RAF_TIMEOUT_FALLBACK_MS = 35; // < 30 FPS
 
 let fastRafCallbacks: Set<NoneToVoidFunction> | undefined;
 let fastRafFallbackCallbacks: Set<NoneToVoidFunction> | undefined;
@@ -136,6 +126,45 @@ export function onTickEnd(callback: NoneToVoidFunction) {
     });
   } else {
     onTickEndCallbacks.push(callback);
+  }
+}
+
+const IDLE_TIMEOUT = 500;
+
+let onIdleCallbacks: NoneToVoidFunction[] | undefined;
+
+export function onIdle(callback: NoneToVoidFunction) {
+  // eslint-disable-next-line no-restricted-globals
+  if (!self.requestIdleCallback) {
+    onTickEnd(callback);
+    return;
+  }
+
+  if (!onIdleCallbacks) {
+    onIdleCallbacks = [callback];
+
+    requestIdleCallback((deadline) => {
+      const currentCallbacks = onIdleCallbacks!;
+      onIdleCallbacks = undefined;
+
+      while (currentCallbacks.length) {
+        const cb = currentCallbacks.shift()!;
+        cb();
+
+        if (!deadline.timeRemaining()) break;
+      }
+
+      if (currentCallbacks.length) {
+        if (onIdleCallbacks) {
+          // Prepend the remaining callbacks if the next pass is already planned
+          onIdleCallbacks = currentCallbacks.concat(onIdleCallbacks);
+        } else {
+          currentCallbacks.forEach(onIdle);
+        }
+      }
+    }, { timeout: IDLE_TIMEOUT });
+  } else {
+    onIdleCallbacks.push(callback);
   }
 }
 
