@@ -3,7 +3,7 @@ import { DEBUG } from '../config';
 type Handler = (e: Event) => void;
 type DelegationRegistry = Map<Element, Handler>;
 
-const NON_BUBBLEABLE_EVENTS = new Set(['scroll', 'mouseenter', 'mouseleave', 'load']);
+const NON_BUBBLEABLE_EVENTS = new Set(['scroll', 'mouseenter', 'mouseleave', 'load', 'error']);
 
 const documentEventCounters: Record<string, number> = {};
 const delegationRegistryByEventType: Record<string, DelegationRegistry> = {};
@@ -27,7 +27,7 @@ export function removeEventListener(element: Element, propName: string, handler:
   }
 }
 
-function resolveEventType(propName: string, element: Element) {
+export function resolveEventType(propName: string, element: Element) {
   const eventType = propName
     .replace(/^on/, '')
     .replace(/Capture$/, '').toLowerCase();
