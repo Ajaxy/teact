@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Fasterdom: Optimized Browser Rendering</title>
+    <meta name="description" content="Best practices for maximizing browser rendering efficiency and main-thread performance to deliver smooth, highly responsive UI behavior.">
+    <meta name="author" content="Alexander Zinchuk">
+    <link rel="canonical" href="https://ajaxy.github.io/teact/Fasterdom-Optimized-Browser-Rendering/">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Fasterdom: Optimized Browser Rendering">
+    <meta property="og:description" content="Best practices for maximizing browser rendering efficiency and main-thread performance to deliver smooth, highly responsive UI behavior.">
+    <meta property="og:image" content="https://github.com/user-attachments/assets/64eea825-fa6d-40ae-a970-5044ea72045d">
+    <meta property="og:url" content="https://ajaxy.github.io/teact/Fasterdom-Optimized-Browser-Rendering/">
+    <meta property="article:published_time" content="2024-05-15T10:00:00+0000">
+    <meta property="article:author" content="Alexander Zinchuk">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Fasterdom: Optimized Browser Rendering">
+    <meta name="twitter:description" content="Best practices for maximizing browser rendering efficiency and main-thread performance to deliver smooth, highly responsive UI behavior.">
+    <meta name="twitter:image" content="https://github.com/user-attachments/assets/64eea825-fa6d-40ae-a970-5044ea72045d">
+    <link rel="stylesheet" href="fonts.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap">
+    <link rel="stylesheet" href="https://esm.sh/prismjs@1.30.0/themes/prism.css" media="(prefers-color-scheme: light)">
+    <link rel="stylesheet" href="https://esm.sh/prismjs@1.30.0/themes/prism-dark.css" media="(prefers-color-scheme: dark)">
+    <style>
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-family: sans-serif;
+  line-height: 1.15;
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+
+  -ms-overflow-style: scrollbar;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+
+@-ms-viewport {
+  width: device-width;
+}
+
+article,
+aside,
+dialog,
+figcaption,
+figure,
+footer,
+header,
+hgroup,
+main,
+nav,
+section {
+  display: block;
+}
+
+body {
+  margin: 0;
+}
+
+[tabindex="-1"]:focus {
+  outline: none !important;
+}
+
+hr {
+  overflow: visible;
+
+  box-sizing: content-box;
+  height: 0;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+
+  font-weight: 500;
+}
+
+abbr[title],
+abbr[data-original-title] {
+  cursor: help;
+
+  text-decoration: underline;
+  text-decoration: underline dotted;
+
+  border-bottom: 0;
+}
+
+address {
+  margin-bottom: 1rem;
+
+  font-style: normal;
+  line-height: inherit;
+}
+
+p,
+ol,
+ul,
+dl {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+ol ol,
+ul ul,
+ol ul,
+ul ol {
+  margin-bottom: 0;
+}
+
+dd {
+  margin-bottom: 0.5rem;
+  margin-left: 0;
+}
+
+blockquote,
+figure {
+  margin: 0 0 1rem;
+}
+
+dfn {
+  font-style: italic;
+}
+
+dt,
+b,
+strong {
+  font-weight: 600;
+}
+
+small {
+  font-size: 80%;
+}
+
+sub,
+sup {
+  position: relative;
+
+  font-size: 75%;
+  line-height: 0;
+  vertical-align: baseline;
+}
+
+sub {
+  bottom: -0.25em;
+}
+
+sup {
+  top: -0.5em;
+}
+
+a {
+  color: var(--color-blue);
+  text-decoration: none;
+
+  background-color: transparent;
+
+  -webkit-text-decoration-skip: objects;
+}
+
+a:hover {
+  color: #0056b3;
+  text-decoration: underline;
+}
+
+a:not([href]):not([tabindex]),
+a:not([href]):not([tabindex]):hover,
+a:not([href]):not([tabindex]):focus {
+  color: inherit;
+  text-decoration: none;
+}
+
+a:not([href]):not([tabindex]):focus {
+  outline: 0;
+}
+
+pre,
+code,
+kbd,
+samp {
+  font: 0.9375rem/1.25 "Courier", "Courier New", "Nimbus Mono L", "Courier 10 Pitch", "FreeMono", sans-serif-monospace, monospace;
+  font-size-adjust: 0.43;
+}
+
+pre {
+  overflow: auto;
+
+  margin-top: 0;
+  margin-bottom: 1rem;
+
+  -ms-overflow-style: scrollbar;
+}
+
+img {
+  vertical-align: middle;
+
+  border-style: none;
+}
+
+svg:not(:root) {
+  overflow: hidden;
+}
+
+a,
+area,
+button,
+[role="button"],
+input:not([type="range"]),
+label,
+select,
+summary,
+textarea {
+  touch-action: manipulation;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+caption {
+  caption-side: bottom;
+
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+
+  color: #868e96;
+  text-align: left;
+}
+
+th {
+  text-align: inherit;
+}
+
+label {
+  display: inline-block;
+
+  margin-bottom: 0.5rem;
+}
+
+button {
+  border-radius: 0;
+}
+
+button:not([class]):focus {
+  outline: 1px dotted;
+  outline: 5px auto -webkit-focus-ring-color;
+}
+
+input,
+button,
+select,
+optgroup,
+textarea {
+  margin: 0;
+
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+button,
+input {
+  overflow: visible;
+}
+
+button,
+select {
+  text-transform: none;
+}
+
+button,
+html [type="button"],
+[type="reset"],
+[type="submit"] {
+  -webkit-appearance: button;
+}
+
+button::-moz-focus-inner,
+[type="button"]::-moz-focus-inner,
+[type="reset"]::-moz-focus-inner,
+[type="submit"]::-moz-focus-inner {
+  padding: 0;
+
+  border-style: none;
+}
+
+input[type="radio"],
+input[type="checkbox"] {
+  box-sizing: border-box;
+  padding: 0;
+}
+
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"],
+input[type="month"] {
+  -webkit-appearance: listbox;
+}
+
+textarea {
+  resize: vertical;
+
+  overflow: auto;
+}
+
+fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+
+  border: 0;
+}
+
+legend {
+  display: block;
+
+  width: 100%;
+  max-width: 100%;
+  margin-bottom: 0.5rem;
+  padding: 0;
+
+  font-size: 1.5rem;
+  line-height: inherit;
+  color: inherit;
+  white-space: normal;
+}
+
+progress {
+  vertical-align: baseline;
+}
+
+[type="number"]::-webkit-inner-spin-button,
+[type="number"]::-webkit-outer-spin-button {
+  height: auto;
+}
+
+[type="search"] {
+  outline-offset: -2px;
+
+  -webkit-appearance: none;
+}
+
+[type="search"]::-webkit-search-cancel-button,
+[type="search"]::-webkit-search-decoration {
+  -webkit-appearance: none;
+}
+
+::-webkit-file-upload-button {
+  font: inherit;
+
+  -webkit-appearance: button;
+}
+
+output {
+  display: inline-block;
+}
+
+summary {
+  display: list-item;
+}
+
+template {
+  display: none;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+:root {
+  --color-white: #fff;
+  --color-blue: #0088CC;
+  --color-black: #313D4F;
+  --color-gray-1: #53657B;
+  --color-gray-2: #798795;
+  --color-gray-2-15: #E3E7EC;
+  --color-gray-3: #C1D1D9;
+  --color-gray-4: #91ABB8;
+  --color-green: #2CD36F;
+  --color-red: #F35B5B;
+  --color-background-first: #FFFFFF;
+  --color-background-window: #FFFFFF;
+  --color-blue-button-text: #FFFFFF;
+  --color-blue-button-text-hover: #FFFFFF;
+  --color-blue-button-text-active: #BFDBE9;
+  --color-blue-button-background: #0088CC;
+  --color-blue-button-background-hover: #16A5ED;
+  --color-blue-button-background-active: #006EA6;
+  --color-red-button-text: #FFFFFF;
+  --color-red-button-text-hover: #FFFFFF;
+  --color-red-button-text-active: #F5D2D2;
+  --color-red-button-background: #F35B5B;
+  --color-red-button-background-hover: #FF7070;
+  --color-red-button-background-active: #D74A4A;
+  --color-red-warning-text: #FFFFFF;
+  --color-red-warning-text-75: rgba(255, 255, 255, 0.75);
+  --color-red-warning-background: rgba(243, 91, 91, 0.9);
+  --color-gray-button-text: #2D4C5C;
+  --color-gray-button-text-hover: #313D4F;
+  --color-gray-button-text-active: #53657B;
+  --color-gray-button-background: #DEE6EC;
+  --color-gray-button-background-hover: #E3EAEF;
+  --color-gray-button-background-active: #C7D5DC;
+  --color-close-button-text: #798795;
+  --color-close-button-text-hover: #6F7C89;
+  --color-close-button-text-active: #66727E;
+  --color-close-button-background: #E3E7EC;
+  --color-close-button-background-hover: #D2D4DC;
+  --color-close-button-background-active: #C2C5CE;
+  --color-activity-round-blue: #0088CC;
+  --color-activity-round-orange: #FF9900;
+  --color-activity-icon: #FFFFFF;
+  --color-activity-gray-10: #F3F5F9;
+  --color-activity-gray-text: #53657B;
+  --color-activity-green-10: #EAFBF1;
+  --color-activity-green-text: #1EC160;
+  --color-separator: rgba(131, 148, 166, 0.3);
+  --color-linear-effect-1: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, #FFFFFF 100%);
+  --color-linear-effect-2: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.7) 100%);
+  --color-interactive-home-button-hover: rgb(249, 251, 253);
+  --color-interactive-input-text-hover-active: #758495;
+  --color-interactive-popup-menu-hover: rgba(0, 136, 204, 0.07);
+  --color-interactive-popup-menu-active: rgba(83, 101, 123, 0.07);
+  --color-tint: rgba(0, 0, 0, 0.45);
+  --color-card-text: #FFFFFF;
+  --color-card-second-text: rgba(255, 255, 255, 0.6);
+  --default-shadow: 0 0 1.5625rem 0 #00000026;
+  --spinner-white-data: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTEwLjggMjIuNEM2IDIxLjkgMi4xIDE4IDEuNiAxMy4yLjkgNy4xIDUuNCAxLjkgMTEuMyAxLjVjLjQgMCAuNy0uMy43LS43IDAtLjQtLjQtLjgtLjgtLjhDNC44LjQtLjIgNS45IDAgMTIuNS4yIDE4LjYgNS40IDIzLjggMTEuNSAyNGM2LjYuMiAxMi00LjggMTIuNC0xMS4yIDAtLjQtLjMtLjgtLjgtLjgtLjQgMC0uNy4zLS43LjctLjMgNS45LTUuNSAxMC40LTExLjYgOS43eiIgZmlsbD0iI2ZmZmZmZiIvPjwvc3ZnPg==);
+  --spinner-white-thin-data: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iI2ZmZmZmZiIgZD0iTTEyIDIzQzUuOSAyMyAxIDE4LjEgMSAxMlM1LjkgMSAxMiAxVjBDNS40IDAgMCA1LjQgMCAxMnM1LjQgMTIgMTIgMTIgMTItNS40IDEyLTEyaC0xYzAgNi4xLTQuOSAxMS0xMSAxMXoiLz48L3N2Zz4=);
+  --spinner-blue-data: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTEwLjggMjIuNEM2IDIxLjkgMi4xIDE4IDEuNiAxMy4yLjkgNy4xIDUuNCAxLjkgMTEuMyAxLjVjLjQgMCAuNy0uMy43LS43IDAtLjQtLjQtLjgtLjgtLjhDNC44LjQtLjIgNS45IDAgMTIuNS4yIDE4LjYgNS40IDIzLjggMTEuNSAyNGM2LjYuMiAxMi00LjggMTIuNC0xMS4yIDAtLjQtLjMtLjgtLjgtLjgtLjQgMC0uNy4zLS43LjctLjMgNS45LTUuNSAxMC40LTExLjYgOS43eiIgZmlsbD0iIzAwODhDQyIvPjwvc3ZnPg==);
+  --spinner-dark-blue-data: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTEwLjggMjIuNEM2IDIxLjkgMi4xIDE4IDEuNiAxMy4yLjkgNy4xIDUuNCAxLjkgMTEuMyAxLjVjLjQgMCAuNy0uMy43LS43IDAtLjQtLjQtLjgtLjgtLjhDNC44LjQtLjIgNS45IDAgMTIuNS4yIDE4LjYgNS40IDIzLjggMTEuNSAyNGM2LjYuMiAxMi00LjggMTIuNC0xMS4yIDAtLjQtLjMtLjgtLjgtLjgtLjQgMC0uNy4zLS43LjctLjMgNS45LTUuNSAxMC40LTExLjYgOS43eiIgZmlsbD0iIzAwODhDQyIvPjwvc3ZnPg==);
+  --layer-blackout-opacity: 0.3;
+  --layer-transition: 300ms cubic-bezier(0.33, 1, 0.68, 1);
+  --slide-transition: 250ms cubic-bezier(0.25, 1, 0.5, 1);
+  --select-transition: 200ms ease-out;
+  --border-radius-small: 0.625rem;
+  --border-radius-default: 0.9375rem;
+  --border-radius-big: 1.5rem;
+  --z-below: -1;
+  --z-modal: 100;
+  --z-menu-backdrop: 199;
+  --z-menu-bubble: 200;
+  --z-notification: 250;
+  --container-width: 1200px;
+  --color-background: #ffffff;
+  --color-background-second: #f7f9fb;
+  --color-text-primary: #1f2432;
+  --color-text-secondary: #5e6677;
+  --color-text-meta: #8c96a8;
+  --color-primary: #0098ea;
+  --color-primary-darker: #0088d1;
+  --color-border: #e6e9ee;
+  --color-code-bg: rgba(0, 136, 204, 0.06);
+  --color-blockquote-bg: rgba(0, 136, 204, 0.06);
+  --color-blockquote-border: #0088cc;
+  --mobile-width: 576px;
+  --tablet-width: 768px;
+  --desktop-width: 992px;
+  --large-desktop-width: 1200px;
+}
+:root html.is-ios {
+  --layer-transition: 450ms cubic-bezier(0.33, 1, 0.68, 1);
+  --slide-transition: 450ms cubic-bezier(0.25, 1, 0.5, 1);
+}
+:root html.is-android {
+  --layer-transition: 450ms cubic-bezier(0.25, 1, 0.5, 1);
+  --slide-transition: 400ms cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.dark {
+  --color-background: #1a1d29;
+  --color-background-second: #242936;
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #b0b8c8;
+  --color-text-meta: #8c96a8;
+  --color-border: #3a4050;
+  --color-code-bg: rgba(106, 170, 255, 0.1);
+  --color-blockquote-bg: rgba(106, 170, 255, 0.1);
+  --color-blockquote-border: #4a9eff;
+}
+
+@media (prefers-color-scheme: dark) {
+  html:not(.light):not(.dark) {
+    --color-background: #1a1d29;
+    --color-background-second: #242936;
+    --color-text-primary: #ffffff;
+    --color-text-secondary: #b0b8c8;
+    --color-text-meta: #8c96a8;
+    --color-border: #3a4050;
+    --color-code-bg: rgba(106, 170, 255, 0.1);
+    --color-blockquote-bg: rgba(106, 170, 255, 0.1);
+    --color-blockquote-border: #4a9eff;
+  }
+}
+.light {
+  --color-background: #ffffff;
+  --color-background-second: #f7f9fb;
+  --color-text-primary: #1f2432;
+  --color-text-secondary: #5e6677;
+  --color-text-meta: #8c96a8;
+  --color-border: #e6e9ee;
+}
+
+html {
+  overflow-y: auto;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: var(--color-background);
+}
+
+body, #root {
+  overflow-x: hidden;
+  overflow-y: auto;
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: "Nunito", -apple-system, BlinkMacSystemFont, "Apple Color Emoji", "Segoe UI", Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.25;
+  color: var(--color-text-primary);
+  text-align: left;
+  background-color: var(--color-background);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html.is-ios body,
+html.is-macos body {
+  font-family: "Nunito", system-ui, -apple-system, BlinkMacSystemFont, "Roboto", "Apple Color Emoji", "Helvetica Neue", sans-serif;
+}
+
+#root {
+  height: 100%;
+}
+
+#root,
+#portals {
+  font-size: 1.0625rem;
+}
+
+.not-implemented {
+  opacity: 0.5;
+}
+.not-implemented, .not-implemented * {
+  cursor: not-allowed !important;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.custom-scroll,
+.custom-scroll-x {
+  pointer-events: auto;
+  transition: scrollbar-color 0.3s ease;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-color: rgba(90, 90, 90, 0) transparent;
+  scrollbar-width: thin;
+}
+.custom-scroll::-webkit-scrollbar-thumb,
+.custom-scroll-x::-webkit-scrollbar-thumb {
+  background-color: rgba(90, 90, 90, 0);
+  border-radius: 0.375rem;
+  box-shadow: 0 0 1px rgba(255, 255, 255, 0.01);
+}
+.custom-scroll:hover, .custom-scroll:focus, .custom-scroll:focus-within,
+.custom-scroll-x:hover,
+.custom-scroll-x:focus,
+.custom-scroll-x:focus-within {
+  scrollbar-color: rgba(90, 90, 90, 0.3) transparent;
+}
+.custom-scroll:hover::-webkit-scrollbar-thumb, .custom-scroll:focus::-webkit-scrollbar-thumb, .custom-scroll:focus-within::-webkit-scrollbar-thumb,
+.custom-scroll-x:hover::-webkit-scrollbar-thumb,
+.custom-scroll-x:focus::-webkit-scrollbar-thumb,
+.custom-scroll-x:focus-within::-webkit-scrollbar-thumb {
+  background-color: rgba(90, 90, 90, 0.3);
+}
+
+body:not(.is-ios) .custom-scroll::-webkit-scrollbar {
+  width: 0.375rem;
+}
+body:not(.is-ios) .custom-scroll-x::-webkit-scrollbar {
+  height: 0.375rem;
+}
+
+.flex {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+div[role=button] {
+  cursor: pointer;
+  outline: none !important;
+}
+
+.opacity-transition {
+  opacity: 1;
+  transition: opacity 0.15s ease;
+}
+.opacity-transition:not(.open) {
+  opacity: 0;
+}
+.opacity-transition:not(.shown) {
+  display: none;
+}
+.opacity-transition.slow {
+  transition-duration: 0.3s;
+}
+
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+a:hover, a:focus {
+  color: var(--color-primary-darker);
+  text-decoration: none;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+@charset "UTF-8";
+body,
+html {
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.tl_page_wrap {
+  display: flex;
+  flex-direction: column;
+  min-height: var(--viewport-height, 100vh);
+}
+
+.tl_page {
+  position: relative;
+  flex-grow: 1;
+  width: 100%;
+  max-width: 732px;
+  margin: 0 auto;
+  padding: 21px 0;
+}
+
+.tl_article ::selection {
+  background: #dbdbdb;
+}
+.tl_article ::-moz-selection {
+  background: #dbdbdb;
+}
+.tl_article .tl_article_header {
+  display: block;
+  word-wrap: break-word;
+}
+.tl_article .tl_article_content,
+.tl_article .tl_article_header {
+  margin: 0;
+  padding: 0;
+  font-family: CustomSerif, Georgia, Cambria, "Times New Roman", serif;
+  font-size: 18px;
+  font-weight: 400;
+  font-style: normal;
+  line-height: 1.58;
+}
+.tl_article h1,
+.tl_article h2 {
+  margin: 21px 21px 12px;
+  font-family: CustomSansSerif, "Lucida Grande", Arial, sans-serif;
+  font-size: 32px;
+  font-weight: 700;
+  font-style: normal;
+  line-height: 34px;
+}
+.tl_article address {
+  margin: 12px 21px;
+  font-family: CustomSansSerif, "Lucida Grande", Arial, sans-serif;
+  font-size: 15px;
+  font-style: normal;
+  line-height: 18px;
+  color: #79828B;
+}
+.tl_article address a {
+  color: #79828B;
+}
+.tl_article address a[href] {
+  border-bottom: none;
+}
+.tl_article address time:before {
+  content: "•";
+  padding: 0 7px;
+}
+.tl_article address a[rel=author]:empty + time:before {
+  display: none;
+}
+.tl_article time:empty:before {
+  display: none;
+}
+.tl_article a[href] {
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 0.1em solid currentColor;
+  transition: color 0.15s ease, border-color 0.15s ease;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0.44);
+}
+.tl_article a[href]:hover, .tl_article a[href]:active {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+}
+.tl_article .tl_article_content p {
+  margin: 0 21px 12px;
+  word-wrap: break-word;
+}
+.tl_article .tl_article_content code {
+  padding: 2px 4px;
+  font-family: Menlo, "Courier New", Courier, monospace;
+  font-size: 16px;
+  background: var(--color-code-bg);
+  border-radius: 6px;
+}
+.tl_article .tl_article_content pre {
+  margin: 14px 4px;
+  padding: 12px 16px;
+  font-family: Menlo, "Courier New", Courier, monospace;
+  font-size: 16px;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  background: var(--color-code-bg);
+  border: none !important;
+  border-radius: 6px;
+  box-shadow: none !important;
+}
+.tl_article .tl_article_content pre code {
+  padding: 0;
+  font-size: inherit;
+  text-shadow: none !important;
+  background: none;
+  border-radius: 0;
+}
+.tl_article .tl_article_content h3,
+.tl_article .tl_article_content h4 {
+  margin: 18px 21px 9px;
+  font-family: CustomSansSerif, "Lucida Grande", Arial, sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  font-style: normal;
+}
+.tl_article .tl_article_content h4 {
+  margin: 18px 21px 7px;
+  font-size: 24px;
+}
+.tl_article .tl_article_content blockquote {
+  position: relative;
+  margin: 0 6px 12px;
+  padding: 8px 12px;
+  font-family: CustomSerif, Georgia, Cambria, "Times New Roman", serif;
+  font-size: 17px;
+  font-style: italic;
+  word-wrap: break-word;
+  background: var(--color-blockquote-bg);
+  border-left: 3px solid var(--color-blockquote-border);
+  border-radius: 6px;
+}
+.tl_article .tl_article_content blockquote p {
+  margin: 0;
+}
+.tl_article .tl_article_content hr {
+  overflow: visible;
+  width: 50%;
+  margin: 30px auto;
+  font-size: 2px;
+  text-align: right;
+  border: none;
+}
+.tl_article .tl_article_content hr:after {
+  content: "";
+  position: relative;
+  top: 1px;
+  display: block;
+  margin: 0 3px;
+  border-top: 1px solid #c9cdd1;
+}
+.tl_article .tl_article_content ol,
+.tl_article .tl_article_content ul {
+  counter-reset: list;
+  margin: 21px;
+  padding: 0;
+  list-style: none;
+}
+.tl_article .tl_article_content ol li,
+.tl_article .tl_article_content ul li {
+  position: relative;
+  margin-bottom: 14px;
+  margin-left: 30px;
+  padding: 0;
+}
+.tl_article .tl_article_content ol li:before,
+.tl_article .tl_article_content ul li:before {
+  position: absolute;
+  display: inline-block;
+  box-sizing: border-box;
+  width: 78px;
+  margin: 0 0 0 -78px;
+  text-align: end;
+}
+.tl_article .tl_article_content ol li p,
+.tl_article .tl_article_content ul li p {
+  margin-left: 0;
+}
+.tl_article .tl_article_content ol li blockquote,
+.tl_article .tl_article_content ul li blockquote {
+  margin-right: -14px;
+  margin-left: -14px;
+}
+.tl_article .tl_article_content ul li:before {
+  content: "•";
+  padding: 1px 15px 0 0;
+}
+.tl_article .tl_article_content ol li:before {
+  content: counter(list) ".";
+  counter-increment: list;
+  padding-right: 12px;
+  -moz-font-feature-settings: "liga" on, "lnum" on;
+  -webkit-font-feature-settings: "liga" on, "lnum" on;
+  font-feature-settings: "liga" on, "lnum" on;
+}
+.tl_article .tl_article_content img,
+.tl_article .tl_article_content video {
+  max-width: 100%;
+  vertical-align: top;
+  border-radius: 6px;
+}
+.tl_article .tl_article_content figure {
+  position: relative;
+  margin: 0 21px 16px;
+  padding: 0;
+  text-align: center;
+  border-radius: 6px;
+}
+.tl_article .tl_article_content figcaption {
+  padding: 12px 21px 0;
+  font-family: CustomSansSerif, "Lucida Grande", Arial, sans-serif;
+  font-size: 15px;
+  line-height: 18px;
+  color: #79828B;
+  text-align: center;
+  vertical-align: top;
+}
+
+.heading-anchor {
+  position: absolute;
+  left: -20px;
+  color: rgba(0, 0, 0, 0.8);
+  text-decoration: none;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.heading-anchor:hover {
+  cursor: pointer;
+  color: #000000;
+}
+
+h1[id],
+h2[id],
+h3[id],
+h4[id],
+h5[id],
+h6[id] {
+  position: relative;
+}
+h1:hover .heading-anchor,
+h2:hover .heading-anchor,
+h3:hover .heading-anchor,
+h4:hover .heading-anchor,
+h5:hover .heading-anchor,
+h6:hover .heading-anchor {
+  opacity: 1;
+}
+
+h1 {
+  font-family: "Nunito", CustomSansSerif, "Lucida Grande", Arial, sans-serif !important;
+}
+
+h3 {
+  margin-top: 36px !important;
+  line-height: 30px !important;
+}
+
+.tl_article address time:before {
+  content: "·" !important;
+}
+
+@media (max-width: 768px) {
+  figure,
+video,
+img {
+    width: 100% !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+  }
+}
+video {
+  background: linear-gradient(to bottom right, #6FE2FF, #604AEC);
+  display: block;
+  aspect-ratio: 1/1;
+  width: calc(100% - 42px);
+  height: auto;
+  margin: auto;
+  margin-bottom: 12px;
+}
+video.bg-purple {
+  background: linear-gradient(to bottom right, #716CFF, #E94AEE);
+}
+video.bg-orange {
+  background: linear-gradient(to bottom right, #FF617F, #F4CA18);
+}
+video.bg-green {
+  background: linear-gradient(to bottom right, #61E571, #44D2D8);
+}
+video.bg-pink {
+  background: linear-gradient(to bottom right, #FF78DD, #F27653);
+}
+video.bg-lime {
+  background: linear-gradient(to bottom right, #E6E06B, #61DB4B);
+}
+video.bg-blue {
+  background: linear-gradient(to bottom right, #95E3FB, #6855E8);
+}
+video.bg-gray {
+  background: linear-gradient(to bottom right, #212842, #3F4C6B);
+}
+video.v4-0-Air-UI, video.v4-0-Air-UI-Ru {
+  background: linear-gradient(to bottom right, #fc706c, #eee646);
+}
+video.v4-0-Base-Currency, video.v4-0-Base-Currency-Ru {
+  background: linear-gradient(to bottom right, #c6e15e, #42d453);
+}
+video.v4-0-WebSockets, video.v4-0-WebSockets-Ru {
+  background: linear-gradient(to bottom right, #6de0fe, #5e49ed);
+}
+video.v4-1-Air-Explore, video.v4-1-Air-Explore-Ru {
+  background: linear-gradient(to bottom right, #12c56e, #08de7b);
+}
+video.v4-1-Air-Gestures, video.v4-1-Air-Gestures-Ru {
+  background: linear-gradient(to bottom right, #5114c5, #5408de);
+}
+video.v4-1-Air-Wallets, video.v4-1-Air-Wallets-Ru {
+  background: linear-gradient(to bottom right, #b91149, #d80650);
+}
+video.v4-1-Air-Full, video.v4-1-Air-Full-Ru {
+  background: linear-gradient(to bottom right, #0098eb, #008af4);
+}
+video.v4-1-Air-NFTs, video.v4-1-Air-NFTs-Ru {
+  background: linear-gradient(to bottom right, #d25913, #e47106);
+}
+video.v4-1-Air-Price-Charts, video.v4-1-Air-Price-Charts-Ru {
+  background: linear-gradient(to bottom right, #d0ae14, #d6c814);
+}
+video.v4-2-Base-Currency-Preview, video.v4-2-Base-Currency-Preview-Ru {
+  background: linear-gradient(to bottom right, #fc706c, #eee649);
+}
+video.v4-2-Providers, video.v4-2-Providers-Ru {
+  background: linear-gradient(to bottom right, #c6e15e, #41d352);
+}
+video.v4-2-Swaps, video.v4-2-Swaps-Ru {
+  background: linear-gradient(to bottom right, #6de1fc, #5e49ed);
+}
+video.v4-2-Onboarding, video.v4-2-Onboarding-Ru {
+  background: linear-gradient(to bottom right, #6f6cfe, #e749ee);
+}
+video.v4-2-Widgets, video.v4-2-Widgets-Ru {
+  background: linear-gradient(to bottom right, #77ef65, #44e1c0);
+}
+video.v4-3-Wallets-Settings {
+  background: linear-gradient(to bottom right, #6de0fe, #5e49ed);
+}
+video.v4-3-Customize {
+  background: linear-gradient(to bottom right, #6de160, #44d4b4);
+}
+video.v4-3-Balances {
+  background: linear-gradient(to bottom right, #6f6cfe, #e749ec);
+}
+video.v4-3-Liquid-Glass {
+  background: linear-gradient(to bottom right, #3568a4, #61d7c5);
+}
+video.v4-4-Offramp {
+  background: linear-gradient(to bottom right, #a45dda, #cd3e86);
+}
+video.v4-4-Offramp-Ru {
+  background: linear-gradient(to bottom right, #a45dda, #cd3e86);
+}
+video.v4-4-Domains {
+  background: linear-gradient(to bottom right, #71e161, #42d4b5);
+}
+video.v4-4-Domains-Ru {
+  background: linear-gradient(to bottom right, #71e161, #42d4b5);
+}
+video.v4-4-Wallet-Viewer {
+  background: linear-gradient(to bottom right, #6f6cfe, #e749ec);
+}
+video.v4-4-Wallet-Viewer-Ru {
+  background: linear-gradient(to bottom right, #6f6cfe, #e749ec);
+}
+video.v4-4-View {
+  background: linear-gradient(to bottom right, #c6e15e, #42d453);
+}
+video.v4-4-View-Ru {
+  background: linear-gradient(to bottom right, #c6e15e, #42d453);
+}
+video.v4-4-Links {
+  background: linear-gradient(to bottom right, #fc706c, #efe74a);
+}
+video.v4-4-Links-Ru {
+  background: linear-gradient(to bottom right, #fc706c, #ede848);
+}
+video.v4-4-Switch-Wallets {
+  background: linear-gradient(to bottom right, #6be1fc, #5e49ed);
+}
+video.v4-4-Switch-Wallets-Ru {
+  background: linear-gradient(to bottom right, #6de1fc, #5e49ed);
+}
+video.v4-5-Net-Worth {
+  background: linear-gradient(to bottom right, #6de1fc, #5e49ed);
+}
+video.v4-6-New-Mobile-Widgets {
+  background: linear-gradient(to bottom right, #6de0fe, #5e49ed);
+}
+video.v4-6-Choose-Your-Blockchain-Explorer {
+  background: linear-gradient(to bottom right, #71e161, #42d4b6);
+}
+video.v4-6-Record-Breaking-Transfer-Speed-On-TON-Testnet {
+  background: linear-gradient(to bottom right, #b24c10, #5d2708);
+}
+video.v4-6-New-Mobile-Widgets-Ru {
+  background: linear-gradient(to bottom right, #6de0fe, #5e49ed);
+}
+video.v4-6-Choose-Your-Blockchain-Explorer-Ru {
+  background: linear-gradient(to bottom right, #71e161, #42d4b6);
+}
+video.push-motion {
+  background: linear-gradient(to bottom right, #0096F8, #0FA2EE);
+}
+video + p {
+  margin-top: 12px !important;
+}
+@media (max-width: 768px) {
+  video {
+    border-radius: 8px;
+  }
+}
+
+figure + p {
+  margin-top: 12px !important;
+}
+
+.noRoundedHeaders h1,
+.noRoundedHeaders h3 {
+  font-family: CustomSansSerif, "Lucida Grande", Arial, sans-serif !important;
+}
+    </style>
+  </head>
+  <body>
+    <div class="tl_page_wrap noRoundedHeaders">
+      <div class="tl_page">
+        <main class="tl_article">
+          <header class="tl_article_header" dir="auto">
+            <h1>Fasterdom: Optimized Browser Rendering</h1>
+            <address><a rel="author noopener noreferrer" href="https://zinchuk.com" target="_blank">Alexander Zinchuk</a><time datetime="2024-05-15T10:00:00+0000">May 15, 2024</time></address>
+          </header>
+          <article id="_tl_editor" class="tl_article_content">
+            <p><a href="https://github.com/Ajaxy/teact/tree/main/src/lib/fasterdom"><strong>Fasterdom</strong></a> is part of the <a href="https://github.com/Ajaxy/teact"><strong>Teact</strong></a> library, which is used as a foundation for <a href="https://web.telegram.org/a/get/mac.html"><strong>Telegram Air</strong></a> (Web A) and <a href="https://mytonwallet.io/"><strong>MyTonWallet</strong></a>. It facilitates performance optimizations by properly leveraging the browser’s rendering cycle.</p>
+<p>This article outlines several best practices for maximizing browser rendering efficiency and main-thread performance to deliver smooth, highly responsive UI behavior.</p>
+<h3 id="user-content-why-do-we-need-fasterdom">Why do we need Fasterdom?</h3>
+<p>We can divide DOM operations into <strong>mutations</strong> and <strong>measurements</strong>. A mutation happens when you <em>change</em> something in the DOM (such as assigning a class to an element), and a measurement happens when you <em>read</em> something from it (such as element's <code>offsetWidth</code>). It is important to separate these operations from each other because of the underlying browser rendering cycle.</p>
+<p>The browser renders document updates in a cycle of animation frames, and there is a <a href="https://www.youtube.com/watch?v=cCOL7MC4Pl0">must-see explanation video</a> of the whole process. The general takeaway is that the browser stakes all your mutation calls until the rendering moment, which is either the end of an animation frame or a <strong>forced reflow</strong> caused by a measurement call.</p>
+<p><a href="https://web.dev/avoid-large-complex-layouts-and-layout-thrashing/">Forced reflows are bad</a> (because the browser needs to recalculate layout and styles instead of leveraging computation cache), so the idea is to <strong>avoid measurements after mutations</strong> within a single animation frame.</p>
+<p><img width="635" height="407" alt="Frame 1" src="https://github.com/user-attachments/assets/64eea825-fa6d-40ae-a970-5044ea72045d">⠀</p>
+<p>Web frameworks such as React or Teact already respect this during virtual DOM operations. Still, there are cases when the developer needs to keep that in mind, particularly in component effects and event callbacks.</p>
+<p>To achieve that, Fasterdom provides a <code>requestMutation</code> method that allows batching and postponing mutations to the end of the animation frame to make sure they always execute <em>after</em> all measurements.</p>
+<h3 id="user-content-working-with-dom-from-component-effects">Working with DOM from component effects</h3>
+<p>In most cases, you will be good just with savvy use of <code>useEffect</code> and <code>useLayoutEffect</code>:</p>
+<ul>
+<li><code>useLayoutEffect</code> is needed when modifying anything in the DOM. It is called immediately after the component render in DOM and is a safe and easy way to apply some additional mutations: add/remove class names, modify <code>style</code> and <code>dataset</code> properties, etc.</li>
+<li>In all other cases, you would use <code>useEffect</code>. It is called in the following animation frame after component render (when layout is already calculated and cached by the browser) and can be used for both measuring DOM properties (such as <code>offsetWidth</code> and <code>getBoundingClientRect</code>), attaching event listeners and non-DOM calls (such as updating component state or calling a global action).</li>
+</ul>
+<p>It gets more interesting when you need to <strong>combine measuring and mutating</strong>, so let's consider some cases.</p>
+<ul>
+<li>You need to measure an element's width and then assign the same width to another element. In this case, use <code>useEffect</code> for the measurement part and add <code>requestMutation</code> inside it to schedule the mutation part.</li>
+<li>You need to add a class to an element and then calculate its width. Use <code>useLayoutEffect</code> for assigning the class and add <code>requestMeasure</code> inside it to schedule the measurement part.</li>
+</ul>
+<h3 id="user-content-working-with-dom-from-event-callbacks">Working with DOM from event callbacks</h3>
+<p>Event callbacks are always called during the measurement phase, so you can freely read things such as <code>offsetWidth</code> or any other DOM parameters. However, if you need to apply some mutations to DOM, use <code>requestMutation</code> from event callbacks.</p>
+<h3 id="user-content-when-a-requested-callback-will-be-really-called">When a requested callback will be really called?</h3>
+<p>If you do <code>requestMutation</code> from the measurement phase, it will be called in the earliest mutation phase (the end of the current animation frame). In all other cases (i.e., <code>requestMutation</code> from the mutation phase or <code>requestMeasure</code> from the measurement phase), it will be called in the corresponding phase of the next animation frame).</p>
+<h3 id="user-content-replacingrequestanimationframefastraf">Replacing <code>requestAnimationFrame</code>/<code>fastRaf</code></h3>
+<p>Sometimes you just know that you need to schedule an execution to the next frame (e.g., for animation purposes). Earlier, you would use <code>requestAnimationFrame</code> or <code>fastRaf</code>, but now you need to choose between <code>requestMeasure</code> or <code>requestMutation</code>, depending on what you want to do.</p>
+<p>Also, according to the previous paragraph, if you call <code>requestMutation</code> from the measurement phase, it will be called in the same animation frame, so if you really need to run mutations in the next frame, there is <code>requestNextMutation</code>.</p>
+<h3 id="user-content-forced-reflows">Forced reflows</h3>
+<p>Sometimes you need to apply additional <strong>mutations based on the measurement</strong> of the current mutations.</p>
+<p>Imagine you prepended a new slice to the message list, and you need to update the scroll position (synchronously so the user does not see a blink). You will need to read your anchor element's updated <code>offsetTop</code> to see how much the entire list is shifted, and then update the scroll position accordingly.</p>
+<p>Fasterdom provides a way to do so with <code>requestForcedReflow</code> method. It allows running additional measurements in the current animation frame right after the mutation phase. Moreover, it allows you to return a callback containing the mutation calls, which will execute after those forced measurements.</p>
+<p>Another reason for using <code>requestForcedReflow</code> is forcing CSS transitions with <code>forceReflow</code> (see examples in the code).</p>
+<p>Try to <strong>avoid forced reflows</strong>. Although Fasterdom supports it, it still can be a performance bottleneck.</p>
+          </article>
+        </main>
+      </div>
+    </div>
+    <script>
+    // Theme: sync .dark/.light class with system preference
+    (function() {
+      var mq = window.matchMedia('(prefers-color-scheme: dark)');
+      function apply(dark) {
+        document.documentElement.classList.toggle('dark', dark);
+        document.documentElement.classList.toggle('light', !dark);
+      }
+      apply(mq.matches);
+      mq.addEventListener('change', function(e) { apply(e.matches); });
+    })();
+
+    // Video auto-play observer
+    document.addEventListener('DOMContentLoaded', function() {
+      var videos = document.querySelectorAll('video');
+      if (!videos.length) return;
+      var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          var video = entry.target;
+          if (entry.intersectionRatio >= 0.8) video.play();
+          else if (entry.intersectionRatio <= 0.4) video.pause();
+        });
+      }, { root: null, threshold: [0.4, 0.8] });
+      videos.forEach(function(v) { observer.observe(v); });
+    });
+
+    // Heading anchors
+    document.addEventListener('DOMContentLoaded', function() {
+      var sel = 'h1[id], h2[id], h3[id], h4[id], h5[id], h6[id]';
+      document.querySelectorAll(sel).forEach(function(heading) {
+        var a = document.createElement('a');
+        a.className = 'heading-anchor';
+        a.textContent = '#';
+        a.addEventListener('click', function(e) {
+          e.preventDefault();
+          var url = location.origin + location.pathname + '#' + heading.id;
+          navigator.clipboard.writeText(url);
+          heading.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          history.pushState(null, '', '#' + heading.id);
+        });
+        heading.prepend(a);
+      });
+    });
+
+    </script>
+  </body>
+</html>
