@@ -1,1 +1,9 @@
 dist/
+.claude
+.omc
+node_modules
+
+# Playwright
+test-results/
+playwright-report/
+

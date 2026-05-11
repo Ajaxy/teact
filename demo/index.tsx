@@ -1,41 +1,61 @@
 import React, { useState } from '../src/teact/teact';
 import TeactDOM from '../src/teact/teact-dom';
 
+import TestFragment from './tests/TestFragment';
+
+type TestName = 'TestFragment';
+
+const TESTS: Record<TestName, () => JSX.Element> = {
+  TestFragment,
+};
+
 TeactDOM.render(
   <App />,
   document.getElementById('root')!,
 );
 
 function App() {
-  return (
-    <div>
-      <h2>Hello Teact!</h2>
+  const [active, setActive] = useState<TestName | null>(null);
 
-      <Child />
-      <Checkbox />
-    </div>
-  );
-}
-
-function Child() {
-  return (
-    <div>
-      This is your first component.
-    </div>
-  );
-}
-
-function Checkbox() {
-  const [isChecked, setIsChecked] = useState(true);
-
-  function handleCheck() {
-    setIsChecked((current) => !current);
+  if (active !== null) {
+    const TestComponent = TESTS[active];
+    return (
+      <div>
+        <div>
+          <a
+            href="#"
+            onClick={(e) => {
+              e.preventDefault();
+              setActive(null);
+            }}
+          >
+            ← Back to list
+          </a>
+        </div>
+        <h2>{active}</h2>
+        <TestComponent />
+      </div>
+    );
   }
 
   return (
-    <label>
-      <input type="checkbox" checked={isChecked} onChange={handleCheck} />
-      This is a controlled form element.
-    </label>
+    <div>
+      <h2>Teact Test Harness</h2>
+      <ul>
+        {(Object.keys(TESTS) as TestName[]).map((name) => (
+          <li key={name}>
+            <a
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                setActive(name);
+              }}
+            >
+              {name}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
