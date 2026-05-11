@@ -5,12 +5,14 @@ import TestFragment from './tests/TestFragment';
 import TestFragment2 from './tests/TestFragment2';
 import TestSetContent from './tests/TestSetContent';
 import TestNoContainer from './tests/TestNoContainer';
+import TestUpdateRef from './tests/TestUpdateRef';
 
 const TESTS: Record<string, () => JSX.Element> = {
   TestFragment,
   TestFragment2,
   TestSetContent,
   TestNoContainer,
+  TestUpdateRef,
 };
 
 TeactDOM.render(
