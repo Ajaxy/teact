@@ -2,11 +2,13 @@ import React, { useState } from '../src/teact/teact';
 import TeactDOM from '../src/teact/teact-dom';
 
 import TestFragment from './tests/TestFragment';
+import TestFragment2 from './tests/TestFragment2';
 
-type TestName = 'TestFragment';
+type TestName = 'TestFragment' | 'TestFragment2';
 
 const TESTS: Record<TestName, () => JSX.Element> = {
   TestFragment,
+  TestFragment2,
 };
 
 TeactDOM.render(
