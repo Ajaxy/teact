@@ -1,3 +1,4 @@
+import { Page } from '@playwright/test';
 import { test, expect } from './fixtures';
 
 test('TestFragment2: items toggle and sibling stays last', async ({ page, navigateToTest }) => {
@@ -16,7 +17,7 @@ test('TestFragment2: items toggle and sibling stays last', async ({ page, naviga
   await assertItems(page, [1, 2, 3], true);
 });
 
-async function assertItems(page: any, items: number[], shouldBeVisible: boolean) {
+async function assertItems(page: Page, items: number[], shouldBeVisible: boolean) {
   const html = await page.content();
   items.forEach(num => {
     if (shouldBeVisible) {

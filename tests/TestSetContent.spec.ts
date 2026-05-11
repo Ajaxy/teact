@@ -1,6 +1,7 @@
+import { Page } from '@playwright/test';
 import { test, expect } from './fixtures';
 
-async function assertContent(page: any, firstLine: boolean, shouldHaveText: boolean = true) {
+async function assertContent(page: Page, firstLine: boolean) {
   const html = await page.content();
   if (firstLine) {
     expect(html).toContain('First line');

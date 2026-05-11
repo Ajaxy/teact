@@ -4,13 +4,13 @@ import TeactDOM from '../src/teact/teact-dom';
 import TestFragment from './tests/TestFragment';
 import TestFragment2 from './tests/TestFragment2';
 import TestSetContent from './tests/TestSetContent';
+import TestNoContainer from './tests/TestNoContainer';
 
-type TestName = 'TestFragment' | 'TestFragment2' | 'TestSetContent';
-
-const TESTS: Record<TestName, () => JSX.Element> = {
+const TESTS: Record<string, () => JSX.Element> = {
   TestFragment,
   TestFragment2,
   TestSetContent,
+  TestNoContainer,
 };
 
 TeactDOM.render(
@@ -19,7 +19,7 @@ TeactDOM.render(
 );
 
 function App() {
-  const [active, setActive] = useState<TestName | null>(null);
+  const [active, setActive] = useState<string | null>(null);
 
   if (active !== null) {
     const TestComponent = TESTS[active];
@@ -46,7 +46,7 @@ function App() {
     <div>
       <h2>Teact Test Harness</h2>
       <ul>
-        {(Object.keys(TESTS) as TestName[]).map((name) => (
+        {Object.keys(TESTS).map((name) => (
           <li key={name}>
             <a
               href="#"
