@@ -483,7 +483,7 @@ function renderChildren(
   forceMoveToEnd = false,
   namespace?: string,
 ) {
-  if (('props' in $new) && $new.props.teactFastList) {
+  if ($new.type === VirtualType.Tag && $new.props.teactFastList) {
     renderFastListChildren($current, $new, currentContext, currentEl, namespace);
     return;
   }
@@ -806,11 +806,15 @@ function setAttribute(element: DOMElement, key: string, value: any, namespace?: 
   } else if (key.startsWith('on')) {
     addEventListener(element, key, value, key.endsWith('Capture'));
   } else if (
-    namespace === SVG_NAMESPACE || key.startsWith('data-') || key.startsWith('aria-') || HTML_ATTRIBUTES.has(key)
+    key.startsWith('data-') || key.startsWith('aria-') || HTML_ATTRIBUTES.has(key)
   ) {
     element.setAttribute(key, value);
   } else if (!FILTERED_ATTRIBUTES.has(key)) {
-    (element as any)[MAPPED_ATTRIBUTES[key] || key] = value;
+    if (namespace === SVG_NAMESPACE) {
+      element.setAttribute(key, value);
+    } else {
+      (element as any)[MAPPED_ATTRIBUTES[key] || key] = value;
+    }
   }
 }
 
@@ -943,7 +947,7 @@ function getChildKeysByIndex(children: VirtualElementChildren) {
     if (isNullable(key)) {
       if (DEBUG && isParentElement($child)) {
         // eslint-disable-next-line no-console
-        console.warn('Missing `key` in `teactFastList`');
+        console.warn('Missing `key` in `teactFastList`', $child);
       }
 
       key = `${INDEX_KEY_PREFIX}${index}`;
