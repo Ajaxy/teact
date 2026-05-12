@@ -40,6 +40,14 @@ type CurrentContext = Record<string, Signal<unknown>>;
 
 type DOMElement = HTMLElement | SVGElement;
 
+interface RenderWithVirtualOptions {
+  skipComponentUpdate?: boolean;
+  nextSibling?: ChildNode;
+  forceMoveToEnd?: boolean;
+  fragment?: DocumentFragment;
+  namespace?: string;
+}
+
 const SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
 const HTML_NAMESPACE = 'http://www.w3.org/1999/xhtml';
 
@@ -93,13 +101,7 @@ function renderWithVirtual<T extends VirtualElement | undefined>(
   $parent: VirtualElementParent | VirtualDomHead,
   currentContext: CurrentContext,
   index: number,
-  options: {
-    skipComponentUpdate?: boolean;
-    nextSibling?: ChildNode;
-    forceMoveToEnd?: boolean;
-    fragment?: DocumentFragment;
-    namespace?: string;
-  } = {},
+  options: RenderWithVirtualOptions = {},
 ): T {
   const { skipComponentUpdate, fragment } = options;
   let { nextSibling, namespace } = options;
