@@ -7,6 +7,7 @@ import TestSetContent from './tests/TestSetContent';
 import TestNoContainer from './tests/TestNoContainer';
 import TestUpdateRef from './tests/TestUpdateRef';
 import TestOrdered from './tests/TestOrdered';
+import TestCleanupOrder from './tests/TestCleanupOrder';
 
 const TESTS: Record<string, () => JSX.Element> = {
   TestFragment,
@@ -15,6 +16,7 @@ const TESTS: Record<string, () => JSX.Element> = {
   TestNoContainer,
   TestUpdateRef,
   TestOrdered,
+  TestCleanupOrder,
 };
 
 TeactDOM.render(
