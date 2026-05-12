@@ -82,6 +82,7 @@ interface ComponentInstance {
   renderedValue?: any;
   mountState: MountState;
   context?: Record<string, Signal<unknown>>;
+  lastMountNamespace?: string;
   hooks?: {
     state?: {
       cursor: number;
