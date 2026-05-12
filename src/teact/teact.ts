@@ -219,6 +219,44 @@ function buildComponentElement(
   };
 }
 
+function cloneElement($element: VirtualElement): VirtualElement {
+  switch ($element.type) {
+    case VirtualType.Empty:
+      return { type: VirtualType.Empty };
+    case VirtualType.Text:
+      return { type: VirtualType.Text, value: $element.value };
+    case VirtualType.Tag:
+      return {
+        type: VirtualType.Tag,
+        tag: $element.tag,
+        props: $element.props,
+        children: $element.children.map(cloneElement),
+      };
+    case VirtualType.Component: {
+      const { componentInstance } = $element;
+      return createComponentInstance(componentInstance.Component, componentInstance.props, []);
+    }
+    case VirtualType.Fragment:
+      return {
+        type: VirtualType.Fragment,
+        children: $element.children.map(cloneElement),
+      };
+  }
+}
+
+function isElementUsed($element: VirtualElement): boolean {
+  switch ($element.type) {
+    case VirtualType.Component:
+      return $element.componentInstance.mountState !== MountState.Unmounted;
+    case VirtualType.Fragment:
+      return $element.placeholderTarget !== undefined || $element.children.some(isElementUsed);
+    case VirtualType.Tag:
+    case VirtualType.Text:
+    case VirtualType.Empty:
+      return $element.target !== undefined;
+  }
+}
+
 function buildTagElement(tag: string, props: Props, children: any[]): VirtualElementTag {
   return {
     type: VirtualType.Tag,
@@ -1054,4 +1092,4 @@ export default {
   Fragment,
 };
 
-export { createElement, Fragment };
+export { createElement, Fragment, cloneElement, isElementUsed };
