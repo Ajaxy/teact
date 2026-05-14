@@ -10,6 +10,7 @@ import TestOrdered from './tests/TestOrdered';
 import TestCleanupOrder from './tests/TestCleanupOrder';
 import TestJsxVariableReuse from './tests/TestJsxVariableReuse';
 import TestSvg from './tests/TestSvg';
+import TestContext from './tests/TestContext';
 
 const TESTS: Record<string, () => JSX.Element> = {
   TestFragment,
@@ -21,6 +22,7 @@ const TESTS: Record<string, () => JSX.Element> = {
   TestCleanupOrder,
   TestJsxVariableReuse,
   TestSvg,
+  TestContext,
 };
 
 TeactDOM.render(
