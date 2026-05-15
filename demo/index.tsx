@@ -12,6 +12,7 @@ import TestJsxVariableReuse from './tests/TestJsxVariableReuse';
 import TestSvg from './tests/TestSvg';
 import TestContext from './tests/TestContext';
 import TestPortal from './tests/TestPortal';
+import TestControlledInput from './tests/TestControlledInput';
 
 const TESTS: Record<string, () => JSX.Element> = {
   TestFragment,
@@ -25,6 +26,7 @@ const TESTS: Record<string, () => JSX.Element> = {
   TestSvg,
   TestContext,
   TestPortal,
+  TestControlledInput,
 };
 
 TeactDOM.render(

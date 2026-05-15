@@ -51,7 +51,7 @@ interface RenderWithVirtualOptions {
 const SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
 const HTML_NAMESPACE = 'http://www.w3.org/1999/xhtml';
 
-const FILTERED_ATTRIBUTES = new Set(['key', 'ref', 'teactFastList', 'teactOrderKey']);
+const FILTERED_ATTRIBUTES = new Set(['key', 'ref', 'teactFastList', 'teactOrderKey', 'teactExperimentControlled']);
 const HTML_ATTRIBUTES = new Set(['dir', 'role', 'form']);
 const CONTROLLABLE_TAGS = ['INPUT', 'TEXTAREA', 'SELECT'];
 const MAPPED_ATTRIBUTES: Partial<Record<string, string>> = {
@@ -693,6 +693,11 @@ function setElementRef($element: VirtualElementTag, element: DOMElement | undefi
 }
 
 function processControlled(tag: string, props: AnyLiteral) {
+  // TODO Remove after tests
+  if (!props.teactExperimentControlled) {
+    return;
+  }
+
   const isValueControlled = props.value !== undefined;
   const isCheckedControlled = props.checked !== undefined;
   const isControlled = (isValueControlled || isCheckedControlled) && CONTROLLABLE_TAGS.includes(tag.toUpperCase());
