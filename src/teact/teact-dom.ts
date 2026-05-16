@@ -15,7 +15,9 @@ import { DEBUG } from '../config';
 import { addEventListener, removeAllDelegatedListeners, removeEventListener } from './dom-events';
 import {
   captureImmediateEffects,
+  cloneElement,
   hasElementChanged,
+  isElementUsed,
   isParentElement,
   mountComponent,
   MountState,
@@ -41,7 +43,7 @@ type DOMElement = HTMLElement | SVGElement;
 const SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
 const HTML_NAMESPACE = 'http://www.w3.org/1999/xhtml';
 
-const FILTERED_ATTRIBUTES = new Set(['key', 'ref', 'teactFastList', 'teactOrderKey']);
+const FILTERED_ATTRIBUTES = new Set(['key', 'ref', 'teactFastList', 'teactOrderKey', 'teactExperimentControlled']);
 const HTML_ATTRIBUTES = new Set(['dir', 'role', 'form']);
 const CONTROLLABLE_TAGS = ['INPUT', 'TEXTAREA', 'SELECT'];
 const MAPPED_ATTRIBUTES: Partial<Record<string, string>> = {
@@ -61,6 +63,14 @@ const extraStyles = new WeakMap<Element, Record<string, string>>();
 const uniqueChildKeysCache = new WeakMap<VirtualElementChildren, (keyof any)[]>();
 
 let DEBUG_virtualTreeSize = 1;
+
+interface RenderWithVirtualOptions {
+  skipComponentUpdate?: boolean;
+  nextSibling?: ChildNode;
+  forceMoveToEnd?: boolean;
+  fragment?: DocumentFragment;
+  namespace?: string;
+}
 
 function render($element: VirtualElement | undefined, parentEl: HTMLElement) {
   if (!headsByElement.has(parentEl)) {
@@ -91,16 +101,22 @@ function renderWithVirtual<T extends VirtualElement | undefined>(
   $parent: VirtualElementParent | VirtualDomHead,
   currentContext: CurrentContext,
   index: number,
-  options: {
-    skipComponentUpdate?: boolean;
-    nextSibling?: ChildNode;
-    forceMoveToEnd?: boolean;
-    fragment?: DocumentFragment;
-    namespace?: string;
-  } = {},
+  options: RenderWithVirtualOptions = {},
 ): T {
   const { skipComponentUpdate, fragment } = options;
   let { nextSibling, namespace } = options;
+
+  // Since JSX elements are used as is, clone is needed to allow JSX reuse
+  if ($new && $current !== $new && isElementUsed($new)) {
+    const isSelfUpdate = (
+      $new.type === VirtualType.Component
+      && $current?.type === VirtualType.Component
+      && $new.componentInstance === $current.componentInstance
+    );
+    if (!isSelfUpdate) {
+      $new = cloneElement($new) as T;
+    }
+  }
 
   const isCurrentComponent = $current?.type === VirtualType.Component;
   const isNewComponent = $new?.type === VirtualType.Component;
@@ -112,6 +128,10 @@ function renderWithVirtual<T extends VirtualElement | undefined>(
   if ($new?.type === VirtualType.Tag) {
     if ($new.tag === 'svg') namespace = SVG_NAMESPACE;
     if ($new.props.xmlns) namespace = $new.props.xmlns;
+  }
+
+  if ($new?.type === VirtualType.Component) {
+    $new.componentInstance.lastMountNamespace = namespace;
   }
 
   if (
@@ -223,6 +243,11 @@ function renderWithVirtual<T extends VirtualElement | undefined>(
         $newAsReal.target = currentTarget;
         $currentAsReal.target = undefined; // Help GC
 
+        // Store namespace for Components to use on re-renders
+        if (isNewComponent && namespace) {
+          ($new as VirtualElementComponent).componentInstance.lastMountNamespace = namespace;
+        }
+
         const isTag = $current.type === VirtualType.Tag;
         if (isTag) {
           const $newAsTag = $new as VirtualElementTag;
@@ -288,7 +313,7 @@ function setupComponentUpdateListener(
       $parent,
       currentContext,
       index,
-      { skipComponentUpdate: true },
+      { skipComponentUpdate: true, namespace: componentInstance.lastMountNamespace },
     );
   };
 }
@@ -460,8 +485,8 @@ function renderChildren(
   forceMoveToEnd = false,
   namespace?: string,
 ) {
-  if (('props' in $new) && $new.props.teactFastList) {
-    renderFastListChildren($current, $new, currentContext, currentEl);
+  if ($new.type === VirtualType.Tag && $new.props.teactFastList) {
+    renderFastListChildren($current, $new, currentContext, currentEl, namespace);
     return;
   }
 
@@ -524,7 +549,7 @@ function renderChildren(
 // This function allows to prepend/append a bunch of new DOM nodes to the top/bottom of preserved ones.
 // It also allows to selectively move particular preserved nodes within their DOM list.
 function renderFastListChildren(
-  $current: VirtualElementParent, $new: VirtualElementParent, currentContext: CurrentContext, currentEl: DOMElement,
+  $current: VirtualElementParent, $new: VirtualElementParent, currentContext: CurrentContext, currentEl: DOMElement, namespace?: string,
 ) {
   const currentChildren = $current.children;
   const newChildren = $new.children;
@@ -586,7 +611,7 @@ function renderFastListChildren(
 
     // This prepends new children to the top
     if (fragmentSize) {
-      renderFragment(fragmentIndex!, fragmentSize, currentEl, $new, currentContext);
+      renderFragment(fragmentIndex!, fragmentSize, currentEl, $new, currentContext, namespace);
       fragmentSize = undefined;
       fragmentIndex = undefined;
     }
@@ -606,8 +631,9 @@ function renderFastListChildren(
     const nextSibling = currentEl.childNodes[isMovingDown ? i + 1 : i];
     const options = shouldMoveNode ? (nextSibling ? { nextSibling } : { forceMoveToEnd: true }) : undefined;
 
+    const renderOptions = { ...(options || {}), namespace };
     const $renderedChild = renderWithVirtual(
-      currentEl, currentChildInfo.$element, $newChild, $new, currentContext, i, options,
+      currentEl, currentChildInfo.$element, $newChild, $new, currentContext, i, renderOptions,
     );
     if ($renderedChild !== $newChild) {
       newChildren[i] = $renderedChild;
@@ -616,7 +642,7 @@ function renderFastListChildren(
 
   // This appends new children to the bottom
   if (fragmentSize) {
-    renderFragment(fragmentIndex!, fragmentSize, currentEl, $new, currentContext);
+    renderFragment(fragmentIndex!, fragmentSize, currentEl, $new, currentContext, namespace);
   }
 }
 
@@ -626,13 +652,14 @@ function renderFragment(
   parentEl: DOMElement,
   $parent: VirtualElementParent,
   currentContext: CurrentContext,
+  namespace?: string,
 ) {
   const nextSibling = parentEl.childNodes[fragmentIndex];
 
   if (fragmentSize === 1) {
     const $child = $parent.children[fragmentIndex];
     const $renderedChild = renderWithVirtual(
-      parentEl, undefined, $child, $parent, currentContext, fragmentIndex, { nextSibling },
+      parentEl, undefined, $child, $parent, currentContext, fragmentIndex, { nextSibling, namespace },
     );
     if ($renderedChild !== $child) {
       $parent.children[fragmentIndex] = $renderedChild;
@@ -645,7 +672,7 @@ function renderFragment(
 
   for (let i = fragmentIndex; i < fragmentIndex + fragmentSize; i++) {
     const $child = $parent.children[i];
-    const $renderedChild = renderWithVirtual(parentEl, undefined, $child, $parent, currentContext, i, { fragment });
+    const $renderedChild = renderWithVirtual(parentEl, undefined, $child, $parent, currentContext, i, { fragment, namespace });
     if ($renderedChild !== $child) {
       $parent.children[i] = $renderedChild;
     }
@@ -666,6 +693,11 @@ function setElementRef($element: VirtualElementTag, element: DOMElement | undefi
 }
 
 function processControlled(tag: string, props: AnyLiteral) {
+  // TODO Remove after tests
+  if (!props.teactExperimentControlled) {
+    return;
+  }
+
   const isValueControlled = props.value !== undefined;
   const isCheckedControlled = props.checked !== undefined;
   const isControlled = (isValueControlled || isCheckedControlled) && CONTROLLABLE_TAGS.includes(tag.toUpperCase());
@@ -781,11 +813,15 @@ function setAttribute(element: DOMElement, key: string, value: any, namespace?: 
   } else if (key.startsWith('on')) {
     addEventListener(element, key, value, key.endsWith('Capture'));
   } else if (
-    namespace === SVG_NAMESPACE || key.startsWith('data-') || key.startsWith('aria-') || HTML_ATTRIBUTES.has(key)
+    key.startsWith('data-') || key.startsWith('aria-') || HTML_ATTRIBUTES.has(key)
   ) {
     element.setAttribute(key, value);
   } else if (!FILTERED_ATTRIBUTES.has(key)) {
-    (element as any)[MAPPED_ATTRIBUTES[key] || key] = value;
+    if (namespace === SVG_NAMESPACE) {
+      element.setAttribute(key, value);
+    } else {
+      (element as any)[MAPPED_ATTRIBUTES[key] || key] = value;
+    }
   }
 }
 
@@ -918,7 +954,7 @@ function getChildKeysByIndex(children: VirtualElementChildren) {
     if (isNullable(key)) {
       if (DEBUG && isParentElement($child)) {
         // eslint-disable-next-line no-console
-        console.warn('Missing `key` in `teactFastList`');
+        console.warn('Missing `key` in `teactFastList`', $child);
       }
 
       key = `${INDEX_KEY_PREFIX}${index}`;
