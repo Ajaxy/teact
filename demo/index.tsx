@@ -1,41 +1,69 @@
 import React, { useState } from '../src/teact/teact';
 import TeactDOM from '../src/teact/teact-dom';
 
+import TestFragment from './tests/TestFragment';
+import TestFragment2 from './tests/TestFragment2';
+import TestSetContent from './tests/TestSetContent';
+import TestNoContainer from './tests/TestNoContainer';
+import TestUpdateRef from './tests/TestUpdateRef';
+import TestOrdered from './tests/TestOrdered';
+
+const TESTS: Record<string, () => JSX.Element> = {
+  TestFragment,
+  TestFragment2,
+  TestSetContent,
+  TestNoContainer,
+  TestUpdateRef,
+  TestOrdered,
+};
+
 TeactDOM.render(
   <App />,
   document.getElementById('root')!,
 );
 
 function App() {
-  return (
-    <div>
-      <h2>Hello Teact!</h2>
+  const [active, setActive] = useState<string | null>(null);
 
-      <Child />
-      <Checkbox />
-    </div>
-  );
-}
-
-function Child() {
-  return (
-    <div>
-      This is your first component.
-    </div>
-  );
-}
-
-function Checkbox() {
-  const [isChecked, setIsChecked] = useState(true);
-
-  function handleCheck() {
-    setIsChecked((current) => !current);
+  if (active !== null) {
+    const TestComponent = TESTS[active];
+    return (
+      <div>
+        <div>
+          <a
+            href="#"
+            onClick={(e) => {
+              e.preventDefault();
+              setActive(null);
+            }}
+          >
+            ← Back to list
+          </a>
+        </div>
+        <h2>{active}</h2>
+        <TestComponent />
+      </div>
+    );
   }
 
   return (
-    <label>
-      <input type="checkbox" checked={isChecked} onChange={handleCheck} />
-      This is a controlled form element.
-    </label>
+    <div>
+      <h2>Teact Test Harness</h2>
+      <ul>
+        {Object.keys(TESTS).map((name) => (
+          <li key={name}>
+            <a
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                setActive(name);
+              }}
+            >
+              {name}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
