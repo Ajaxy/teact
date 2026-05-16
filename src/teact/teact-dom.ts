@@ -40,14 +40,6 @@ type CurrentContext = Record<string, Signal<unknown>>;
 
 type DOMElement = HTMLElement | SVGElement;
 
-interface RenderWithVirtualOptions {
-  skipComponentUpdate?: boolean;
-  nextSibling?: ChildNode;
-  forceMoveToEnd?: boolean;
-  fragment?: DocumentFragment;
-  namespace?: string;
-}
-
 const SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
 const HTML_NAMESPACE = 'http://www.w3.org/1999/xhtml';
 
@@ -71,6 +63,14 @@ const extraStyles = new WeakMap<Element, Record<string, string>>();
 const uniqueChildKeysCache = new WeakMap<VirtualElementChildren, (keyof any)[]>();
 
 let DEBUG_virtualTreeSize = 1;
+
+interface RenderWithVirtualOptions {
+  skipComponentUpdate?: boolean;
+  nextSibling?: ChildNode;
+  forceMoveToEnd?: boolean;
+  fragment?: DocumentFragment;
+  namespace?: string;
+}
 
 function render($element: VirtualElement | undefined, parentEl: HTMLElement) {
   if (!headsByElement.has(parentEl)) {

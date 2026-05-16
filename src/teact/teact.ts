@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react';
 
 import { DEBUG, DEBUG_MORE } from '../config';
-import { logUnequalProps } from '../util/arePropsShallowEqual';
+import { logUnequalProps } from '../util/areShallowEqual';
 import { incrementOverlayCounter } from '../util/debugOverlay';
 import { orderBy } from '../util/iteratees';
 import safeExec from '../util/safeExec';
@@ -80,9 +80,9 @@ interface ComponentInstance {
   name: string;
   props: Props;
   renderedValue?: any;
+  lastMountNamespace?: string;
   mountState: MountState;
   context?: Record<string, Signal<unknown>>;
-  lastMountNamespace?: string;
   hooks?: {
     state?: {
       cursor: number;
@@ -154,6 +154,7 @@ const Fragment = Symbol('Fragment') as unknown as FC<{ children: TeactNode }>;
 const DEBUG_RENDER_THRESHOLD = 7;
 const DEBUG_EFFECT_THRESHOLD = 7;
 const DEBUG_SILENT_RENDERS_FOR = new Set(['TeactMemoWrapper', 'TeactNContainer', 'Button', 'ListItem', 'MenuItem']);
+const MAX_EFFECT_CURSORS_PER_INSTANCE = 10000;
 
 let contextCounter = 0;
 
@@ -166,6 +167,44 @@ export function isParentElement($element: VirtualElement): $element is VirtualEl
     || $element.type === VirtualType.Component
     || $element.type === VirtualType.Fragment
   );
+}
+
+function cloneElement($element: VirtualElement): VirtualElement {
+  switch ($element.type) {
+    case VirtualType.Empty:
+      return { type: VirtualType.Empty };
+    case VirtualType.Text:
+      return { type: VirtualType.Text, value: $element.value };
+    case VirtualType.Tag:
+      return {
+        type: VirtualType.Tag,
+        tag: $element.tag,
+        props: $element.props,
+        children: $element.children.map(cloneElement),
+      };
+    case VirtualType.Component: {
+      const { componentInstance } = $element;
+      return createComponentInstance(componentInstance.Component, componentInstance.props, []);
+    }
+    case VirtualType.Fragment:
+      return {
+        type: VirtualType.Fragment,
+        children: $element.children.map(cloneElement),
+      };
+  }
+}
+
+function isElementUsed($element: VirtualElement): boolean {
+  switch ($element.type) {
+    case VirtualType.Component:
+      return $element.componentInstance.mountState !== MountState.Unmounted;
+    case VirtualType.Fragment:
+      return $element.placeholderTarget !== undefined || $element.children.some(isElementUsed);
+    case VirtualType.Tag:
+    case VirtualType.Text:
+    case VirtualType.Empty:
+      return $element.target !== undefined;
+  }
 }
 
 function createElement(
@@ -218,44 +257,6 @@ function buildComponentElement(
     props: componentInstance.props,
     children: children ? buildChildren(children, true) : [],
   };
-}
-
-function cloneElement($element: VirtualElement): VirtualElement {
-  switch ($element.type) {
-    case VirtualType.Empty:
-      return { type: VirtualType.Empty };
-    case VirtualType.Text:
-      return { type: VirtualType.Text, value: $element.value };
-    case VirtualType.Tag:
-      return {
-        type: VirtualType.Tag,
-        tag: $element.tag,
-        props: $element.props,
-        children: $element.children.map(cloneElement),
-      };
-    case VirtualType.Component: {
-      const { componentInstance } = $element;
-      return createComponentInstance(componentInstance.Component, componentInstance.props, []);
-    }
-    case VirtualType.Fragment:
-      return {
-        type: VirtualType.Fragment,
-        children: $element.children.map(cloneElement),
-      };
-  }
-}
-
-function isElementUsed($element: VirtualElement): boolean {
-  switch ($element.type) {
-    case VirtualType.Component:
-      return $element.componentInstance.mountState !== MountState.Unmounted;
-    case VirtualType.Fragment:
-      return $element.placeholderTarget !== undefined || $element.children.some(isElementUsed);
-    case VirtualType.Tag:
-    case VirtualType.Text:
-    case VirtualType.Empty:
-      return $element.target !== undefined;
-  }
 }
 
 function buildTagElement(tag: string, props: Props, children: any[]): VirtualElementTag {
@@ -324,7 +325,6 @@ function buildChildElement(child: any): VirtualElement {
 const DEBUG_components: AnyLiteral = { TOTAL: { name: 'TOTAL', renders: 0 } };
 const DEBUG_memos: Record<string, { key: string; calls: number; misses: number; hitRate: number }> = {};
 const DEBUG_MEMOS_CALLS_THRESHOLD = 20;
-const MAX_EFFECT_CURSORS_PER_INSTANCE = 10000;
 
 if (DEBUG) {
   document.addEventListener('dblclick', () => {
@@ -1092,7 +1092,8 @@ export function DEBUG_resolveComponentName(Component: FC_withDebug) {
 
 export default {
   createElement,
+  cloneElement,
   Fragment,
 };
 
-export { createElement, Fragment, cloneElement, isElementUsed };
+export { createElement, cloneElement, Fragment, isElementUsed };
