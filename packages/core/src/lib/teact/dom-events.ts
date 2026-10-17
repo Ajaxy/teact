@@ -1,5 +1,3 @@
-import { DEBUG } from '../../env';
-
 type Handler = (e: Event) => void;
 type DelegationRegistry = Map<Element, Handler>;
 
@@ -163,26 +161,25 @@ function resolveDelegatedEventTypes(element: Element) {
   return newSet;
 }
 
-if (DEBUG) {
-  document.addEventListener('dblclick', () => {
-    const documentListenersCount = Object.keys(documentEventCounters).length;
-    const delegatedHandlersCount1 = Object.values(documentEventCounters)
-      .reduce((acc, counter) => acc + counter, 0);
-    const delegationRegistriesCount = Object.keys(delegationRegistryByEventType).length;
-    const delegatedHandlersCount2 = Object.values(delegationRegistryByEventType)
-      .reduce((acc, delegationRegistry) => acc + delegationRegistry.size, 0);
-    const delegationElementsCount = delegatedEventTypesByElement.size;
-    const delegatedEventTypesCount = Array.from(delegatedEventTypesByElement.values())
-      .reduce((acc, eventTypes) => acc + eventTypes.size, 0);
+// The dblclick dump of `installTeactDevTools()` (devtools.ts)
+export function DEBUG_logDelegationStats() {
+  const documentListenersCount = Object.keys(documentEventCounters).length;
+  const delegatedHandlersCount1 = Object.values(documentEventCounters)
+    .reduce((acc, counter) => acc + counter, 0);
+  const delegationRegistriesCount = Object.keys(delegationRegistryByEventType).length;
+  const delegatedHandlersCount2 = Object.values(delegationRegistryByEventType)
+    .reduce((acc, delegationRegistry) => acc + delegationRegistry.size, 0);
+  const delegationElementsCount = delegatedEventTypesByElement.size;
+  const delegatedEventTypesCount = Array.from(delegatedEventTypesByElement.values())
+    .reduce((acc, eventTypes) => acc + eventTypes.size, 0);
 
-    // eslint-disable-next-line no-console
-    console.warn('DELEGATED EVENTS STATS', {
-      delegatedHandlersCount1,
-      delegatedHandlersCount2,
-      delegatedEventTypesCount,
-      delegationRegistriesCount,
-      delegationElementsCount,
-      documentListenersCount,
-    });
+  // eslint-disable-next-line no-console
+  console.warn('DELEGATED EVENTS STATS', {
+    delegatedHandlersCount1,
+    delegatedHandlersCount2,
+    delegatedEventTypesCount,
+    delegationRegistriesCount,
+    delegationElementsCount,
+    documentListenersCount,
   });
 }

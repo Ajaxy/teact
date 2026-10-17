@@ -329,29 +329,28 @@ const DEBUG_components: AnyLiteral = { TOTAL: { name: 'TOTAL', renders: 0 } };
 const DEBUG_memos: Record<string, { key: string; calls: number; misses: number; hitRate: number }> = {};
 const DEBUG_MEMOS_CALLS_THRESHOLD = 20;
 
-if (DEBUG) {
-  document.addEventListener('dblclick', () => {
-    // eslint-disable-next-line no-console
-    console.warn('COMPONENTS', orderBy(
-      Object
-        .values(DEBUG_components)
-        .map(({ avgRenderTime, ...state }) => {
-          return { ...state, ...(avgRenderTime !== undefined && { avgRenderTime: Number(avgRenderTime.toFixed(2)) }) };
-        }),
-      'renders',
-      'desc',
-    ));
+// The dblclick dump of `installTeactDevTools()` (devtools.ts). The stats are collected in the dev build only.
+export function DEBUG_logRenderStats() {
+  // eslint-disable-next-line no-console
+  console.warn('COMPONENTS', orderBy(
+    Object
+      .values(DEBUG_components)
+      .map(({ avgRenderTime, ...state }) => {
+        return { ...state, ...(avgRenderTime !== undefined && { avgRenderTime: Number(avgRenderTime.toFixed(2)) }) };
+      }),
+    'renders',
+    'desc',
+  ));
 
-    // eslint-disable-next-line no-console
-    console.warn('MEMOS', orderBy(
-      Object
-        .values(DEBUG_memos)
-        .filter(({ calls }) => calls >= DEBUG_MEMOS_CALLS_THRESHOLD)
-        .map((state) => ({ ...state, hitRate: Number(state.hitRate.toFixed(2)) })),
-      'hitRate',
-      'asc',
-    ));
-  });
+  // eslint-disable-next-line no-console
+  console.warn('MEMOS', orderBy(
+    Object
+      .values(DEBUG_memos)
+      .filter(({ calls }) => calls >= DEBUG_MEMOS_CALLS_THRESHOLD)
+      .map((state) => ({ ...state, hitRate: Number(state.hitRate.toFixed(2)) })),
+    'hitRate',
+    'asc',
+  ));
 }
 
 let instancesPendingUpdate = new Set<ComponentInstance>();

@@ -1,6 +1,5 @@
 // `@teact/core`: components, hooks, signals and heavy-animation helpers.
-// TODO(B3): Curate per the plan (§3c): drop `cloneElement` from the default and named exports,
-// add `installTeactDevTools`.
+// TODO(B3): Curate per the plan (§3c): drop `cloneElement` from the default and named exports.
 
 export { default } from './lib/teact/teact';
 export {
@@ -37,3 +36,4 @@ export { createSignal, isSignal, cleanupEffect } from './util/signals';
 export type { Signal, SignalSetter } from './util/signals';
 export { configureTeact } from './errors';
 export type { TeactConfig } from './errors';
+export { installTeactDevTools } from './devtools';

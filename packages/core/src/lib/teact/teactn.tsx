@@ -378,12 +378,24 @@ export function typify<
   };
 }
 
-if (DEBUG) {
-  (window as any).getGlobal = getUntypedGlobal;
-  (window as any).setGlobal = setUntypedGlobal;
-  (window as any).getActions = getUntypedActions;
+/**
+ * Installs TeactN's debugging aids: `window.getGlobal`, `window.setGlobal` and `window.getActions`, and a double click
+ * anywhere logs how many times each container has updated. They work in the development build (the `teact-dev` export
+ * condition); in the production build this does nothing. Returns a function that removes them.
+ */
+export function installTeactNDevTools(): NoneToVoidFunction {
+  if (!DEBUG) {
+    return noop;
+  }
 
-  document.addEventListener('dblclick', () => {
+  const windowGlobals: AnyLiteral = {
+    getGlobal: getUntypedGlobal,
+    setGlobal: setUntypedGlobal,
+    getActions: getUntypedActions,
+  };
+  Object.assign(window, windowGlobals);
+
+  const logContainers = () => {
     // eslint-disable-next-line no-console
     console.warn(
       'GLOBAL CONTAINERS',
@@ -394,5 +406,18 @@ if (DEBUG) {
         'desc',
       ),
     );
-  });
+  };
+  document.addEventListener('dblclick', logContainers);
+
+  return () => {
+    document.removeEventListener('dblclick', logContainers);
+
+    Object.entries(windowGlobals).forEach(([key, value]) => {
+      if ((window as AnyLiteral)[key] === value) {
+        delete (window as AnyLiteral)[key];
+      }
+    });
+  };
 }
+
+function noop() {}
