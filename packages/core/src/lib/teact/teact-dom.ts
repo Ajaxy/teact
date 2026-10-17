@@ -1,6 +1,6 @@
 import type { ChangeEvent, FocusEvent } from 'react';
 
-import type { Signal } from '../util/signals';
+import type { Signal } from '../../util/signals';
 import type {
   VirtualElement,
   VirtualElementChildren,
@@ -11,7 +11,7 @@ import type {
   VirtualElementTag,
 } from './teact';
 
-import { DEBUG, IS_PERF } from '../config';
+import { DEBUG, IS_PERF } from '../../config';
 import { addEventListener, removeAllDelegatedListeners, removeEventListener } from './dom-events';
 import {
   captureImmediateEffects,

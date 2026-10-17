@@ -1,4 +1,4 @@
-import { useCallback, useState } from '../teact/teact';
+import { useCallback, useState } from '../lib/teact/teact';
 
 const useForceUpdate = () => {
   // eslint-disable-next-line @eslint-react/use-state

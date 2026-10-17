@@ -1,4 +1,4 @@
-import { useRef } from '../teact/teact';
+import { useRef } from '../lib/teact/teact';
 
 import generateUniqueId from '../util/generateUniqueId';
 

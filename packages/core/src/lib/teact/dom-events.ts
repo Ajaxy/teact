@@ -1,4 +1,4 @@
-import { DEBUG } from '../config';
+import { DEBUG } from '../../config';
 
 type Handler = (e: Event) => void;
 type DelegationRegistry = Map<Element, Handler>;

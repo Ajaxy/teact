@@ -1,15 +1,15 @@
 import type { FC, FC_withDebug, Props } from './teact';
 
-import { DEBUG, DEBUG_MORE } from '../config';
-import { areRecordsShallowEqual, logUnequalProps } from '../util/areShallowEqual';
-import Deferred from '../util/Deferred';
-import { handleError } from '../util/handleError';
-import { orderBy } from '../util/iteratees';
-import { throttleWithTickEnd } from '../util/schedulers';
+import { DEBUG, DEBUG_MORE } from '../../config';
+import { areRecordsShallowEqual, logUnequalProps } from '../../util/areShallowEqual';
+import Deferred from '../../util/Deferred';
+import { handleError } from '../../util/handleError';
+import { orderBy } from '../../util/iteratees';
+import { throttleWithTickEnd } from '../../util/schedulers';
 import React, { DEBUG_resolveComponentName, getIsHeavyAnimating, useUnmountCleanup } from './teact';
 
-import useForceUpdate from '../hooks/useForceUpdate';
-import useUniqueId from '../hooks/useUniqueId';
+import useForceUpdate from '../../hooks/useForceUpdate';
+import useUniqueId from '../../hooks/useUniqueId';
 
 export default React;
 

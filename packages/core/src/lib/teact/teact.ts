@@ -1,14 +1,14 @@
 /* eslint-disable @eslint-react/no-unnecessary-use-prefix */
 import type { ReactElement } from 'react';
 
-import { DEBUG, DEBUG_MORE } from '../config';
-import { logUnequalProps } from '../util/areShallowEqual';
-import { incrementOverlayCounter } from '../util/debugOverlay';
-import { orderBy } from '../util/iteratees';
-import safeExec from '../util/safeExec';
-import { throttleWith } from '../util/schedulers';
-import { createSignal, isSignal, type Signal } from '../util/signals';
-import { requestMeasure, requestMutation } from '../lib/fasterdom/fasterdom';
+import { DEBUG, DEBUG_MORE } from '../../config';
+import { logUnequalProps } from '../../util/areShallowEqual';
+import { incrementOverlayCounter } from '../../util/debugOverlay';
+import { orderBy } from '../../util/iteratees';
+import safeExec from '../../util/safeExec';
+import { throttleWith } from '../../util/schedulers';
+import { createSignal, isSignal, type Signal } from '../../util/signals';
+import { requestMeasure, requestMutation } from '../fasterdom/fasterdom';
 import { getIsBlockingAnimating } from './heavyAnimation';
 
 export { getIsHeavyAnimating, beginHeavyAnimation, onFullyIdle } from './heavyAnimation';
