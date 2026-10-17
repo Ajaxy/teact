@@ -1104,9 +1104,9 @@ export function DEBUG_resolveComponentName(Component: FC_withDebug) {
   return name + (DEBUG_contentComponentName ? `>${DEBUG_contentComponentName}` : '');
 }
 
+// The classic JSX runtime (`import React from '@teact/core'`) needs `createElement` and `Fragment` only
 export default {
   createElement,
-  cloneElement,
   Fragment,
 };
 
