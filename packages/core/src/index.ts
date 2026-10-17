@@ -1,10 +1,8 @@
 // `@teact/core`: components, hooks, signals and heavy-animation helpers.
-// TODO(B3): Curate per the plan (§3c): drop `cloneElement` from the default and named exports.
 
 export { default } from './lib/teact/teact';
 export {
   createElement,
-  cloneElement,
   Fragment,
   memo,
   useState,
