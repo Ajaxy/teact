@@ -1,7 +1,7 @@
 {
   "name": "@teact/core",
   "version": "0.1.0-next.0",
-  "description": "Tiny and fast React-like UI library that powers Telegram Web A and MyTonWallet",
+  "description": "Small React-like UI library whose renderer schedules DOM work in animation frames. Powers Telegram Web A and MyTonWallet.",
   "keywords": [
     "teact",
     "react",

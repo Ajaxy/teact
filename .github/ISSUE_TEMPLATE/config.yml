@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/Ajaxy/teact/security/advisories/new
+    about: Report vulnerabilities privately, not in a public issue.
+  - name: Telegram Web A issue
+    url: https://github.com/Ajaxy/telegram-tt/issues
+    about: Problems with the Telegram Web A app itself, rather than with Teact.
+  - name: MyTonWallet issue
+    url: https://github.com/mytonwallet-org/mytonwallet/issues
+    about: Problems with the MyTonWallet app itself, rather than with Teact.
