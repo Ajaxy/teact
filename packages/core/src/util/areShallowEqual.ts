@@ -1,4 +1,4 @@
-export default function arePropsShallowEqual(currentProps: AnyLiteral, newProps: AnyLiteral) {
+export function areRecordsShallowEqual(currentProps: AnyLiteral, newProps: AnyLiteral) {
   if (currentProps === newProps) {
     return true;
   }
@@ -23,6 +23,27 @@ export default function arePropsShallowEqual(currentProps: AnyLiteral, newProps:
   }
 
   return true;
+}
+
+export function areArraysShallowEqual(currentProps: unknown[], newProps: unknown[]) {
+  if (currentProps === newProps) {
+    return true;
+  }
+
+  if (currentProps.length !== newProps.length) {
+    return false;
+  }
+
+  return currentProps.every((item, i) => item === newProps[i]);
+}
+
+export default function areShallowEqual<T extends AnyLiteral | unknown[] | undefined>(oldValue: T, newValue: T) {
+  if (oldValue === newValue) return true;
+  if (oldValue === undefined || newValue === undefined) return false;
+  if (Array.isArray(oldValue) && Array.isArray(newValue)) {
+    return areArraysShallowEqual(oldValue, newValue);
+  }
+  return areRecordsShallowEqual(oldValue, newValue);
 }
 
 export function logUnequalProps(currentProps: AnyLiteral, newProps: AnyLiteral, msg: string, debugKey = '') {

@@ -1,6 +1,6 @@
-import { onIdle, throttleWith } from '../util/schedulers';
-import { createSignal } from '../util/signals';
-import { requestMeasure } from '../lib/fasterdom/fasterdom';
+import { onIdle, throttleWith } from '../../util/schedulers';
+import { createSignal } from '../../util/signals';
+import { requestMeasure } from '../fasterdom/fasterdom';
 
 const AUTO_END_TIMEOUT = 1000;
 

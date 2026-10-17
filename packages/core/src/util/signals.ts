@@ -9,22 +9,20 @@ interface SignalState<T> {
 
 const SIGNAL_MARK = Symbol('SIGNAL_MARK');
 
-export type Signal<T = any> = ((() => T) & {
+export type Signal<T = unknown> = ((() => T) & {
   readonly [SIGNAL_MARK]: symbol;
-  subscribe: (cb: NoneToVoidFunction) => NoneToVoidFunction;
-  once: (cb: NoneToVoidFunction) => NoneToVoidFunction;
+  subscribe: (cb: AnyToVoidFunction) => NoneToVoidFunction;
+  once: (cb: AnyToVoidFunction) => NoneToVoidFunction;
 });
 
-export type SignalSetter = (newValue: any) => void;
+export type SignalSetter<T = unknown> = (newValue: T) => void;
 
-export function isSignal(obj: any): obj is Signal {
+export function isSignal(obj: unknown): obj is Signal {
   return typeof obj === 'function' && SIGNAL_MARK in obj;
 }
 
 // A shorthand to unsubscribe effect from all signals
 const unsubscribesByEffect = new Map<NoneToVoidFunction, Set<NoneToVoidFunction>>();
-
-let currentEffect: NoneToVoidFunction | undefined;
 
 export function createSignal<T>(defaultValue?: T) {
   const state: SignalState<typeof defaultValue> = {
@@ -62,10 +60,6 @@ export function createSignal<T>(defaultValue?: T) {
   }
 
   function getter() {
-    if (currentEffect) {
-      subscribe(currentEffect);
-    }
-
     return state.value;
   }
 

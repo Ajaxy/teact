@@ -1,13 +1,14 @@
+/* eslint-disable @eslint-react/no-unnecessary-use-prefix */
 import type { ReactElement } from 'react';
 
-import { DEBUG, DEBUG_MORE } from '../config';
-import { logUnequalProps } from '../util/arePropsShallowEqual';
-import { incrementOverlayCounter } from '../util/debugOverlay';
-import { orderBy } from '../util/iteratees';
-import safeExec from '../util/safeExec';
-import { throttleWith } from '../util/schedulers';
-import { createSignal, isSignal, type Signal } from '../util/signals';
-import { requestMeasure, requestMutation } from '../lib/fasterdom/fasterdom';
+import { DEBUG, DEBUG_MORE } from '../../config';
+import { logUnequalProps } from '../../util/areShallowEqual';
+import { incrementOverlayCounter } from '../../util/debugOverlay';
+import { orderBy } from '../../util/iteratees';
+import safeExec from '../../util/safeExec';
+import { throttleWith } from '../../util/schedulers';
+import { createSignal, isSignal, type Signal } from '../../util/signals';
+import { requestMeasure, requestMutation } from '../fasterdom/fasterdom';
 import { getIsBlockingAnimating } from './heavyAnimation';
 
 export { getIsHeavyAnimating, beginHeavyAnimation, onFullyIdle } from './heavyAnimation';
@@ -80,6 +81,7 @@ interface ComponentInstance {
   name: string;
   props: Props;
   renderedValue?: any;
+  lastMountNamespace?: string;
   mountState: MountState;
   context?: Record<string, Signal<unknown>>;
   hooks?: {
@@ -153,6 +155,7 @@ const Fragment = Symbol('Fragment') as unknown as FC<{ children: TeactNode }>;
 const DEBUG_RENDER_THRESHOLD = 7;
 const DEBUG_EFFECT_THRESHOLD = 7;
 const DEBUG_SILENT_RENDERS_FOR = new Set(['TeactMemoWrapper', 'TeactNContainer', 'Button', 'ListItem', 'MenuItem']);
+const MAX_EFFECT_CURSORS_PER_INSTANCE = 10000;
 
 let contextCounter = 0;
 
@@ -165,6 +168,45 @@ export function isParentElement($element: VirtualElement): $element is VirtualEl
     || $element.type === VirtualType.Component
     || $element.type === VirtualType.Fragment
   );
+}
+
+function cloneElement($element: VirtualElement): VirtualElement {
+  switch ($element.type) {
+    case VirtualType.Empty:
+      return { type: VirtualType.Empty };
+    case VirtualType.Text:
+      return { type: VirtualType.Text, value: $element.value };
+    case VirtualType.Tag:
+      return {
+        type: VirtualType.Tag,
+        tag: $element.tag,
+        props: $element.props,
+        children: $element.children.map(cloneElement),
+      };
+    case VirtualType.Component: {
+      const { componentInstance } = $element;
+      return createComponentInstance(componentInstance.Component, componentInstance.props, []);
+    }
+    case VirtualType.Fragment:
+      return {
+        type: VirtualType.Fragment,
+        children: $element.children.map(cloneElement),
+      };
+  }
+}
+
+// Check if an element has been used (mounted/rendered) and needs cloning for reuse
+export function isElementUsed($element: VirtualElement): boolean {
+  switch ($element.type) {
+    case VirtualType.Component:
+      return $element.componentInstance.mountState !== MountState.Unmounted;
+    case VirtualType.Fragment:
+      return $element.placeholderTarget !== undefined || $element.children.some(isElementUsed);
+    case VirtualType.Tag:
+    case VirtualType.Text:
+    case VirtualType.Empty:
+      return $element.target !== undefined;
+  }
 }
 
 function createElement(
@@ -286,36 +328,64 @@ const DEBUG_components: AnyLiteral = { TOTAL: { name: 'TOTAL', renders: 0 } };
 const DEBUG_memos: Record<string, { key: string; calls: number; misses: number; hitRate: number }> = {};
 const DEBUG_MEMOS_CALLS_THRESHOLD = 20;
 
-document.addEventListener('dblclick', () => {
-  // eslint-disable-next-line no-console
-  console.warn('COMPONENTS', orderBy(
-    Object
-      .values(DEBUG_components)
-      .map(({ avgRenderTime, ...state }) => {
-        return { ...state, ...(avgRenderTime !== undefined && { avgRenderTime: Number(avgRenderTime.toFixed(2)) }) };
-      }),
-    'renders',
-    'desc',
-  ));
+if (DEBUG) {
+  document.addEventListener('dblclick', () => {
+    // eslint-disable-next-line no-console
+    console.warn('COMPONENTS', orderBy(
+      Object
+        .values(DEBUG_components)
+        .map(({ avgRenderTime, ...state }) => {
+          return { ...state, ...(avgRenderTime !== undefined && { avgRenderTime: Number(avgRenderTime.toFixed(2)) }) };
+        }),
+      'renders',
+      'desc',
+    ));
 
-  // eslint-disable-next-line no-console
-  console.warn('MEMOS', orderBy(
-    Object
-      .values(DEBUG_memos)
-      .filter(({ calls }) => calls >= DEBUG_MEMOS_CALLS_THRESHOLD)
-      .map((state) => ({ ...state, hitRate: Number(state.hitRate.toFixed(2)) })),
-    'hitRate',
-    'asc',
-  ));
-});
+    // eslint-disable-next-line no-console
+    console.warn('MEMOS', orderBy(
+      Object
+        .values(DEBUG_memos)
+        .filter(({ calls }) => calls >= DEBUG_MEMOS_CALLS_THRESHOLD)
+        .map((state) => ({ ...state, hitRate: Number(state.hitRate.toFixed(2)) })),
+      'hitRate',
+      'asc',
+    ));
+  });
+}
 
 let instancesPendingUpdate = new Set<ComponentInstance>();
 let idsToExcludeFromUpdate = new Set<number>();
-let pendingEffects = new Map<string, Effect>();
-let pendingCleanups = new Map<string, EffectCleanup>();
-let pendingLayoutEffects = new Map<string, Effect>();
-let pendingLayoutCleanups = new Map<string, EffectCleanup>();
+let pendingEffects = new Map<number, Effect>();
+let pendingCleanups = new Map<number, EffectCleanup>();
+let pendingLayoutEffects = new Map<number, Effect>();
+let pendingLayoutCleanups = new Map<number, EffectCleanup>();
+let pendingRenderCallbacks: NoneToVoidFunction[] = [];
 let areImmediateEffectsCaptured = false;
+
+/*
+  Effect call order:
+  - Regular call order inside component
+  - Child to parent
+  - Parent to child on unmount
+  - Sibling behavior is not defined
+*/
+function runEffectsMap<T extends NoneToVoidFunction>(map: Map<number, T>) {
+  Array.from(map.entries())
+    .sort(([aKey], [bKey]) => {
+      const idA = Math.floor(aKey / MAX_EFFECT_CURSORS_PER_INSTANCE);
+      const idB = Math.floor(bKey / MAX_EFFECT_CURSORS_PER_INSTANCE);
+
+      const idDiff = idB - idA;
+      if (idDiff !== 0) {
+        return idDiff;
+      }
+
+      const cursorA = aKey % MAX_EFFECT_CURSORS_PER_INSTANCE;
+      const cursorB = bKey % MAX_EFFECT_CURSORS_PER_INSTANCE;
+
+      return cursorA - cursorB;
+    }).forEach(([_, cb]) => void cb());
+}
 
 /*
   Order:
@@ -343,14 +413,16 @@ const runUpdatePassOnRaf = throttleWith(requestMeasure, () => {
     .from(instancesPendingUpdate)
     .sort((a, b) => a.id - b.id);
   instancesPendingUpdate = new Set();
+  const currentRenderCallbacks = pendingRenderCallbacks;
+  pendingRenderCallbacks = [];
 
   const currentCleanups = pendingCleanups;
   pendingCleanups = new Map();
-  currentCleanups.forEach((cb) => cb());
+  runEffectsMap(currentCleanups);
 
   const currentEffects = pendingEffects;
   pendingEffects = new Map();
-  currentEffects.forEach((cb) => cb());
+  runEffectsMap(currentEffects);
 
   requestMutation(() => {
     instancesToUpdate.forEach(prepareComponentForFrame);
@@ -363,8 +435,14 @@ const runUpdatePassOnRaf = throttleWith(requestMeasure, () => {
     });
 
     runImmediateEffects?.();
+    currentRenderCallbacks.forEach((cb) => safeExec(cb));
   });
 });
+
+export function requestAfterRender(cb: NoneToVoidFunction) {
+  pendingRenderCallbacks.push(cb);
+  runUpdatePassOnRaf();
+}
 
 export function captureImmediateEffects() {
   if (areImmediateEffectsCaptured) {
@@ -378,16 +456,18 @@ export function captureImmediateEffects() {
 function runCapturedImmediateEffects() {
   const currentLayoutCleanups = pendingLayoutCleanups;
   pendingLayoutCleanups = new Map();
-  currentLayoutCleanups.forEach((cb) => cb());
+  runEffectsMap(currentLayoutCleanups);
 
   const currentLayoutEffects = pendingLayoutEffects;
   pendingLayoutEffects = new Map();
-  currentLayoutEffects.forEach((cb) => cb());
+  runEffectsMap(currentLayoutEffects);
 
   areImmediateEffectsCaptured = false;
 }
 
 export function renderComponent(componentInstance: ComponentInstance) {
+  // Apply queued state before a prop-driven render suppresses the scheduled state pass
+  prepareComponentForFrame(componentInstance);
   idsToExcludeFromUpdate.add(componentInstance.id);
 
   const { Component, props } = componentInstance;
@@ -734,6 +814,11 @@ function useEffectBase(
   }
 
   renderingInstance.hooks.effects.cursor++;
+
+  if (DEBUG && cursor >= MAX_EFFECT_CURSORS_PER_INSTANCE) {
+    // eslint-disable-next-line no-console
+    console.warn(`[Teact] Effect cursor #${cursor} in ${componentInstance.name} is out of bounds. How?`);
+  }
 }
 
 function scheduleEffect(
@@ -746,7 +831,7 @@ function scheduleEffect(
   const cleanup = byCursor[cursor]?.cleanup;
   const cleanupsContainer = isLayout ? pendingLayoutCleanups : pendingCleanups;
   const effectsContainer = isLayout ? pendingLayoutEffects : pendingEffects;
-  const effectId = `${componentInstance.id}_${cursor}`;
+  const effectId = componentInstance.id * MAX_EFFECT_CURSORS_PER_INSTANCE + cursor;
 
   if (cleanup) {
     const runEffectCleanup = () => safeExec(() => {
@@ -1026,7 +1111,8 @@ export function DEBUG_resolveComponentName(Component: FC_withDebug) {
 
 export default {
   createElement,
+  cloneElement,
   Fragment,
 };
 
-export { createElement, Fragment };
+export { createElement, cloneElement, Fragment };
