@@ -27,6 +27,8 @@ export default defineConfig(
   globalIgnores([
     '.cache/',
     '**/dist/',
+    '**/playwright-report/',
+    '**/test-results/',
     'docs/',
   ]),
   {
@@ -38,11 +40,12 @@ export default defineConfig(
       },
       'import-x/resolver': {
         typescript: {
-          // Each workspace's `paths`; the demo and the tests resolve `@teact/core` to the package source
+          // Each workspace's `paths`; the demo, the tests and e2e resolve `@teact/core` to the package source
           project: [
             'packages/*/tsconfig.json',
             'packages/*/test/tsconfig.json',
             'demo/tsconfig.json',
+            'e2e/tsconfig.json',
           ],
           noWarnOnMultipleProjects: true,
         },
@@ -97,6 +100,8 @@ export default defineConfig(
               '^@?\\w',
               'dist(/.*|$)',
               '^(\\.+/)+(lib/teact)(/.*|$)',
+              // Web A's global store, imported by its test components in e2e/
+              '^(\\.+/)+global$',
             ],
             // Type imports
             [
@@ -108,6 +113,7 @@ export default defineConfig(
             [
               '^(\\.+/)+config',
               '^(\\.+/)+(lib)(?!/teact)(/.*|$)',
+              '^(\\.+/)+global/.+',
               '^(\\.+/)+(util)(/.*|$)',
               '^\\.\\.(?!/?$)',
               '^\\.\\./?$',

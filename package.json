@@ -6,7 +6,8 @@
   "type": "module",
   "workspaces": [
     "packages/*",
-    "demo"
+    "demo",
+    "e2e"
   ],
   "scripts": {
     "build": "npm run build -w @teact/core",
@@ -15,9 +16,11 @@
     "test": "npm run test:unit && npm run test:browser",
     "test:unit": "npm run test:unit -w @teact/core",
     "test:browser": "npm run test:browser -w @teact/core",
+    "test:e2e": "npm run test -w teact-e2e",
     "dev:demo": "npm run build && npm run dev -w teact-demo",
     "build:demo": "npm run build && npm run build -w teact-demo",
-    "upstream:check": "node scripts/upstream-check.mjs"
+    "upstream:check": "node scripts/upstream-check.mjs",
+    "check:e2e-upstream": "node scripts/check-e2e-upstream.mjs"
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "0.18.5",
