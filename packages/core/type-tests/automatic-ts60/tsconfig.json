@@ -1,0 +1,20 @@
+{
+  // Telegram Web A's compiler options, with `jsxImportSource` set to the package and without its own global
+  // declarations; like Web A, it lists its global types (`types`), so @types/react comes only through imports
+  "compilerOptions": {
+    "target": "esnext",
+    "lib": ["dom", "webworker", "esnext"],
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "strict": true,
+    "noImplicitReturns": true,
+    "module": "preserve",
+    "moduleResolution": "bundler",
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "jsxImportSource": "@teact/core",
+    "types": []
+  },
+  "include": ["src"]
+}
