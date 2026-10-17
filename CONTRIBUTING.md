@@ -100,7 +100,7 @@ npx playwright install chromium        # browser tests and e2e; add firefox and 
 | `npm run build:site` | The GitHub Pages site: landing page, demo, benchmark and the Fasterdom article |
 | `npm run canary:web-a -- --app <checkout>`, `npm run canary:mtw -- --app <checkout>` | Migrates a checkout of an app to the packed package and runs its checks |
 
-On every pull request, CI runs lint, the type checks, the build, `publint`, `attw` and the site build, and these suites: unit, browser, package (`test:dist`, `test:types` and the size budget) and e2e. The browser tests must pass in Chromium and WebKit; they also run in Firefox, which does not fail the build yet. CI does not run `npm run test:mutations`: run it locally when you change the renderer, as [Tests](#tests) asks. The canaries run on pull requests that change the package.
+On every pull request, CI runs lint, the type checks, the build, `publint`, `attw` and the site build, and these suites: unit, browser, package (`test:dist`, `test:types` and the size budget) and e2e. The browser tests must pass in Chromium, Firefox and WebKit. CI does not run `npm run test:mutations`: run it locally when you change the renderer, as [Tests](#tests) asks. The canaries run on pull requests that change the package.
 
 ## Code style
 
