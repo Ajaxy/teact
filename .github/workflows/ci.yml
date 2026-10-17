@@ -55,9 +55,6 @@ jobs:
   browser:
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    # Firefox is not verified yet: Playwright's Firefox did not start on the development machine. Until its first
-    # green runs here, its job may fail without failing the workflow; then remove this line.
-    continue-on-error: ${{ matrix.browser == 'firefox' }}
     strategy:
       fail-fast: false
       matrix:
