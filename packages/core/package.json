@@ -73,9 +73,10 @@
     "prebuild": "rm -rf dist",
     "build": "tsdown",
     "typecheck": "tsc -p . && tsc -p test",
-    "test": "vitest run",
+    "test": "vitest run --project unit --project browser",
     "test:unit": "vitest run --project unit",
-    "test:browser": "vitest run --project browser"
+    "test:browser": "vitest run --project browser",
+    "test:dist": "npm run build && vitest run --project dist"
   },
   "peerDependencies": {
     "@types/react": ">=19.1.0"

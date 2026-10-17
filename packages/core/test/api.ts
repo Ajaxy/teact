@@ -1,5 +1,5 @@
 // The public API of each entry point, as listed in the plan (§3c). test/unit/api.test.ts checks the source against it,
-// test/dist/api.test.ts both builds and their declarations. Changing a list changes the API.
+// test/package/api.test.ts both builds and their declarations. Changing a list changes the API.
 
 export const RUNTIME_EXPORTS: Record<string, readonly string[]> = {
   '@teact/core': [
