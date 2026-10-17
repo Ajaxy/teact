@@ -1,38 +1,5 @@
 export type Scheduler = typeof requestAnimationFrame | typeof onTickEnd;
 
-export function throttle<F extends AnyToVoidFunction>(
-  fn: F,
-  ms: number,
-  shouldRunFirst = true,
-) {
-  let interval: number | undefined;
-  let isPending: boolean;
-  let args: Parameters<F>;
-
-  return (..._args: Parameters<F>) => {
-    isPending = true;
-    args = _args;
-
-    if (!interval) {
-      if (shouldRunFirst) {
-        isPending = false;
-        fn(...args);
-      }
-
-      interval = self.setInterval(() => {
-        if (!isPending) {
-          self.clearInterval(interval);
-          interval = undefined;
-          return;
-        }
-
-        isPending = false;
-        fn(...args);
-      }, ms);
-    }
-  };
-}
-
 export function throttleWithTickEnd<F extends AnyToVoidFunction>(fn: F) {
   return throttleWith(onTickEnd, fn);
 }
@@ -164,26 +131,4 @@ export function onIdle(callback: NoneToVoidFunction) {
   } else {
     onIdleCallbacks.push(callback);
   }
-}
-
-let beforeUnloadCallbacks: NoneToVoidFunction[] | undefined;
-
-export function onBeforeUnload(callback: NoneToVoidFunction, isLast = false) {
-  if (!beforeUnloadCallbacks) {
-    beforeUnloadCallbacks = [];
-
-    self.addEventListener('beforeunload', () => {
-      beforeUnloadCallbacks!.forEach((cb) => cb());
-    });
-  }
-
-  if (isLast) {
-    beforeUnloadCallbacks.push(callback);
-  } else {
-    beforeUnloadCallbacks.unshift(callback);
-  }
-
-  return () => {
-    beforeUnloadCallbacks = beforeUnloadCallbacks!.filter((cb) => cb !== callback);
-  };
 }
