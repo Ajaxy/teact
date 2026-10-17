@@ -68,6 +68,18 @@ export default defineConfig({
           },
         },
       },
+      {
+        // The built package (`npm run build` first): files are imported by their paths in dist/, without the aliases,
+        // conditions and defines above
+        test: {
+          name: 'dist',
+          include: ['test/package/**/*.test.{ts,tsx}'],
+          environment: 'node',
+          env: {
+            TEACT_PACKAGE_DIR: fileURLToPath(new URL('.', import.meta.url)),
+          },
+        },
+      },
     ],
   },
 });

@@ -1,5 +1,5 @@
 // T-api on the source: the runtime exports of each entry point, as listed in the plan (§3c).
-// test/dist/api.test.ts checks the same lists, with the type exports, on both built packages.
+// test/package/api.test.ts checks the same lists, with the type exports, on both built packages.
 import * as core from '@teact/core';
 import * as internal from '@teact/core/internal';
 import { describe, expect, test } from 'vitest';

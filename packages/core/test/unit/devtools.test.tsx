@@ -1,5 +1,5 @@
 // T-noside and T-devtools on the source with the dev-build flags: importing Teact changes nothing global, and the dev
-// tools exist only between their installation and their removal. test/dist/ checks both built packages.
+// tools exist only between their installation and their removal. test/package/ checks both built packages.
 import { installTeactDevTools, memo } from '@teact/core';
 import TeactDOM from '@teact/core/dom';
 import {
