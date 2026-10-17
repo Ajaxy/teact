@@ -45,12 +45,24 @@ export default defineConfig([
   {
     ...shared,
     outDir: 'dist',
-    // No declaration maps: they would point at src/, which the package does not ship. The JavaScript source maps embed
-    // their sources (`sourcesContent`), so debugging works without it.
-    dts: { sourcemap: false },
+    dts: false,
     define: { __TEACT_DEV__: 'false', __TEACT_DEBUG_MORE__: 'false' },
+  },
+  // Development build (`teact-dev` condition): warnings, key checks and debug helpers in `dist/dev/`
+  {
+    ...shared,
+    outDir: 'dist/dev',
+    dts: false,
+    define: { __TEACT_DEV__: 'true', __TEACT_DEBUG_MORE__: 'false' },
+  },
+  // Declarations, for both builds. A pass of their own, so that they get no source maps: declaration maps would point
+  // at src/, which the package does not ship. The JavaScript source maps embed their sources (`sourcesContent`).
+  {
+    ...shared,
+    outDir: 'dist',
+    sourcemap: false,
+    dts: { emitDtsOnly: true },
     banner: ({ fileName }) => ({
-      js: LICENSE_BANNER,
       dts: DECLARATIONS_WITH_JSX_TYPES.has(fileName) ? `${LICENSE_BANNER}\n${JSX_TYPES_REFERENCE}` : LICENSE_BANNER,
     }),
     // Not `copy`, which cannot add the banner
@@ -60,12 +72,5 @@ export default defineConfig([
         await writeFile(resolve(options.outDir, 'jsx.d.ts'), `${LICENSE_BANNER}\n${jsxTypes}`);
       },
     },
-  },
-  // Development build (`teact-dev` condition): warnings, key checks and debug helpers in `dist/dev/`
-  {
-    ...shared,
-    outDir: 'dist/dev',
-    dts: false,
-    define: { __TEACT_DEV__: 'true', __TEACT_DEBUG_MORE__: 'false' },
   },
 ]);
