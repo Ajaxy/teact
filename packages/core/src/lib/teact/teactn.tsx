@@ -1,3 +1,4 @@
+import type { AnyLiteral, NoneToVoidFunction } from '../../types';
 import type { FC, FC_withDebug, Props } from './teact';
 
 import { DEBUG, DEBUG_MORE } from '../../env';

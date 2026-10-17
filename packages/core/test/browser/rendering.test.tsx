@@ -37,7 +37,7 @@ function useToggle(initial: boolean) {
 
 describe('Fragments and text', () => {
   test('an emptied fragment keeps its position and its items come back before the next sibling', async () => {
-    let toggle!: NoneToVoidFunction;
+    let toggle!: () => void;
 
     function Items({ items }: { items: number[] }) {
       return <>{items.map((item) => <div>{item}</div>)}</>;
@@ -69,7 +69,7 @@ describe('Fragments and text', () => {
   });
 
   test('a fragment inserted between siblings does not remount them', async () => {
-    let toggle!: NoneToVoidFunction;
+    let toggle!: () => void;
 
     function Child() {
       const [id] = useState(() => Math.random());
@@ -111,7 +111,7 @@ describe('Fragments and text', () => {
   });
 
   test('a component that renders text does not replace the text before it', async () => {
-    let toggle!: NoneToVoidFunction;
+    let toggle!: () => void;
 
     function Text() {
       return 'text component';
@@ -153,7 +153,7 @@ describe('Fragments and text', () => {
 
 describe('Replaced elements', () => {
   test('content that replaces an element of another type takes its position', async () => {
-    let toggle!: NoneToVoidFunction;
+    let toggle!: () => void;
 
     function Pair() {
       return (
@@ -188,7 +188,7 @@ describe('Replaced elements', () => {
   });
 
   test('a component remounted by a key change keeps its position and gets new state', async () => {
-    let changeKey!: NoneToVoidFunction;
+    let changeKey!: () => void;
 
     function Counter() {
       const [count, setCount] = useState(0);
@@ -267,7 +267,7 @@ describe('Refs', () => {
   });
 
   test('a ref moves to the new element when the tag changes, and is cleared when a reused node drops it', async () => {
-    let toggle!: NoneToVoidFunction;
+    let toggle!: () => void;
     let refs!: { input: ElementRef<HTMLInputElement>; heading: ElementRef<HTMLHeadingElement> };
 
     function App() {
@@ -306,7 +306,7 @@ describe('Refs', () => {
 
   test('`onChange` of an object ref is called when the ref changes', () => {
     const onChange = vi.fn();
-    const ref: ElementRef<HTMLDivElement> & { onChange: NoneToVoidFunction } = { current: undefined, onChange };
+    const ref: ElementRef<HTMLDivElement> & { onChange: () => void } = { current: undefined, onChange };
 
     const container = mount(<div ref={ref} />);
     expect(onChange).toHaveBeenCalledTimes(1);

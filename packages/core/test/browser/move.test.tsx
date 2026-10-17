@@ -60,7 +60,7 @@ describe('Keyed moves (T-move)', () => {
   });
 
   test.runIf(HAS_MOVE_BEFORE)('`moveBefore` keeps the focus and does not reload iframes in moved nodes', async () => {
-    const moveBefore = vi.spyOn(Element.prototype as Element & { moveBefore: AnyFunction }, 'moveBefore');
+    const moveBefore = vi.spyOn(Element.prototype as Element & { moveBefore: (...args: any[]) => any }, 'moveBefore');
     const container = mount(<List />);
     const [a, b, c] = getItems(container);
     const input = c.querySelector('input')!;

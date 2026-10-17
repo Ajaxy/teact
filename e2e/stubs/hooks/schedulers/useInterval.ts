@@ -2,7 +2,7 @@
 // away unless `noFirst` is set
 import { useEffect, useRef } from '@teact/core';
 
-export default function useInterval(callback: NoneToVoidFunction, delay?: number, noFirst = false) {
+export default function useInterval(callback: () => void, delay?: number, noFirst = false) {
   const callbackRef = useRef(callback);
   callbackRef.current = callback;
 

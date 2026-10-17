@@ -1,5 +1,6 @@
-import type { ChangeEvent, FocusEvent } from 'react';
+import type { ChangeEvent, CompositionEvent, FocusEvent } from 'react';
 
+import type { AnyLiteral } from '../../types';
 import type { Signal } from '../../util/signals';
 import type {
   VirtualElement,
@@ -725,12 +726,12 @@ function processControlled(element: DOMElement, props: AnyLiteral) {
     onInput, onChange, onBlur, onCompositionStart, onCompositionEnd,
   } = props;
 
-  props.onCompositionStart = (e: React.CompositionEvent<HTMLInputElement>) => {
+  props.onCompositionStart = (e: CompositionEvent<HTMLInputElement>) => {
     composingInputs.add(element);
     selectionStates.delete(element);
     onCompositionStart?.(e);
   };
-  props.onCompositionEnd = (e: React.CompositionEvent<HTMLInputElement>) => {
+  props.onCompositionEnd = (e: CompositionEvent<HTMLInputElement>) => {
     if (isValueControlled) {
       saveInputSelection(e.currentTarget);
     }

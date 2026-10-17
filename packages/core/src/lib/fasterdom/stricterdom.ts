@@ -1,3 +1,5 @@
+import type { AnyFunction } from '../../types';
+
 import LAYOUT_CAUSES from './layoutCauses';
 
 type Entities = keyof typeof LAYOUT_CAUSES;

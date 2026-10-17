@@ -1,3 +1,5 @@
+import type { AnyFunction, NoneToVoidFunction } from '../types';
+
 import { reportError } from '../errors';
 
 type SafeExecOptions = {

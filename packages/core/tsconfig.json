@@ -6,7 +6,8 @@
       "@teact/core/jsx-runtime": ["./src/lib/teact/jsx-runtime.ts"],
       "@teact/core/jsx-dev-runtime": ["./src/lib/teact/jsx-dev-runtime.ts"]
     },
-    "types": ["react"]
+    // No global types: the source imports what it uses, so the emitted declarations need no app globals
+    "types": []
   },
   "include": ["src", "tsdown.config.ts", "vitest.config.ts"]
 }

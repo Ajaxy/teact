@@ -1,3 +1,4 @@
+import type { AnyToVoidFunction } from '../types';
 export function createCallbackManager<T extends AnyToVoidFunction = AnyToVoidFunction>() {
   const callbacks = new Set<T>();
 
