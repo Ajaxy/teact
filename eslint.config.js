@@ -221,10 +221,13 @@ export default defineConfig(
           allowDefaultProject: [
             '*.js',
             'scripts/*.mjs',
+            'scripts/canary/*.mjs',
+            'scripts/canary/*/*.mjs',
             'packages/core/.size-limit.js',
             'packages/core/size/*.js',
             'packages/core/type-tests/*.mjs',
           ],
+          maximumDefaultProjectFileMatchCount_THIS_WILL_SLOW_DOWN_LINTING: 20,
         },
         tsconfigRootDir: import.meta.dirname,
       },
