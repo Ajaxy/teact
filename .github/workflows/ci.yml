@@ -33,8 +33,8 @@ jobs:
       - run: npm run build
       - run: npx publint packages/core
       - run: npx attw --pack packages/core --profile esm-only
-      - run: npm run build:demo
-      - run: npm run build:benchmark
+      # The GitHub Pages site: the demo, the benchmark, the landing page and the article (pages.yml deploys it)
+      - run: npm run build:site
 
   unit:
     runs-on: ubuntu-latest

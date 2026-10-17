@@ -227,6 +227,7 @@ export default defineConfig(
             'packages/core/.size-limit.js',
             'packages/core/size/*.js',
             'packages/core/type-tests/*.mjs',
+            'site/*.mjs',
           ],
           maximumDefaultProjectFileMatchCount_THIS_WILL_SLOW_DOWN_LINTING: 20,
         },
@@ -252,7 +253,7 @@ export default defineConfig(
   },
   {
     name: 'node-scripts',
-    files: ['scripts/**', 'packages/core/type-tests/*.mjs'],
+    files: ['scripts/**', 'packages/core/type-tests/*.mjs', 'site/*.mjs'],
     rules: {
       'no-console': 'off',
     },
