@@ -1,64 +1,5 @@
 export type Scheduler = typeof requestAnimationFrame | typeof onTickEnd;
 
-export function debounce<F extends AnyToVoidFunction>(
-  fn: F,
-  ms: number,
-  shouldRunFirst = true,
-  shouldRunLast = true,
-) {
-  let waitingTimeout: number | undefined;
-
-  return (...args: Parameters<F>) => {
-    if (waitingTimeout) {
-      clearTimeout(waitingTimeout);
-      waitingTimeout = undefined;
-    } else if (shouldRunFirst) {
-      fn(...args);
-    }
-
-    waitingTimeout = self.setTimeout(() => {
-      if (shouldRunLast) {
-        fn(...args);
-      }
-
-      waitingTimeout = undefined;
-    }, ms);
-  };
-}
-
-export function throttle<F extends AnyToVoidFunction>(
-  fn: F,
-  ms: number,
-  shouldRunFirst = true,
-) {
-  let interval: number | undefined;
-  let isPending: boolean;
-  let args: Parameters<F>;
-
-  return (..._args: Parameters<F>) => {
-    isPending = true;
-    args = _args;
-
-    if (!interval) {
-      if (shouldRunFirst) {
-        isPending = false;
-        fn(...args);
-      }
-
-      interval = self.setInterval(() => {
-        if (!isPending) {
-          self.clearInterval(interval);
-          interval = undefined;
-          return;
-        }
-
-        isPending = false;
-        fn(...args);
-      }, ms);
-    }
-  };
-}
-
 export function throttleWithTickEnd<F extends AnyToVoidFunction>(fn: F) {
   return throttleWith(onTickEnd, fn);
 }
@@ -79,16 +20,6 @@ export function throttleWith<F extends AnyToVoidFunction>(schedulerFn: Scheduler
       });
     }
   };
-}
-
-export const pause = (ms: number) => new Promise<void>((resolve) => {
-  setTimeout(() => resolve(), ms);
-});
-
-export function rafPromise() {
-  return new Promise<void>((resolve) => {
-    fastRaf(resolve);
-  });
 }
 
 const FAST_RAF_TIMEOUT_FALLBACK_MS = 35; // < 30 FPS
@@ -200,26 +131,4 @@ export function onIdle(callback: NoneToVoidFunction) {
   } else {
     onIdleCallbacks.push(callback);
   }
-}
-
-let beforeUnloadCallbacks: NoneToVoidFunction[] | undefined;
-
-export function onBeforeUnload(callback: NoneToVoidFunction, isLast = false) {
-  if (!beforeUnloadCallbacks) {
-    beforeUnloadCallbacks = [];
-
-    self.addEventListener('beforeunload', () => {
-      beforeUnloadCallbacks!.forEach((cb) => cb());
-    });
-  }
-
-  if (isLast) {
-    beforeUnloadCallbacks.push(callback);
-  } else {
-    beforeUnloadCallbacks.unshift(callback);
-  }
-
-  return () => {
-    beforeUnloadCallbacks = beforeUnloadCallbacks!.filter((cb) => cb !== callback);
-  };
 }
