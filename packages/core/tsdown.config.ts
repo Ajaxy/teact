@@ -26,6 +26,11 @@ const shared: UserConfig = {
   },
 };
 
+// Teact's additions to React's JSX types (src/jsx.d.ts) are copied to dist/ as they are. The declarations of the entries
+// that apps reach for JSX reference them: the root (classic runtime) and the JSX runtimes (automatic runtime).
+const JSX_TYPES_REFERENCE = '/// <reference path="./jsx.d.ts" />';
+const DECLARATIONS_WITH_JSX_TYPES = new Set(['index.d.ts', 'jsx-runtime.d.ts', 'jsx-dev-runtime.d.ts']);
+
 export default defineConfig([
   // Production build (`default` condition)
   {
@@ -34,6 +39,10 @@ export default defineConfig([
     // Declaration maps too: with `sourcemap: true`, every `.d.ts` gets a `sourceMappingURL` comment
     dts: { sourcemap: true },
     define: { __TEACT_DEV__: 'false', __TEACT_DEBUG_MORE__: 'false' },
+    banner: ({ fileName }) => ({
+      dts: DECLARATIONS_WITH_JSX_TYPES.has(fileName) ? JSX_TYPES_REFERENCE : undefined,
+    }),
+    copy: ['src/jsx.d.ts'],
   },
   // Development build (`teact-dev` condition): warnings, key checks and debug helpers in `dist/dev/`
   {

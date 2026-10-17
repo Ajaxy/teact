@@ -13,5 +13,6 @@
     },
     "types": ["react", "node", "vite/client"]
   },
-  "include": ["src", "stubs", "specs", "*.ts"]
+  // Teact's JSX props (src/jsx.d.ts): the built jsx-runtime.d.ts references them, the source jsx-runtime.ts does not
+  "include": ["src", "stubs", "specs", "*.ts", "../packages/core/src/jsx.d.ts"]
 }

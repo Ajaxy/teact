@@ -1,4 +1,7 @@
 // `@teact/core`: components, hooks, signals and heavy-animation helpers.
+// Teact's JSX props, for programs that compile against the source (dist/index.d.ts gets the same reference at build)
+// eslint-disable-next-line @typescript-eslint/triple-slash-reference
+/// <reference path="./jsx.d.ts" />
 
 export { default } from './lib/teact/teact';
 export {
