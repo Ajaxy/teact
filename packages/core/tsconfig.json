@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    // `teactn.tsx` uses JSX through the package's own automatic runtime
+    "paths": {
+      "@teact/core/jsx-runtime": ["./src/lib/teact/jsx-runtime.ts"],
+      "@teact/core/jsx-dev-runtime": ["./src/lib/teact/jsx-dev-runtime.ts"]
+    },
+    "types": ["react"]
+  },
+  "include": ["src", "tsdown.config.ts"]
+}

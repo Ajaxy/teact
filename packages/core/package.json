@@ -1,0 +1,92 @@
+{
+  "name": "@teact/core",
+  "version": "0.1.0-next.0",
+  "description": "Tiny and fast React-like UI library that powers Telegram Web A and MyTonWallet",
+  "keywords": [
+    "teact",
+    "react",
+    "jsx",
+    "tsx",
+    "ui",
+    "framework",
+    "virtual-dom",
+    "signals"
+  ],
+  "homepage": "https://github.com/Ajaxy/teact#readme",
+  "bugs": {
+    "url": "https://github.com/Ajaxy/teact/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ajaxy/teact.git",
+    "directory": "packages/core"
+  },
+  "license": "MIT",
+  "author": "Alexander Zinchuk (alexander@zinchuk.com)",
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "teact-dev": "./dist/dev/index.js",
+      "default": "./dist/index.js"
+    },
+    "./dom": {
+      "types": "./dist/dom.d.ts",
+      "teact-dev": "./dist/dev/dom.js",
+      "default": "./dist/dom.js"
+    },
+    "./jsx-runtime": {
+      "types": "./dist/jsx-runtime.d.ts",
+      "teact-dev": "./dist/dev/jsx-runtime.js",
+      "default": "./dist/jsx-runtime.js"
+    },
+    "./jsx-dev-runtime": {
+      "types": "./dist/jsx-dev-runtime.d.ts",
+      "teact-dev": "./dist/dev/jsx-dev-runtime.js",
+      "default": "./dist/jsx-dev-runtime.js"
+    },
+    "./teactn": {
+      "types": "./dist/teactn.d.ts",
+      "teact-dev": "./dist/dev/teactn.js",
+      "default": "./dist/teactn.js"
+    },
+    "./fasterdom": {
+      "types": "./dist/fasterdom.d.ts",
+      "teact-dev": "./dist/dev/fasterdom.js",
+      "default": "./dist/fasterdom.js"
+    },
+    "./internal": {
+      "types": "./dist/internal.d.ts",
+      "teact-dev": "./dist/dev/internal.js",
+      "default": "./dist/internal.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "prebuild": "rm -rf dist",
+    "build": "tsdown",
+    "typecheck": "tsc -p ."
+  },
+  "peerDependencies": {
+    "@types/react": ">=19.1.0"
+  },
+  "peerDependenciesMeta": {
+    "@types/react": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@types/react": "19.3.0",
+    "tsdown": "0.23.1"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
