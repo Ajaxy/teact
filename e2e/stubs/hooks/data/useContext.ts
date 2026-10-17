@@ -8,7 +8,7 @@ export default function useContext<T>(context: Context<T>) {
   const getValue = useContextSignal(context);
   // eslint-disable-next-line @eslint-react/use-state
   const [, setVersion] = useState(0);
-  const subscriptionRef = useRef<{ signal: Signal<T>; unsubscribe: NoneToVoidFunction }>();
+  const subscriptionRef = useRef<{ signal: Signal<T>; unsubscribe: () => void }>();
 
   if (subscriptionRef.current?.signal !== getValue) {
     subscriptionRef.current?.unsubscribe();

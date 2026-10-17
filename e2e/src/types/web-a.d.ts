@@ -1,5 +1,5 @@
 // Types that Web A's test components use without importing them, as declared in Web A's `src/@types/global.d.ts`:
-// the Teact JSX props (as a module augmentation) and the `Complete` helper.
+// the Teact JSX props (as a module augmentation) and the `Complete` and `NoneToVoidFunction` helpers.
 // TODO(B3): Take the JSX props from the package's `jsx.d.ts` once it ships one.
 import 'react';
 
@@ -28,6 +28,8 @@ declare module 'react' {
 }
 
 declare global {
+  type NoneToVoidFunction = () => void;
+
   type Complete<T> = {
     [P in keyof Required<T>]: Pick<T, P> extends Required<Pick<T, P>> ? T[P] : (T[P] | undefined);
   };

@@ -1,6 +1,8 @@
 /* eslint-disable @eslint-react/no-unnecessary-use-prefix */
 import type { ReactElement } from 'react';
 
+import type { AnyFunction, AnyLiteral, NoneToVoidFunction } from '../../types';
+
 import { DEBUG, DEBUG_MORE } from '../../env';
 import { logUnequalProps } from '../../util/areShallowEqual';
 import { orderBy } from '../../util/iteratees';

@@ -1,3 +1,5 @@
+import type { AnyToVoidFunction, NoneToVoidFunction } from '../../types';
+
 import safeExec from '../../util/safeExec';
 import { fastRaf, throttleWith } from '../../util/schedulers';
 import { setPhase } from './stricterdom';

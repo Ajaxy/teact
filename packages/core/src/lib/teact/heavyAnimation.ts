@@ -1,3 +1,5 @@
+import type { AnyToVoidFunction, NoneToVoidFunction } from '../../types';
+
 import { onIdle, throttleWith } from '../../util/schedulers';
 import { createSignal } from '../../util/signals';
 import { requestMeasure } from '../fasterdom/fasterdom';

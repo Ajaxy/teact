@@ -1,3 +1,4 @@
+import type { AnyLiteral } from '../types';
 export function areRecordsShallowEqual(currentProps: AnyLiteral, newProps: AnyLiteral) {
   if (currentProps === newProps) {
     return true;

@@ -8,7 +8,7 @@ import {
 import { describe, expect, test } from 'vitest';
 
 // Stand-in for Web A's `ActionReturnType` (src/global/types)
-type ActionReturnType = AnyLiteral | void | Promise<void>;
+type ActionReturnType = Record<string, any> | void | Promise<void>;
 
 describe('Prevent async managing of global', () => {
   test('Work when setting synchronously', () => {

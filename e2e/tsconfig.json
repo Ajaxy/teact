@@ -5,7 +5,6 @@
     // stand-ins in `stubs/` (vite.config.ts aliases the same imports).
     "rootDirs": ["src", "stubs"],
     // Type-check against the package source, like the demo.
-    // TODO(B3): Drop the global shims from `include` once the package has no ambient types.
     "paths": {
       "@teact/core": ["../packages/core/src/index.ts"],
       "@teact/core/jsx-runtime": ["../packages/core/src/lib/teact/jsx-runtime.ts"],
@@ -14,5 +13,5 @@
     },
     "types": ["react", "node", "vite/client"]
   },
-  "include": ["src", "stubs", "specs", "*.ts", "../packages/core/src/@types"]
+  "include": ["src", "stubs", "specs", "*.ts"]
 }

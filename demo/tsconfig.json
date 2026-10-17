@@ -2,7 +2,6 @@
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
     // Type-check against the package source, so that linting and type-checking do not need a build first.
-    // TODO(B3): Drop the global shims from `include` once the package has no ambient types.
     "paths": {
       "@teact/core": ["../packages/core/src/index.ts"],
       "@teact/core/jsx-runtime": ["../packages/core/src/lib/teact/jsx-runtime.ts"],
@@ -11,5 +10,5 @@
     },
     "types": ["react"]
   },
-  "include": ["*.ts", "*.tsx", "../packages/core/src/@types"]
+  "include": ["*.ts", "*.tsx"]
 }

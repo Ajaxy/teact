@@ -1,3 +1,4 @@
+import type { AnyToVoidFunction, NoneToVoidFunction } from '../types';
 export type Scheduler = typeof requestAnimationFrame | typeof onTickEnd;
 
 export function throttleWithTickEnd<F extends AnyToVoidFunction>(fn: F) {

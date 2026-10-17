@@ -16,8 +16,8 @@ afterEach(() => {
 
 describe('throttleWith', () => {
   test('calls the function once per scheduled run, with the latest arguments', () => {
-    const scheduled: NoneToVoidFunction[] = [];
-    const scheduler = (cb: NoneToVoidFunction) => {
+    const scheduled: (() => void)[] = [];
+    const scheduler = (cb: () => void) => {
       scheduled.push(cb);
     };
     const fn = vi.fn();

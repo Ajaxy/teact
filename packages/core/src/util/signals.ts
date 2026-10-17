@@ -1,3 +1,4 @@
+import type { AnyToVoidFunction, NoneToVoidFunction } from '../types';
 import type { CallbackManager } from './callbacks';
 
 import { createCallbackManager } from './callbacks';
