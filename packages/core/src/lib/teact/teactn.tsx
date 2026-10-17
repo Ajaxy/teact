@@ -1,9 +1,9 @@
 import type { FC, FC_withDebug, Props } from './teact';
 
 import { DEBUG, DEBUG_MORE } from '../../env';
+import { reportError } from '../../errors';
 import { areRecordsShallowEqual, logUnequalProps } from '../../util/areShallowEqual';
 import Deferred from '../../util/Deferred';
-import { handleError } from '../../util/handleError';
 import { orderBy } from '../../util/iteratees';
 import { throttleWithTickEnd } from '../../util/schedulers';
 import React, { DEBUG_resolveComponentName, getIsHeavyAnimating, useUnmountCleanup } from './teact';
@@ -205,7 +205,7 @@ function updateContainers() {
     try {
       newMappedProps = mapStateToProps(currentGlobal, ownProps);
     } catch (err: any) {
-      handleError(err);
+      reportError(err);
 
       return;
     }
@@ -302,7 +302,7 @@ export function withUntypedGlobal<OwnProps extends AnyLiteral>(
         try {
           container.mappedProps = mapStateToProps(currentGlobal, props);
         } catch (err: any) {
-          handleError(err);
+          reportError(err);
         }
       }
 

@@ -70,6 +70,7 @@ const ALLOWED_EXTERNALS = new Set(['react']);
 // Web A modules outside the closure that the closure imports, and the package modules that replace them
 const REPLACED_MODULES = {
   'src/config': 'src/env.ts',
+  'src/util/handleError': 'src/errors.ts',
 };
 
 const IMPORT_RE = /(?:^|[;\n])\s*(?:import|export)\s(?:[^'";]*?\sfrom\s)?\s*'([^']+)'/g;

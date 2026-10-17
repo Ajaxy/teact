@@ -1,6 +1,6 @@
 // `@teact/core`: components, hooks, signals and heavy-animation helpers.
 // TODO(B3): Curate per the plan (§3c): drop `cloneElement` from the default and named exports,
-// add `configureTeact`, `installTeactDevTools` and the `TeactConfig` type.
+// add `installTeactDevTools`.
 
 export { default } from './lib/teact/teact';
 export {
@@ -35,3 +35,5 @@ export type {
 export { throttleWithFullyIdle } from './lib/teact/heavyAnimation';
 export { createSignal, isSignal, cleanupEffect } from './util/signals';
 export type { Signal, SignalSetter } from './util/signals';
+export { configureTeact } from './errors';
+export type { TeactConfig } from './errors';
