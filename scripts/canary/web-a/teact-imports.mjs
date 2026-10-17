@@ -69,12 +69,18 @@ const stats = {
 // '../util/signals'`) now has a value import and a type-only import of the same entry. `eslint --fix`
 // (import-x/no-duplicates) merges such a pair wrongly when the value import has inline `type` specifiers: it produced
 // `import type { type ElementRef, memo, … }` in Message.tsx, which does not compile. So the type-only import is merged
-// into the value import here, as inline `type` specifiers.
+// into the value import here, as inline `type` specifiers, but only when the value import already has some: every other
+// pair is left as it is (`eslint --fix` handles those correctly), which keeps the separate `import type` style.
 const VALUE_IMPORT_RE = /^import (?!type\s)(?:[\w$]+\s*,\s*)?\{([^}]*)\} from (['"])(@teact\/core[^'"]*)\2;$/gm;
 const TYPE_IMPORT_RE = /^import type \{([^}]*)\} from (['"])(@teact\/core[^'"]*)\2;\n/gm;
+const INLINE_TYPE_SPECIFIER_RE = /(^|[{,])\s*type\s/;
 
 function mergeTypeImports(source) {
-  const valueImports = new Map([...source.matchAll(VALUE_IMPORT_RE)].map((match) => [match[3], match]));
+  const valueImports = new Map(
+    [...source.matchAll(VALUE_IMPORT_RE)]
+      .filter(([, names]) => INLINE_TYPE_SPECIFIER_RE.test(names))
+      .map((match) => [match[3], match]),
+  );
 
   let result = source;
   for (const [statement, names, , specifier] of source.matchAll(TYPE_IMPORT_RE)) {
