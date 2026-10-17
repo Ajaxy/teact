@@ -3,7 +3,6 @@ import type { ReactElement } from 'react';
 
 import { DEBUG, DEBUG_MORE } from '../../config';
 import { logUnequalProps } from '../../util/areShallowEqual';
-import { incrementOverlayCounter } from '../../util/debugOverlay';
 import { orderBy } from '../../util/iteratees';
 import safeExec from '../../util/safeExec';
 import { throttleWith } from '../../util/schedulers';
@@ -525,11 +524,6 @@ export function renderComponent(componentInstance: ComponentInstance) {
       DEBUG_components[componentName].avgRenderTime = (avgRenderTime * renders + duration) / (renders + 1);
       DEBUG_components[componentName].renders++;
       DEBUG_components.TOTAL.renders++;
-
-      if (DEBUG_MORE) {
-        incrementOverlayCounter(`${componentName} renders`);
-        incrementOverlayCounter(`${componentName} duration`, duration);
-      }
     }
   }, {
     rescue: () => {
