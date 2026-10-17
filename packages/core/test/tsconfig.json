@@ -9,5 +9,6 @@
       "@teact/core/*": ["../src/*.ts"]
     }
   },
-  "include": ["."]
+  // Teact's JSX props (src/jsx.d.ts): the built jsx-runtime.d.ts references them, the source jsx-runtime.ts does not
+  "include": [".", "../src/jsx.d.ts"]
 }
