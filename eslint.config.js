@@ -221,6 +221,8 @@ export default defineConfig(
           allowDefaultProject: [
             '*.js',
             'scripts/*.mjs',
+            'packages/core/.size-limit.js',
+            'packages/core/size/*.js',
             'packages/core/type-tests/*.mjs',
           ],
         },
@@ -234,6 +236,14 @@ export default defineConfig(
     rules: {
       // Tests keep state setters in outer variables to drive updates, under names of their own
       '@eslint-react/use-state': 'off',
+    },
+  },
+  {
+    name: 'size-fixtures',
+    files: ['packages/core/size/*.js'],
+    rules: {
+      // They import the build, which does not exist before `npm run build`
+      'import-x/no-unresolved': 'off',
     },
   },
   {
