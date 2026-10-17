@@ -1,0 +1,14 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    // Tests import the package by its public specifiers; like vitest.config.ts, resolve them to the source.
+    // TODO(B3): Drop the global shims from `include` once the package has no ambient types.
+    "paths": {
+      "@teact/core": ["../src/index.ts"],
+      "@teact/core/jsx-runtime": ["../src/lib/teact/jsx-runtime.ts"],
+      "@teact/core/jsx-dev-runtime": ["../src/lib/teact/jsx-dev-runtime.ts"],
+      "@teact/core/*": ["../src/*.ts"]
+    }
+  },
+  "include": [".", "../src/@types", "../src/env.d.ts"]
+}

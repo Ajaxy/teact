@@ -38,8 +38,12 @@ export default defineConfig(
       },
       'import-x/resolver': {
         typescript: {
-          // Each workspace's `paths`; the demo resolves `@teact/core` to the package source
-          project: ['packages/*/tsconfig.json', 'demo/tsconfig.json'],
+          // Each workspace's `paths`; the demo and the tests resolve `@teact/core` to the package source
+          project: [
+            'packages/*/tsconfig.json',
+            'packages/*/test/tsconfig.json',
+            'demo/tsconfig.json',
+          ],
           noWarnOnMultipleProjects: true,
         },
       },
@@ -208,6 +212,14 @@ export default defineConfig(
         },
         tsconfigRootDir: import.meta.dirname,
       },
+    },
+  },
+  {
+    name: 'tests',
+    files: ['packages/*/test/**'],
+    rules: {
+      // Tests keep state setters in outer variables to drive updates, under names of their own
+      '@eslint-react/use-state': 'off',
     },
   },
   {

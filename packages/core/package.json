@@ -72,7 +72,10 @@
   "scripts": {
     "prebuild": "rm -rf dist",
     "build": "tsdown",
-    "typecheck": "tsc -p ."
+    "typecheck": "tsc -p . && tsc -p test",
+    "test": "vitest run",
+    "test:unit": "vitest run --project unit",
+    "test:browser": "vitest run --project browser"
   },
   "peerDependencies": {
     "@types/react": ">=19.1.0"
@@ -84,7 +87,12 @@
   },
   "devDependencies": {
     "@types/react": "19.3.0",
-    "tsdown": "0.23.1"
+    "@vitest/browser-playwright": "5.0.3",
+    "jsdom": "30.1.2",
+    "playwright": "1.64.0",
+    "tsdown": "0.23.1",
+    "vite": "8.3.4",
+    "vitest": "5.0.3"
   },
   "publishConfig": {
     "access": "public"
