@@ -1,4 +1,4 @@
-import { DEBUG_MORE } from '../config';
+import { DEBUG_MORE } from '../env';
 import { handleError } from './handleError';
 
 const SAFE_EXEC_ENABLED = !DEBUG_MORE;

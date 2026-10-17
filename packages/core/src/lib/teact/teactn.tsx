@@ -1,6 +1,6 @@
 import type { FC, FC_withDebug, Props } from './teact';
 
-import { DEBUG, DEBUG_MORE } from '../../config';
+import { DEBUG, DEBUG_MORE } from '../../env';
 import { areRecordsShallowEqual, logUnequalProps } from '../../util/areShallowEqual';
 import Deferred from '../../util/Deferred';
 import { handleError } from '../../util/handleError';
