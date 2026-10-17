@@ -10,7 +10,7 @@
     "typecheck": "tsc -p ."
   },
   "dependencies": {
-    "@teact/core": "0.1.0-next.0"
+    "@teact/core": "*"
   },
   "devDependencies": {
     "@types/react": "19.3.0",

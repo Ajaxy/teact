@@ -1,0 +1,285 @@
+# Release: versions and publishes @teact/core with Changesets (https://changesets.dev).
+#
+# On every push to main:
+#   - `select-mode` looks at .changeset/. Pending changesets mean "version". No pending changesets, and a version that
+#     npm does not have yet, mean "publish".
+#   - `version` runs `npm run version-packages` and opens or updates the "Release: Version packages" pull request.
+#     Merging that pull request puts the new version on main, and the next run publishes it.
+#   - `pack` builds and packs @teact/core. It has no publishing rights.
+#   - `wait-for-ci` waits for the run of the CI workflow on the same commit (the push to main starts both workflows),
+#     and stops the release unless that run succeeded.
+#   - `publish` publishes that tarball with npm trusted publishing (OIDC; npm 11.5.1 or newer). No npm token is stored
+#     anywhere. It runs in the `npm` environment, so a required reviewer approves each publish.
+#   - `github-release` creates the tag `@teact/core@<version>` and a GitHub Release with the changelog entry.
+#
+# While .changeset/pre.json is in pre mode, versions are 0.1.0-next.N and are published under the `next` dist-tag.
+# Run `npx changeset pre exit` in the pull request that should release 0.1.0 under `latest`.
+#
+# One-time setup by the maintainer, before this workflow can publish:
+#   1. npm: create the `teact` organization (scope @teact), with two-factor authentication.
+#   2. Publish the first version by hand. npm accepts a trusted publisher only for a package that already exists. From
+#      the merge commit that has packages/core at 0.1.0-next.0:
+#        npm ci && npm run build && npm pack -w @teact/core
+#        npm publish teact-core-0.1.0-next.0.tgz --tag next --access public --provenance=false
+#      `--provenance=false` is needed because package.json asks for provenance, which only CI can generate. Check
+#      `npm view @teact/core dist-tags` afterwards. If the registry also pointed `latest` at this first version, leave
+#      it: it moves when 0.1.0 is published, and this workflow publishes prereleases under `next` only.
+#      Tag that commit and create its release by hand:
+#        git tag @teact/core@0.1.0-next.0 <commit> && git push origin @teact/core@0.1.0-next.0
+#        node scripts/release-notes.mjs 0.1.0-next.0 > notes.md
+#        gh release create @teact/core@0.1.0-next.0 --prerelease --title @teact/core@0.1.0-next.0 --notes-file notes.md
+#      Until then, runs of this workflow skip publishing with a warning.
+#   3. npmjs.com, @teact/core → Settings → Trusted publishing: GitHub Actions, organization or user `Ajaxy`,
+#      repository `teact`, workflow `release.yml`, environment `npm`. Then, under "Publishing access", require
+#      two-factor authentication and disallow tokens, so that only this workflow and the maintainer can publish.
+#   4. GitHub, Settings → Environments: create `npm` with the maintainer as required reviewer and deployments limited
+#      to the `main` branch. Create it before this workflow first runs: GitHub creates a missing environment without
+#      any protection rules.
+#   5. GitHub, Settings → Actions → General: allow GitHub Actions to create pull requests (for the Version PR).
+#
+# The Version PR is created with this workflow's GITHUB_TOKEN, and GitHub does not start workflows for events caused
+# by that token, so CI runs on the Version PR only after it is closed and reopened (a ruleset that requires CI before
+# merging makes that necessary). Publishing does not depend on it: `wait-for-ci` checks CI on the merged commit.
+#
+# Retrying:
+#   - A run that stopped before publishing (CI failed and has passed on a re-run since, or an approval was rejected or
+#     expired): "Re-run failed jobs" on that run, or a manual run of this workflow on main.
+#   - A run that published but failed in `github-release`: "Re-run failed jobs" on that run. A manual run would find
+#     the version on npm and skip every job. The tag and the release can also be created by hand with the commands of
+#     step 2, for the published version and the commit of that run.
+name: Release
+
+on:
+  push:
+    branches: [main]
+  # A new run on the latest commit of main (see "Retrying" above)
+  workflow_dispatch:
+
+permissions: {}
+
+# Never cancel a running release: a later push waits for it
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  select-mode:
+    # Only Ajaxy/teact releases, and only from main (forks and other branches do nothing)
+    if: github.repository == 'Ajaxy/teact' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    outputs:
+      mode: ${{ steps.select-mode.outputs.mode }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+
+      - run: npm ci
+
+      # "version", "publish" or "none"
+      - id: select-mode
+        uses: changesets/action/select-mode@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
+
+  version:
+    needs: select-mode
+    if: needs.select-mode.outputs.mode == 'version'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write # to push the Version PR's branch
+      pull-requests: write # to open or update the Version PR
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+
+      - run: npm ci
+
+      # Commits through the GitHub API (signed by GitHub), so no git credentials are needed on disk. The action passes
+      # its token to the script as GITHUB_TOKEN, which @changesets/changelog-github uses for the changelog's links.
+      - uses: changesets/action/version@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
+        with:
+          script: npm run version-packages
+          commit-message: 'Release: Version packages'
+          pr-title: 'Release: Version packages'
+
+  pack:
+    needs: select-mode
+    if: needs.select-mode.outputs.mode == 'publish'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    outputs:
+      version: ${{ steps.plan.outputs.version }}
+      dist-tag: ${{ steps.plan.outputs.dist-tag }}
+      publish: ${{ steps.plan.outputs.publish }}
+      tarball: ${{ steps.pack.outputs.tarball }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+
+      # The version, its dist-tag (`next` in pre mode, otherwise `latest`), and whether npm still lacks it
+      - id: plan
+        run: node scripts/release-plan.mjs
+
+      - if: steps.plan.outputs.publish == 'true'
+        run: npm ci
+
+      - if: steps.plan.outputs.publish == 'true'
+        run: npm run build
+
+      - id: pack
+        if: steps.plan.outputs.publish == 'true'
+        run: |
+          mkdir -p "$RUNNER_TEMP/pack"
+          tarball=$(npm pack -w @teact/core --pack-destination "$RUNNER_TEMP/pack" --json | node -p 'JSON.parse(require("fs").readFileSync(0, "utf8"))[0].filename')
+          echo "tarball=$tarball" >> "$GITHUB_OUTPUT"
+          tar -tzf "$RUNNER_TEMP/pack/$tarball"
+
+      - if: steps.plan.outputs.publish == 'true'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: teact-core-tarball
+          path: ${{ runner.temp }}/pack/${{ steps.pack.outputs.tarball }}
+          if-no-files-found: error
+          retention-days: 7
+
+  # The push that started this run also started CI (.github/workflows/ci.yml) on the same commit. Publishing waits for
+  # it, so the required reviewer of the `npm` environment is only asked to approve a commit that passed CI.
+  wait-for-ci:
+    needs: pack
+    if: needs.pack.outputs.publish == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      actions: read # to find and read the CI run
+    steps:
+      - name: Wait for CI on this commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # GitHub can list the CI run a little later than this one
+          run_id=
+          for _ in $(seq 1 20); do
+            run_id=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow ci.yml --event push --commit "$GITHUB_SHA" \
+              --limit 1 --json databaseId --jq '.[0].databaseId // empty')
+            if [ -n "$run_id" ]; then
+              break
+            fi
+            sleep 15
+          done
+          if [ -z "$run_id" ]; then
+            echo "::error::Found no CI run for the push of $GITHUB_SHA, so it is not published"
+            exit 1
+          fi
+
+          url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$run_id"
+          echo "CI run: $url"
+          while true; do
+            result=$(gh run view "$run_id" --repo "$GITHUB_REPOSITORY" --json status,conclusion \
+              --jq '"\(.status) \(.conclusion)"')
+            if [ "${result%% *}" = completed ]; then
+              break
+            fi
+            sleep 30
+          done
+
+          conclusion=${result#* }
+          if [ "$conclusion" != success ]; then
+            echo "::error::CI ended with '$conclusion' on $GITHUB_SHA ($url), so it is not published." \
+              "Once a re-run of CI passes, re-run the failed jobs of this run."
+            exit 1
+          fi
+
+  publish:
+    needs: [pack, wait-for-ci]
+    if: needs.pack.outputs.publish == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: npm
+      url: https://www.npmjs.com/package/@teact/core/v/${{ needs.pack.outputs.version }}
+    permissions:
+      contents: read
+      id-token: write # npm trusted publishing (OIDC) and provenance
+    steps:
+      # No checkout and no install: this job runs no code from the repository or its dependencies
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24 # as .nvmrc
+          package-manager-cache: false
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: teact-core-tarball
+          path: ${{ runner.temp }}/pack
+
+      - name: Check the npm version
+        run: |
+          npm --version
+          node -e '
+            const [major, minor, patch] = process.argv[1].split(".").map(Number);
+            if (major < 11 || (major === 11 && (minor < 5 || (minor === 5 && patch < 1)))) {
+              console.error("Trusted publishing needs npm 11.5.1 or newer");
+              process.exit(1);
+            }
+          ' "$(npm --version)"
+
+      # Without NODE_AUTH_TOKEN or an .npmrc, npm authenticates with the workflow's OIDC token and adds provenance
+      - name: Publish
+        env:
+          TARBALL: ${{ runner.temp }}/pack/${{ needs.pack.outputs.tarball }}
+          DIST_TAG: ${{ needs.pack.outputs.dist-tag }}
+        run: npm publish "$TARBALL" --tag "$DIST_TAG" --access public --provenance
+
+  github-release:
+    needs: [pack, publish]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write # to create the tag and the release
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Create the tag and the GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.pack.outputs.version }}
+        run: |
+          tag="@teact/core@$VERSION"
+          if gh release view "$tag" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
+            echo "::notice::The release $tag exists already"
+            exit 0
+          fi
+
+          node scripts/release-notes.mjs "$VERSION" > "$RUNNER_TEMP/notes.md"
+          prerelease=()
+          if [[ "$VERSION" == *-* ]]; then
+            prerelease=(--prerelease)
+          fi
+
+          # Creates the tag on the commit that was published, unless it exists
+          gh release create "$tag" --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title "$tag" \
+            --notes-file "$RUNNER_TEMP/notes.md" "${prerelease[@]}"
