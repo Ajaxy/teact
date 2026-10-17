@@ -1,0 +1,91 @@
+import type { AnyToVoidFunction, NoneToVoidFunction } from '../types';
+import type { CallbackManager } from './callbacks';
+
+import { createCallbackManager } from './callbacks';
+
+interface SignalState<T> {
+  value: T;
+  effects: CallbackManager;
+}
+
+// A registered symbol, so that `isSignal` also recognises the signals of another copy of this module
+const SIGNAL_MARK: unique symbol = Symbol.for('teact.signal');
+
+export type Signal<T = unknown> = ((() => T) & {
+  readonly [SIGNAL_MARK]: symbol;
+  subscribe: (cb: AnyToVoidFunction) => NoneToVoidFunction;
+  once: (cb: AnyToVoidFunction) => NoneToVoidFunction;
+});
+
+export type SignalSetter<T = unknown> = (newValue: T) => void;
+
+export function isSignal(obj: unknown): obj is Signal {
+  return typeof obj === 'function' && SIGNAL_MARK in obj;
+}
+
+// A shorthand to unsubscribe effect from all signals
+const unsubscribesByEffect = new Map<NoneToVoidFunction, Set<NoneToVoidFunction>>();
+
+export function createSignal<T>(defaultValue?: T): readonly [Signal<T>, SignalSetter<T>] {
+  const state: SignalState<typeof defaultValue> = {
+    value: defaultValue,
+    effects: createCallbackManager(),
+  };
+
+  function subscribe(effect: NoneToVoidFunction) {
+    const unsubscribe = state.effects.addCallback(effect);
+
+    if (!unsubscribesByEffect.has(effect)) {
+      unsubscribesByEffect.set(effect, new Set([unsubscribe]));
+    } else {
+      unsubscribesByEffect.get(effect)!.add(unsubscribe);
+    }
+
+    return () => {
+      unsubscribe();
+
+      const unsubscribes = unsubscribesByEffect.get(effect)!;
+      unsubscribes.delete(unsubscribe);
+      if (!unsubscribes.size) {
+        unsubscribesByEffect.delete(effect);
+      }
+    };
+  }
+
+  function once(effect: NoneToVoidFunction) {
+    const unsub = subscribe(() => {
+      unsub();
+      effect();
+    });
+
+    return unsub;
+  }
+
+  function getter() {
+    return state.value;
+  }
+
+  function setter(newValue: T) {
+    if (state.value === newValue) {
+      return;
+    }
+
+    state.value = newValue;
+    state.effects.runCallbacks();
+  }
+
+  const signal = Object.assign(getter as Signal<T>, {
+    [SIGNAL_MARK]: SIGNAL_MARK,
+    subscribe,
+    once,
+  });
+
+  return [signal, setter] as const;
+}
+
+export function cleanupEffect(effect: NoneToVoidFunction) {
+  unsubscribesByEffect.get(effect)?.forEach((unsubscribe) => {
+    unsubscribe();
+  });
+  unsubscribesByEffect.delete(effect);
+}

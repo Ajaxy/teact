@@ -1,0 +1,79 @@
+{
+  "repo": "Ajaxy/telegram-tt",
+  "sha": "f67a40879a7d78c2683ec5a296cf55bc22417d56",
+  "importedAt": "2026-10-17",
+  "private": {
+    "repo": "Ajaxy/telegram-t",
+    "sha": "6364717800b7ad120673ddb6151efa8d247c015b"
+  },
+  "files": {
+    "src/components/test/ErrorTest.tsx": {
+      "upstreamPath": "src/components/test/ErrorTest.tsx",
+      "blob": "72209a163c65a53585eb55fe526a48f76fb83b8e"
+    },
+    "src/components/test/SubTest.tsx": {
+      "upstreamPath": "src/components/test/SubTest.tsx",
+      "blob": "2dd1e7f7d12c99fbe6352a72f832d56166bab05a"
+    },
+    "src/components/test/Test.tsx": {
+      "upstreamPath": "src/components/test/Test.tsx",
+      "blob": "538ee158363a9c07fa9a25e5f244944c38432d7d"
+    },
+    "src/components/test/TestCleanupOrder.tsx": {
+      "upstreamPath": "src/components/test/TestCleanupOrder.tsx",
+      "blob": "139475e55360659cc5d2474bc3cf6d5f3ffaf69e"
+    },
+    "src/components/test/TestContext.tsx": {
+      "upstreamPath": "src/components/test/TestContext.tsx",
+      "blob": "91d24ec4a468a7718e5954b482264b78f3c1d7d6"
+    },
+    "src/components/test/TestControlledInput.tsx": {
+      "upstreamPath": "src/components/test/TestControlledInput.tsx",
+      "blob": "1c9b3e224c45036f33579d3a5fcd77c36e8de67f"
+    },
+    "src/components/test/TestFragment.tsx": {
+      "upstreamPath": "src/components/test/TestFragment.tsx",
+      "blob": "51a9ae2e2c34811851fc62fb7b8d63488842b8ae"
+    },
+    "src/components/test/TestFragment2.tsx": {
+      "upstreamPath": "src/components/test/TestFragment2.tsx",
+      "blob": "683f2d6719855ebdee6808ad695c9996a81be061"
+    },
+    "src/components/test/TestJsxVariableReuse.tsx": {
+      "upstreamPath": "src/components/test/TestJsxVariableReuse.tsx",
+      "blob": "6042fe75bee24e51e39b19144e5d14d21c5d29e3"
+    },
+    "src/components/test/TestNoContainer.tsx": {
+      "upstreamPath": "src/components/test/TestNoContainer.tsx",
+      "blob": "80803f099bbb7e12bdd8f436f1c16029a9720215"
+    },
+    "src/components/test/TestNoRedundancy.tsx": {
+      "upstreamPath": "src/components/test/TestNoRedundancy.tsx",
+      "blob": "f4b657d5bd0000cf587f4d7558ddb8208bb4b437"
+    },
+    "src/components/test/TestOrdered.tsx": {
+      "upstreamPath": "src/components/test/TestOrdered.tsx",
+      "blob": "d317185c186f04478af9b1c481b61a6bce971df0"
+    },
+    "src/components/test/TestPortal.tsx": {
+      "upstreamPath": "src/components/test/TestPortal.tsx",
+      "blob": "0cb8d37b1d1e29558b0d551028faddcabb8ff19a"
+    },
+    "src/components/test/TestSetContent.tsx": {
+      "upstreamPath": "src/components/test/TestSetContent.tsx",
+      "blob": "5f9678b996e246c3ded14320c37bb352024cc6f3"
+    },
+    "src/components/test/TestSvg.tsx": {
+      "upstreamPath": "src/components/test/TestSvg.tsx",
+      "blob": "e61674fe9a88c8f230103f31d5ec2b90d05ffa5f"
+    },
+    "src/components/test/testTick.tsx": {
+      "upstreamPath": "src/components/test/testTick.tsx",
+      "blob": "c7665397deec3ac6bcac20621006140fd8f1d61a"
+    },
+    "src/components/test/TestUpdateRef.tsx": {
+      "upstreamPath": "src/components/test/TestUpdateRef.tsx",
+      "blob": "02b0c285d8fa2f3ab7f494d383bfeb851b78381d"
+    }
+  }
+}

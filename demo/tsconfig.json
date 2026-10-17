@@ -1,0 +1,15 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    // Type-check against the package source, so that linting and type-checking do not need a build first.
+    "paths": {
+      "@teact/core": ["../packages/core/src/index.ts"],
+      "@teact/core/jsx-runtime": ["../packages/core/src/lib/teact/jsx-runtime.ts"],
+      "@teact/core/jsx-dev-runtime": ["../packages/core/src/lib/teact/jsx-dev-runtime.ts"],
+      "@teact/core/*": ["../packages/core/src/*.ts"]
+    },
+    "types": ["react"]
+  },
+  // Teact's JSX props (src/jsx.d.ts): the built jsx-runtime.d.ts references them, the source jsx-runtime.ts does not
+  "include": ["*.ts", "*.tsx", "../packages/core/src/jsx.d.ts"]
+}

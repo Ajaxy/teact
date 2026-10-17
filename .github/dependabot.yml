@@ -1,0 +1,33 @@
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    # A new version becomes a candidate a week after its release
+    cooldown:
+      default-days: 7
+    groups:
+      github-actions:
+        patterns: ['*']
+    commit-message:
+      prefix: CI
+
+  # The root lockfile covers every workspace (packages/core, demo, e2e, benchmark, site). The type tests in
+  # packages/core/type-tests pin their TypeScript and @types/react versions on purpose and are not updated.
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    groups:
+      npm:
+        applies-to: version-updates
+        patterns: ['*']
+    ignore:
+      # The benchmark compares with Preact 10
+      - dependency-name: preact
+        update-types: ['version-update:semver-major']
+    commit-message:
+      prefix: Build

@@ -1,0 +1,62 @@
+name: Bug report
+description: Teact renders, updates or schedules something incorrectly
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting! Please check the [open issues](https://github.com/Ajaxy/teact/issues), [KNOWN-ISSUES.md](https://github.com/Ajaxy/teact/blob/main/KNOWN-ISSUES.md) and [Differences from React](https://github.com/Ajaxy/teact/blob/main/docs/guide/differences-from-react.md) first: some behaviour that differs from React is intended.
+
+        Report security vulnerabilities privately instead: https://github.com/Ajaxy/teact/security/advisories/new
+  - type: textarea
+    id: description
+    attributes:
+      label: What happens
+      description: What you did, and what Teact did.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: The smallest component or code that shows the problem, or a link to a repository or sandbox with it.
+      render: tsx
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: '@teact/core version'
+      placeholder: 0.1.0-next.0
+    validations:
+      required: true
+  - type: dropdown
+    id: build
+    attributes:
+      label: Build
+      description: The development build is the one that the `teact-dev` export condition selects.
+      options:
+        - Production build
+        - Development build (`teact-dev`)
+        - Both
+        - Not sure
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Browsers and operating systems
+      placeholder: Chrome on macOS, Safari on iOS
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Anything else
+      description: Console errors, StricterDOM reports, the bundler and its configuration, screenshots or recordings.

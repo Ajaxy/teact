@@ -1,0 +1,112 @@
+# Canaries: the apps that use Teact, migrated to the packed @teact/core (scripts/canary/*/run.mjs). They run on pull
+# requests that change the package or the canaries (a release needs them green, as CI), nightly and on demand.
+#
+# This workflow can only reach the public mirrors, Ajaxy/telegram-tt and mytonwallet-org/mytonwallet. The private
+# repos, where the apps' changes land first (Ajaxy/telegram-t, mytonwalletorg/mytonwallet-dev), would need a token
+# that this repository does not have. Run the same scripts locally against clones of them before each app bump:
+#   node scripts/canary/web-a/run.mjs --app <telegram-t clone> --build --eslint
+#   node scripts/canary/mtw/run.mjs --app <mytonwallet-dev clone> --build
+#
+# Web A's own Playwright suite (tests/playwright) is not run: the public mirror has no tests/ directory, and Web A runs
+# the suite nowhere itself (its tests.yml is manual-only, with the Playwright steps commented out). Teact's behaviour in
+# browsers is covered by this repository's browser suites and e2e (Web A's test components); the Web A migration PR
+# runs Web A's Playwright locally (extraction plan §5D).
+name: Canary
+
+on:
+  pull_request:
+    paths:
+      - 'packages/core/**'
+      - 'scripts/canary/**'
+      - '.github/workflows/canary.yml'
+  workflow_dispatch:
+    inputs:
+      web_a_ref:
+        description: Ajaxy/telegram-tt commit, branch or tag
+        default: f67a40879a7d78c2683ec5a296cf55bc22417d56
+      mtw_ref:
+        description: mytonwallet-org/mytonwallet commit, branch or tag (empty for the default branch)
+        default: ''
+  schedule:
+    - cron: '17 3 * * *'
+
+permissions:
+  contents: read
+
+# A new push to a pull request cancels its running canary. Scheduled and manual runs have groups of their own and are
+# never cancelled: a later run of the same kind waits for the running one (GitHub keeps one waiting run per group).
+concurrency:
+  group: canary-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  web-a:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # The Web A commit that the package was imported from, unless a run names another. The public mirror gets the
+      # private repo's changes later, so newer commits may still need app changes that the canary does not make.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: Ajaxy/telegram-tt
+          ref: ${{ inputs.web_a_ref || 'f67a40879a7d78c2683ec5a296cf55bc22417d56' }}
+          path: apps/web-a
+          persist-credentials: false
+
+      # No shared package cache: the app installs run third-party install scripts, so nothing from this job may reach
+      # a cache that CI or the release workflow restores. npm's own cache goes to a throwaway directory
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - run: echo "npm_config_cache=$RUNNER_TEMP/npm-cache" >> "$GITHUB_ENV"
+
+      - run: npm ci
+      # --eslint: `eslint --fix` on the files that the migration changes, as the migration PR runs it
+      - run: node scripts/canary/web-a/run.mjs --app apps/web-a --work "$RUNNER_TEMP/canary-web-a" --build --eslint
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: failure()
+        with:
+          name: canary-web-a
+          path: ${{ runner.temp }}/canary-web-a/*.txt
+          retention-days: 14
+
+  mtw:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: mytonwallet-org/mytonwallet
+          ref: ${{ inputs.mtw_ref }}
+          path: apps/mtw
+          persist-credentials: false
+
+      # No shared package cache: the app installs run third-party install scripts, so nothing from this job may reach
+      # a cache that CI or the release workflow restores. npm's own cache goes to a throwaway directory
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - run: echo "npm_config_cache=$RUNNER_TEMP/npm-cache" >> "$GITHUB_ENV"
+
+      - run: npm ci
+      - run: node scripts/canary/mtw/run.mjs --app apps/mtw --work "$RUNNER_TEMP/canary-mtw" --build
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: failure()
+        with:
+          name: canary-mtw
+          path: |
+            ${{ runner.temp }}/canary-mtw/*.txt
+            ${{ runner.temp }}/canary-mtw/*.json
+          retention-days: 14

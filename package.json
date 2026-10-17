@@ -1,47 +1,62 @@
 {
-  "name": "teact",
-  "version": "1.0.0",
-  "description": "Tiny and fast alternative for React",
-  "main": "index.js",
-  "scripts": {
-    "build": "webpack",
-    "dev:benchmark": "webpack serve --mode development",
-    "build:benchmark": "npm run build && cp ./dist/teact* ./docs/benchmark",
-    "dev:demo": "webpack serve --config demo/webpack.config.js --mode development",
-    "build:demo": "webpack --config demo/webpack.config.js --mode development",
-    "build:docs": "npm run build:demo && npm run build:benchmark && git add -A && git commit -m \"[Build Docs]\"",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Ajaxy/teact.git"
-  },
-  "keywords": [
-    "react",
-    "jsx",
-    "tsx",
-    "framework"
-  ],
-  "author": "Alexander Zinchuk (alexander@zinchuk.com)",
+  "name": "teact-workspace",
+  "private": true,
+  "description": "Teact monorepo: the @teact/core package, its demo, benchmark and website",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/Ajaxy/teact/issues"
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "demo",
+    "e2e",
+    "benchmark",
+    "site"
+  ],
+  "scripts": {
+    "build": "npm run build -w @teact/core",
+    "lint": "eslint --cache --cache-location .cache/.eslintcache",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test:unit && npm run test:browser && npm run test:dist",
+    "test:unit": "npm run test:unit -w @teact/core",
+    "test:browser": "npm run test:browser -w @teact/core",
+    "test:dist": "npm run test:dist -w @teact/core",
+    "test:types": "npm run test:types -w @teact/core",
+    "size": "npm run size -w @teact/core",
+    "test:e2e": "npm run test -w teact-e2e",
+    "test:mutations": "scripts/mutate-teact-dom.sh",
+    "dev:demo": "npm run build && npm run dev -w teact-demo",
+    "build:demo": "npm run build && npm run build -w teact-demo",
+    "dev:benchmark": "npm run build && npm run dev -w teact-benchmark",
+    "build:benchmark": "npm run build && npm run build -w teact-benchmark",
+    "build:site": "npm run build && npm run build -w teact-demo -w teact-benchmark && npm run build -w teact-site",
+    "upstream:check": "node scripts/upstream-check.mjs",
+    "check:e2e-upstream": "node scripts/check-e2e-upstream.mjs",
+    "canary:web-a": "node scripts/canary/web-a/run.mjs",
+    "canary:mtw": "node scripts/canary/mtw/run.mjs",
+    "version-packages": "changeset version && npm install --package-lock-only --ignore-scripts"
   },
-  "homepage": "https://github.com/Ajaxy/teact#readme",
   "devDependencies": {
-    "@babel/plugin-proposal-class-properties": "^7.18.6",
-    "@babel/plugin-proposal-nullish-coalescing-operator": "^7.18.6",
-    "@babel/plugin-syntax-nullish-coalescing-operator": "^7.8.3",
-    "@babel/preset-env": "^7.19.1",
-    "@babel/preset-react": "^7.18.6",
-    "@babel/preset-typescript": "^7.18.6",
-    "@types/react": "^18.0.21",
-    "babel-loader": "^8.2.5",
-    "html-webpack-plugin": "^5.5.0",
-    "ts-loader": "^9.4.3",
-    "typescript": "^5.1.3",
-    "webpack": "^5.88.0",
-    "webpack-cli": "^5.1.4",
-    "webpack-dev-server": "^4.11.1"
+    "@arethetypeswrong/cli": "0.18.5",
+    "@changesets/changelog-github": "1.0.1",
+    "@changesets/cli": "3.0.3",
+    "@eslint-react/eslint-plugin": "5.24.10",
+    "@eslint/js": "10.0.1",
+    "@size-limit/preset-small-lib": "14.2.0",
+    "@stylistic/eslint-plugin": "5.10.0",
+    "@types/node": "24.19.1",
+    "eslint": "10.12.0",
+    "eslint-import-resolver-typescript": "4.4.5",
+    "eslint-plugin-import-x": "4.17.1",
+    "eslint-plugin-no-null": "1.0.2",
+    "eslint-plugin-react-hooks-static-deps": "github:zubiden/eslint-plugin-react-hooks-static-deps#160ac4ae8cc3819eb7d692ec7157ddf7da699f38",
+    "eslint-plugin-simple-import-sort": "14.0.0",
+    "eslint-plugin-unused-imports": "4.4.1",
+    "publint": "0.3.25",
+    "size-limit": "14.2.0",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.71.1"
+  },
+  "allowScripts": {
+    "fsevents@2.3.3": true,
+    "unrs-resolver@1.12.2": true
   }
 }

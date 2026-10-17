@@ -1,0 +1,12 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    // Type-check against the package source, like the demo
+    "paths": {
+      "@teact/core": ["../packages/core/src/index.ts"],
+      "@teact/core/*": ["../packages/core/src/*.ts"]
+    },
+    "types": ["node", "vite/client"]
+  },
+  "include": ["src", "*.ts"]
+}

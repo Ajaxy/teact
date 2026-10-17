@@ -1,0 +1,103 @@
+{
+  "repo": "Ajaxy/telegram-tt",
+  "sha": "f67a40879a7d78c2683ec5a296cf55bc22417d56",
+  "importedAt": "2026-10-17",
+  "private": {
+    "repo": "Ajaxy/telegram-t",
+    "sha": "6364717800b7ad120673ddb6151efa8d247c015b"
+  },
+  "files": {
+    "src/lib/teact/teact.ts": {
+      "upstreamPath": "src/lib/teact/teact.ts",
+      "blob": "9ebf978fc56b23e56d5408cc44fe00b794ec7d3e"
+    },
+    "src/lib/teact/teact-dom.ts": {
+      "upstreamPath": "src/lib/teact/teact-dom.ts",
+      "blob": "83f82718b25532d089624aac39c46b7dfe3160ac"
+    },
+    "src/lib/teact/teactn.tsx": {
+      "upstreamPath": "src/lib/teact/teactn.tsx",
+      "blob": "49c8d4504eb6835d7be6d400521f0094544c92d7"
+    },
+    "src/lib/teact/dom-events.ts": {
+      "upstreamPath": "src/lib/teact/dom-events.ts",
+      "blob": "c2299dc37169937b5e955940fd1b7057b44e20bf"
+    },
+    "src/lib/teact/heavyAnimation.ts": {
+      "upstreamPath": "src/lib/teact/heavyAnimation.ts",
+      "blob": "d9bb7f437dbd6c52e2697adb5359cacd99de3054"
+    },
+    "src/lib/teact/jsx-runtime.ts": {
+      "upstreamPath": "src/lib/teact/jsx-runtime.ts",
+      "blob": "ae0047e02be441d3d831aa98dbe2b1e344d4689b"
+    },
+    "src/lib/teact/jsx-dev-runtime.ts": {
+      "upstreamPath": "src/lib/teact/jsx-dev-runtime.ts",
+      "blob": "8789aa8d6d87b44bf836684ee20ce672ab4e25f0"
+    },
+    "src/lib/fasterdom/fasterdom.ts": {
+      "upstreamPath": "src/lib/fasterdom/fasterdom.ts",
+      "blob": "922cf63c660965750c1d985592df4f81cceb1287"
+    },
+    "src/lib/fasterdom/stricterdom.ts": {
+      "upstreamPath": "src/lib/fasterdom/stricterdom.ts",
+      "blob": "7cc8c1c6a6c5e59532b7cca62d0c762a14a7c4d9"
+    },
+    "src/lib/fasterdom/layoutCauses.ts": {
+      "upstreamPath": "src/lib/fasterdom/layoutCauses.ts",
+      "blob": "7758b09ac1caae75775729ad98285a07417dcd60"
+    },
+    "src/util/Deferred.ts": {
+      "upstreamPath": "src/util/Deferred.ts",
+      "blob": "0592f6525ae12515f7d5ebc692dc76af83a778e7"
+    },
+    "src/util/areShallowEqual.ts": {
+      "upstreamPath": "src/util/areShallowEqual.ts",
+      "blob": "db85f67c7afef1bb1fea09f11dace1db2cc231f8"
+    },
+    "src/util/callbacks.ts": {
+      "upstreamPath": "src/util/callbacks.ts",
+      "blob": "70d79a71aac697b0c84e2fcd9e3de4be5fb0c544"
+    },
+    "src/util/debugOverlay.ts": {
+      "upstreamPath": "src/util/debugOverlay.ts",
+      "blob": "e30378c0e47fabbad97fba9f5376ede491b5dcef"
+    },
+    "src/util/generateUniqueId.ts": {
+      "upstreamPath": "src/util/generateUniqueId.ts",
+      "blob": "248e04f900ed7455ffd689dfda1d75793bf780fd"
+    },
+    "src/util/iteratees.ts": {
+      "upstreamPath": "src/util/iteratees.ts",
+      "blob": "db576147d182a3b642f069f4524121ebb3f21d63"
+    },
+    "src/util/safeExec.ts": {
+      "upstreamPath": "src/util/safeExec.ts",
+      "blob": "efd4843ac9c9302c7f57c9e606526edbd131ce06"
+    },
+    "src/util/schedulers.ts": {
+      "upstreamPath": "src/util/schedulers.ts",
+      "blob": "4210c182488d878e4614233fbafa10687751c796"
+    },
+    "src/util/signals.ts": {
+      "upstreamPath": "src/util/signals.ts",
+      "blob": "6720b5772857abcffe53da5fcd9ab1e8c5e28a9f"
+    },
+    "src/hooks/useForceUpdate.ts": {
+      "upstreamPath": "src/hooks/useForceUpdate.ts",
+      "blob": "cab246909dcce37a061a861729305738e81ea208"
+    },
+    "src/hooks/useUniqueId.ts": {
+      "upstreamPath": "src/hooks/useUniqueId.ts",
+      "blob": "6d37e1802ec9559628056487543d05b2e5d360c1"
+    }
+  },
+  "mtw": {
+    "repo": "mytonwallet-org/mytonwallet",
+    "sha": "bb3f357690633d274e390e799babaf1d642b31de",
+    "private": {
+      "repo": "mytonwalletorg/mytonwallet-dev",
+      "sha": "8338281cf55d1ab829348278c82a3c97353b109a"
+    }
+  }
+}

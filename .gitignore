@@ -1,1 +1,7 @@
+node_modules/
 dist/
+.cache/
+*.tgz
+test-results/
+playwright-report/
+blob-report/

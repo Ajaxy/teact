@@ -1,0 +1,38 @@
+name: Feature request
+description: Suggest a new API or a change in behaviour
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Teact stays small and is shaped by the apps that use it, so a proposal is most convincing with a concrete use case. Check the [open issues](https://github.com/Ajaxy/teact/issues) first.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What you are trying to do, and why it is hard or impossible with Teact today.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: The API or behaviour you suggest. If React has an equivalent, link to it and say where Teact's should differ.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives
+      description: Workarounds you use now, or other designs you considered.
+  - type: textarea
+    id: cost
+    attributes:
+      label: Cost
+      description: Effect on bundle size, performance or existing behaviour, if you know it.
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      options:
+        - label: I would like to implement this in a pull request.

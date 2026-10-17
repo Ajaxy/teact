@@ -1,0 +1,20 @@
+{
+  "name": "teact-e2e",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "vite build --mode development --outDir dist/dev && vite build --outDir dist/prod",
+    "preview": "vite preview --outDir dist",
+    "test": "playwright test",
+    "typecheck": "tsc -p ."
+  },
+  "dependencies": {
+    "@teact/core": "*"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.0",
+    "@types/react": "19.3.0",
+    "vite": "8.3.4"
+  }
+}

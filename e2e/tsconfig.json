@@ -1,0 +1,18 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    // Web A's test components import app modules by their relative paths in Web A: `rootDirs` resolves them to the
+    // stand-ins in `stubs/` (vite.config.ts aliases the same imports).
+    "rootDirs": ["src", "stubs"],
+    // Type-check against the package source, like the demo.
+    "paths": {
+      "@teact/core": ["../packages/core/src/index.ts"],
+      "@teact/core/jsx-runtime": ["../packages/core/src/lib/teact/jsx-runtime.ts"],
+      "@teact/core/jsx-dev-runtime": ["../packages/core/src/lib/teact/jsx-dev-runtime.ts"],
+      "@teact/core/*": ["../packages/core/src/*.ts"]
+    },
+    "types": ["react", "node", "vite/client"]
+  },
+  // Teact's JSX props (src/jsx.d.ts): the built jsx-runtime.d.ts references them, the source jsx-runtime.ts does not
+  "include": ["src", "stubs", "specs", "*.ts", "../packages/core/src/jsx.d.ts"]
+}

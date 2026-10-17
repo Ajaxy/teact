@@ -1,0 +1,14 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    // Tests import the package by its public specifiers; like vitest.config.ts, resolve them to the source.
+    "paths": {
+      "@teact/core": ["../src/index.ts"],
+      "@teact/core/jsx-runtime": ["../src/lib/teact/jsx-runtime.ts"],
+      "@teact/core/jsx-dev-runtime": ["../src/lib/teact/jsx-dev-runtime.ts"],
+      "@teact/core/*": ["../src/*.ts"]
+    }
+  },
+  // Teact's JSX props (src/jsx.d.ts): the built jsx-runtime.d.ts references them, the source jsx-runtime.ts does not
+  "include": [".", "../src/jsx.d.ts"]
+}
