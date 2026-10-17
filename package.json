@@ -17,6 +17,7 @@
     "test:unit": "npm run test:unit -w @teact/core",
     "test:browser": "npm run test:browser -w @teact/core",
     "test:e2e": "npm run test -w teact-e2e",
+    "test:mutations": "scripts/mutate-teact-dom.sh",
     "dev:demo": "npm run build && npm run dev -w teact-demo",
     "build:demo": "npm run build && npm run build -w teact-demo",
     "upstream:check": "node scripts/upstream-check.mjs",
