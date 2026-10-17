@@ -77,7 +77,8 @@
     "test:unit": "vitest run --project unit",
     "test:browser": "vitest run --project browser",
     "test:dist": "npm run build && vitest run --project dist",
-    "test:types": "npm run build && node type-tests/run.mjs"
+    "test:types": "npm run build && node type-tests/run.mjs",
+    "size": "npm run build && size-limit"
   },
   "peerDependencies": {
     "@types/react": ">=19.1.0"

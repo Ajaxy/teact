@@ -97,6 +97,7 @@ jobs:
       - run: npm run test:dist
       # T-types: the packed tarball, installed outside the workspace, on TypeScript 5.8.3 and 6.0.3
       - run: npm run test:types
+      - run: npm run size
 
   e2e:
     runs-on: ubuntu-latest
