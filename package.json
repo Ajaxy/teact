@@ -12,6 +12,9 @@
     "build": "npm run build -w @teact/core",
     "lint": "eslint --cache --cache-location .cache/.eslintcache",
     "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test:unit && npm run test:browser",
+    "test:unit": "npm run test:unit -w @teact/core",
+    "test:browser": "npm run test:browser -w @teact/core",
     "dev:demo": "npm run build && npm run dev -w teact-demo",
     "build:demo": "npm run build && npm run build -w teact-demo",
     "upstream:check": "node scripts/upstream-check.mjs"
@@ -21,6 +24,7 @@
     "@eslint-react/eslint-plugin": "5.24.10",
     "@eslint/js": "10.0.1",
     "@stylistic/eslint-plugin": "5.10.0",
+    "@types/node": "24.19.1",
     "eslint": "10.12.0",
     "eslint-import-resolver-typescript": "4.4.5",
     "eslint-plugin-import-x": "4.17.1",

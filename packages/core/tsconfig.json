@@ -8,5 +8,5 @@
     },
     "types": ["react"]
   },
-  "include": ["src", "tsdown.config.ts"]
+  "include": ["src", "tsdown.config.ts", "vitest.config.ts"]
 }
