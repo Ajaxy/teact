@@ -1,7 +1,4 @@
-import { DEBUG_MORE } from '../env';
-import { handleError } from './handleError';
-
-const SAFE_EXEC_ENABLED = !DEBUG_MORE;
+import { reportError } from '../errors';
 
 type SafeExecOptions = {
   rescue?: (err: Error) => void;
@@ -10,10 +7,6 @@ type SafeExecOptions = {
 };
 
 export default function safeExec<T extends AnyFunction>(cb: T, options?: SafeExecOptions): ReturnType<T> | undefined {
-  if (!SAFE_EXEC_ENABLED) {
-    return cb();
-  }
-
   const { rescue, always, shouldIgnoreError } = options ?? {};
 
   try {
@@ -21,7 +14,7 @@ export default function safeExec<T extends AnyFunction>(cb: T, options?: SafeExe
   } catch (err: any) {
     rescue?.(err);
     if (!shouldIgnoreError) {
-      handleError(err);
+      reportError(err);
     }
     return undefined;
   } finally {
