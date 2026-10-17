@@ -24,7 +24,7 @@ export function isSignal(obj: unknown): obj is Signal {
 // A shorthand to unsubscribe effect from all signals
 const unsubscribesByEffect = new Map<NoneToVoidFunction, Set<NoneToVoidFunction>>();
 
-export function createSignal<T>(defaultValue?: T) {
+export function createSignal<T>(defaultValue?: T): readonly [Signal<T>, SignalSetter<T>] {
   const state: SignalState<typeof defaultValue> = {
     value: defaultValue,
     effects: createCallbackManager(),
