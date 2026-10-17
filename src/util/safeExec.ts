@@ -9,29 +9,6 @@ type SafeExecOptions = {
   shouldIgnoreError?: boolean;
 };
 
-export async function safeExecAsync<T extends AnyAsyncFunction>(
-  cb: T,
-  options?: SafeExecOptions,
-): Promise<ReturnType<T> | undefined> {
-  if (!SAFE_EXEC_ENABLED) {
-    return cb();
-  }
-
-  const { rescue, always, shouldIgnoreError } = options ?? {};
-
-  try {
-    return await cb();
-  } catch (err: any) {
-    rescue?.(err);
-    if (!shouldIgnoreError) {
-      handleError(err);
-    }
-    return undefined;
-  } finally {
-    always?.();
-  }
-}
-
 export default function safeExec<T extends AnyFunction>(cb: T, options?: SafeExecOptions): ReturnType<T> | undefined {
   if (!SAFE_EXEC_ENABLED) {
     return cb();
