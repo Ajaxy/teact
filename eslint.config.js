@@ -42,12 +42,13 @@ export default defineConfig(
       },
       'import-x/resolver': {
         typescript: {
-          // Each workspace's `paths`; the demo, the tests and e2e resolve `@teact/core` to the package source
+          // Each workspace's `paths`; the demo, the benchmark, the tests and e2e resolve `@teact/core` to the package source
           project: [
             'packages/*/tsconfig.json',
             'packages/*/test/tsconfig.json',
             'demo/tsconfig.json',
             'e2e/tsconfig.json',
+            'benchmark/tsconfig.json',
           ],
           noWarnOnMultipleProjects: true,
         },

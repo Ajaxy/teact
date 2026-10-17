@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+
+  <title>Teact Benchmark</title>
+
+  <style>
+    :root {
+      --text: #1f2328;
+      --muted: #59636e;
+      --background: #ffffff;
+      --border: #d1d9e0;
+      --header: #f6f8fa;
+      --best: #1a7f37;
+      --warning-background: #fff8c5;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --text: #f0f6fc;
+        --muted: #9198a1;
+        --background: #0d1117;
+        --border: #3d444d;
+        --header: #151b23;
+        --best: #3fb950;
+        --warning-background: #3b2e0a;
+      }
+    }
+
+    body {
+      margin: 0;
+      padding: 24px 16px 48px;
+      font: 16px/1.5 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      color: var(--text);
+      background: var(--background);
+    }
+
+    main {
+      max-width: 760px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+    }
+
+    p, details {
+      color: var(--muted);
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+      margin: 24px 0 16px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-variant-numeric: tabular-nums;
+    }
+
+    th, td {
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    thead th, tbody th {
+      background: var(--header);
+    }
+
+    small {
+      color: var(--muted);
+      font-weight: normal;
+    }
+
+    td.best {
+      color: var(--best);
+      font-weight: bold;
+    }
+
+    td.pending {
+      color: var(--muted);
+    }
+
+    details {
+      margin-top: 24px;
+    }
+
+    #controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    button {
+      font: inherit;
+      padding: 4px 12px;
+    }
+
+    .warning {
+      padding: 8px 12px;
+      color: var(--text);
+      background: var(--warning-background);
+    }
+
+    a {
+      color: inherit;
+    }
+  </style>
+</head>
+
+<body>
+<main>
+  <h1>Teact benchmark</h1>
+  <p>
+    Rendering a large tree from scratch with <a href="https://github.com/Ajaxy/teact">Teact</a>, React and Preact.
+    Each cell is the median time of one render, lower is better. Percentages compare with React.
+  </p>
+
+  <p id="dev-warning" class="warning" hidden>
+    This is the development server: React and Preact run their development builds here. Use
+    <code>npm run build</code> and <code>npm run preview</code> to compare production builds.
+  </p>
+
+  <div class="table-wrapper">
+    <table id="results">
+      <thead>
+      <tr>
+        <th scope="col">Scenario</th>
+      </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <p id="status" role="status" aria-live="polite"></p>
+
+  <div id="controls"></div>
+
+  <details>
+    <summary>How it is measured</summary>
+    <p>
+      A render builds the root element with the library's <code>createElement</code> and renders it into an empty
+      container; it is timed with <code>performance.now()</code>. React renders inside <code>flushSync</code>, so that
+      it finishes within the measurement, as Teact and Preact do. After each render the container is cleared. Every
+      5 renders the page pauses for 100 ms and waits for an animation frame, and each library's run starts after a
+      1-second pause.
+    </p>
+    <p>
+      "30K elements" renders a list of 30,000 <code>&lt;li&gt;&lt;b&gt;1&lt;/b&gt;&lt;/li&gt;</code> items
+      (median of <span data-iterations="elements"></span> renders). "10K components" renders 10,000 keyed product
+      components, each with a nested button component (median of <span data-iterations="components"></span> renders).
+      All three libraries run their production builds.
+    </p>
+  </details>
+</main>
+
+<div id="root"></div>
+
+<script type="module" src="./src/main.ts"></script>
+</body>
+</html>
