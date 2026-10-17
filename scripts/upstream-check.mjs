@@ -67,6 +67,11 @@ const MTW_CLOSURE = [
 // dependency of @teact/core.
 const ALLOWED_EXTERNALS = new Set(['react']);
 
+// Web A modules outside the closure that the closure imports, and the package modules that replace them
+const REPLACED_MODULES = {
+  'src/config': 'src/env.ts',
+};
+
 const IMPORT_RE = /(?:^|[;\n])\s*(?:import|export)\s(?:[^'";]*?\sfrom\s)?\s*'([^']+)'/g;
 const RESOLVE_SUFFIXES = ['', '.ts', '.tsx', '/index.ts'];
 
@@ -192,9 +197,9 @@ function findNewDependencies(path, source, closurePaths) {
       continue;
     }
 
-    // The package mirrors Web A's paths, so a module the package provides itself (a shim) also counts
+    // The package mirrors Web A's paths, so a module that the package has at the same path, or replaces, also counts
     const target = posix.normalize(posix.join(posix.dirname(path), specifier));
-    const isKnown = RESOLVE_SUFFIXES.some((suffix) => (
+    const isKnown = target in REPLACED_MODULES || RESOLVE_SUFFIXES.some((suffix) => (
       closurePaths.has(target + suffix) || isFile(join(PACKAGE_DIR, target + suffix))
     ));
     if (!isKnown) missing.push(`${path} imports '${specifier}'`);

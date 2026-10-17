@@ -11,7 +11,7 @@ import type {
   VirtualElementTag,
 } from './teact';
 
-import { DEBUG, IS_PERF } from '../../config';
+import { DEBUG } from '../../env';
 import { addEventListener, removeAllDelegatedListeners, removeEventListener } from './dom-events';
 import {
   captureImmediateEffects,
@@ -70,9 +70,8 @@ const inputsAwaitingReconcile = new WeakSet<Element>();
 
 const uniqueChildKeysCache = new WeakMap<VirtualElementChildren, (keyof any)[]>();
 
-let DEBUG_virtualTreeSize = 1;
-
-function render($element: VirtualElement | undefined, parentEl: HTMLElement) {
+// Returns `undefined` (not `void`), so that a component can return its result, as Web A's `Portal` does
+export function render($element: VirtualElement | undefined, parentEl: HTMLElement): undefined {
   if (!headsByElement.has(parentEl)) {
     headsByElement.set(parentEl, { children: [] });
   }
@@ -83,13 +82,6 @@ function render($element: VirtualElement | undefined, parentEl: HTMLElement) {
   runImmediateEffects?.();
 
   $head.children = $renderedChild ? [$renderedChild] : [];
-
-  if (IS_PERF) {
-    DEBUG_virtualTreeSize = 0;
-    DEBUG_addToVirtualTreeSize($head);
-
-    return DEBUG_virtualTreeSize;
-  }
 
   return undefined;
 }
@@ -1016,16 +1008,6 @@ function applyExtraStyles(element: DOMElement) {
   );
 
   Object.assign(element.style, standardStyles);
-}
-
-function DEBUG_addToVirtualTreeSize($current: VirtualElementParent | VirtualDomHead) {
-  DEBUG_virtualTreeSize += $current.children.length;
-
-  $current.children.forEach(($child) => {
-    if (isParentElement($child)) {
-      DEBUG_addToVirtualTreeSize($child);
-    }
-  });
 }
 
 /** Returns unique and not missing key for each child */

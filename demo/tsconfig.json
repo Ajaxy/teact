@@ -11,5 +11,5 @@
     },
     "types": ["react"]
   },
-  "include": ["*.ts", "*.tsx", "../packages/core/src/@types", "../packages/core/src/env.d.ts"]
+  "include": ["*.ts", "*.tsx", "../packages/core/src/@types"]
 }

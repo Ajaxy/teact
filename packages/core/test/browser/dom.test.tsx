@@ -1,14 +1,15 @@
-// T-attr, T-remount and T-fasttype: attributes, DOM changes made outside Teact, and fast-list detection
+// T-render, T-attr, T-remount and T-fasttype: `render()`, attributes, DOM changes made outside Teact, and fast-list
+// detection
 import { useState } from '@teact/core';
-import {
-  addExtraClass, removeExtraClass, setExtraStyles, toggleExtraClass,
+import TeactDOM, {
+  addExtraClass, removeExtraClass, render, setExtraStyles, toggleExtraClass,
 } from '@teact/core/dom';
 import {
-  afterEach, beforeEach, describe, expect, test, vi,
+  afterEach, beforeEach, describe, expect, expectTypeOf, test, vi,
 } from 'vitest';
 
 import { flushFrames } from '../utils/frames';
-import { mount, unmountAll } from '../utils/mount';
+import { createContainer, mount, unmountAll } from '../utils/mount';
 
 let consoleError: ReturnType<typeof vi.spyOn>;
 
@@ -20,6 +21,23 @@ afterEach(async () => {
   await unmountAll();
   expect(consoleError).not.toHaveBeenCalled();
   consoleError.mockRestore();
+});
+
+describe('render() (T-render)', () => {
+  test('returns `undefined` when mounting, updating and unmounting', () => {
+    const container = createContainer();
+
+    expect(render(<div>1</div>, container)).toBeUndefined();
+    expect(render(<div>2</div>, container)).toBeUndefined();
+    expect(container.textContent).toBe('2');
+    expect(render(undefined, container)).toBeUndefined();
+    expect(container.textContent).toBe('');
+  });
+
+  test('is declared to return `undefined`, so a component can return its result', () => {
+    expectTypeOf(render).returns.toEqualTypeOf<undefined>();
+    expect(TeactDOM.render).toBe(render);
+  });
 });
 
 describe('Attributes (T-attr)', () => {

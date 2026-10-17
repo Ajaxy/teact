@@ -112,6 +112,8 @@ export default defineConfig(
             // Config, utils, helpers
             [
               '^(\\.+/)+config',
+              // The package's replacements for Web A's config.ts and util/handleError.ts
+              '^(\\.+/)+(env|errors)$',
               '^(\\.+/)+(lib)(?!/teact)(/.*|$)',
               '^(\\.+/)+global/.+',
               '^(\\.+/)+(util)(/.*|$)',

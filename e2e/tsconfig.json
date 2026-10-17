@@ -14,5 +14,5 @@
     },
     "types": ["react", "node", "vite/client"]
   },
-  "include": ["src", "stubs", "specs", "*.ts", "../packages/core/src/@types", "../packages/core/src/env.d.ts"]
+  "include": ["src", "stubs", "specs", "*.ts", "../packages/core/src/@types"]
 }

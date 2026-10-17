@@ -10,5 +10,5 @@
       "@teact/core/*": ["../src/*.ts"]
     }
   },
-  "include": [".", "../src/@types", "../src/env.d.ts"]
+  "include": [".", "../src/@types"]
 }
