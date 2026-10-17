@@ -16,6 +16,7 @@ import { addEventListener, removeAllDelegatedListeners, removeEventListener } fr
 import {
   captureImmediateEffects,
   cloneElement,
+  getIsHeavyAnimating,
   hasElementChanged,
   isElementUsed,
   isParentElement,
@@ -65,6 +66,7 @@ const extraStyles = new WeakMap<Element, Record<string, string>>();
 const controlledInputProps = new WeakMap<Element, AnyLiteral>();
 const composingInputs = new WeakSet<Element>();
 const selectionStates = new WeakMap<Element, SelectionState>();
+const inputsAwaitingReconcile = new WeakSet<Element>();
 
 const uniqueChildKeysCache = new WeakMap<VirtualElementChildren, (keyof any)[]>();
 
@@ -715,16 +717,14 @@ function setElementRef($element: VirtualElementTag, element: DOMElement | undefi
 }
 
 function processControlled(element: DOMElement, props: AnyLiteral) {
-  // TODO Remove after tests
   const isValueControlled = props.value !== undefined;
   const isCheckedControlled = props.checked !== undefined;
-  const isControlled = props.teactExperimentControlled
-    && (isValueControlled || isCheckedControlled) && CONTROLLABLE_TAGS.includes(element.tagName);
+  const isControlled = (isValueControlled || isCheckedControlled) && CONTROLLABLE_TAGS.includes(element.tagName);
   if (!isControlled) {
     controlledInputProps.delete(element);
     composingInputs.delete(element);
     selectionStates.delete(element);
-    return;
+    return false;
   }
 
   controlledInputProps.set(element, props);
@@ -746,7 +746,7 @@ function processControlled(element: DOMElement, props: AnyLiteral) {
     composingInputs.delete(element);
     onCompositionEnd?.(e);
 
-    requestAfterRender(() => reconcileControlledInput(element));
+    requestReconcile(element);
   };
   props.onChange = undefined;
   props.onInput = (e: ChangeEvent<HTMLInputElement> & InputEvent) => {
@@ -759,13 +759,15 @@ function processControlled(element: DOMElement, props: AnyLiteral) {
       saveInputSelection(e.currentTarget);
     }
 
-    requestAfterRender(() => reconcileControlledInput(element));
+    requestReconcile(element);
   };
   props.onBlur = (e: FocusEvent<HTMLInputElement>) => {
     selectionStates.delete(element);
 
     onBlur?.(e);
   };
+
+  return true;
 }
 
 function saveInputSelection(element: HTMLInputElement) {
@@ -774,6 +776,23 @@ function saveInputSelection(element: HTMLInputElement) {
 
   const isCaretAtEnd = selectionStart === selectionEnd && selectionEnd === element.value.length;
   selectionStates.set(element, { selectionStart, selectionEnd, isCaretAtEnd });
+}
+
+function requestReconcile(element: DOMElement) {
+  // TeactN holds back global updates during heavy animations, so the new state may not be rendered until they end
+  if (getIsHeavyAnimating()) {
+    if (inputsAwaitingReconcile.has(element)) return;
+
+    inputsAwaitingReconcile.add(element);
+    getIsHeavyAnimating.once(() => {
+      inputsAwaitingReconcile.delete(element);
+      requestReconcile(element);
+    });
+
+    return;
+  }
+
+  requestAfterRender(() => reconcileControlledInput(element));
 }
 
 function reconcileControlledInput(element: DOMElement) {
@@ -786,6 +805,20 @@ function reconcileControlledInput(element: DOMElement) {
   if (props.checked !== undefined && (element as HTMLInputElement).checked !== props.checked) {
     setAttribute(element, 'checked', props.checked);
   }
+
+  const { type, name, form } = element as HTMLInputElement;
+  if (type !== 'radio' || !name || props.checked !== false) return;
+
+  // Checking a radio natively unchecks the rest of its group, which receives no `input` event to reconcile on
+  const groupRoot = form || (element.getRootNode() as ParentNode);
+  groupRoot.querySelectorAll<HTMLInputElement>('input[type="radio"]').forEach((radio) => {
+    if (radio === element || radio.name !== name || radio.form !== form) return;
+
+    const radioProps = controlledInputProps.get(radio);
+    if (radioProps?.checked !== undefined && radio.checked !== radioProps.checked) {
+      setAttribute(radio, 'checked', radioProps.checked);
+    }
+  });
 }
 
 function processUncontrolledOnMount(element: DOMElement, props: AnyLiteral) {
@@ -805,7 +838,7 @@ function processUncontrolledOnMount(element: DOMElement, props: AnyLiteral) {
 function updateAttributes(
   $current: VirtualElementTag, $new: VirtualElementTag, element: DOMElement, namespace?: string,
 ) {
-  processControlled(element, $new.props);
+  const isControlled = processControlled(element, $new.props);
 
   const currentEntries = Object.entries($current.props);
   const newEntries = Object.entries($new.props);
@@ -829,7 +862,7 @@ function updateAttributes(
 
     if (
       newValue !== undefined
-      && (newValue !== currentValue || (key === 'value' && $new.props.teactExperimentControlled))
+      && (newValue !== currentValue || (key === 'value' && isControlled))
     ) {
       setAttribute(element, key, newValue, namespace);
     }
@@ -846,7 +879,8 @@ function setAttribute(element: DOMElement, key: string, value: any, namespace?: 
       return;
     }
 
-    if (inputEl.value !== value) {
+    // Numeric values never equal the string DOM value, so compare as strings to avoid redundant writes
+    if (inputEl.value !== String(value)) {
       inputEl.value = value;
 
       const selectionState = selectionStates.get(element);
