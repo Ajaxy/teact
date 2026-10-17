@@ -1,4 +1,4 @@
-export default function arePropsShallowEqual(currentProps: AnyLiteral, newProps: AnyLiteral) {
+export function areRecordsShallowEqual(currentProps: AnyLiteral, newProps: AnyLiteral) {
   if (currentProps === newProps) {
     return true;
   }

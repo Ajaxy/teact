@@ -54,9 +54,10 @@ export function forceMeasure(cb: () => any) {
 }
 
 const forcedMutationAllowedFor = new Set<Node>();
+const IGNORE_SUBTREE_ATTR = 'data-stricterdom-ignore';
 
-export function forceMutation(cb: () => any, nodes: Node | Node[]) {
-  if (phase !== 'measure') {
+export function forceMutation(cb: () => any, nodes: Node | Node[], allowAnyPhase?: boolean) {
+  if (!allowAnyPhase && phase !== 'measure') {
     throw new Error('The current phase is \'mutate\'');
   }
 
@@ -79,9 +80,11 @@ export function suppressStrict(cb: () => any) {
   }
 
   disableStrict();
-  const result = cb();
-  enableStrict();
-  return result;
+  try {
+    return cb();
+  } finally {
+    enableStrict();
+  }
 }
 
 export function setHandler(handler?: ErrorHandler) {
@@ -167,11 +170,20 @@ function setupMutationObserver() {
           return;
         }
 
+        const targetElement = target instanceof Element ? target : target.parentElement;
+        if (targetElement?.closest(`[${IGNORE_SUBTREE_ATTR}]`)) {
+          return;
+        }
+
         if (type === 'childList' && target instanceof HTMLElement && target.contentEditable) {
           return;
         }
 
         if (attributeName?.startsWith('data-')) {
+          return;
+        }
+
+        if (attributeName === 'open' && target instanceof HTMLDetailsElement) {
           return;
         }
 
