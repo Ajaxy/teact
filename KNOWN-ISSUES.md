@@ -8,7 +8,6 @@ assertion on purpose: update the test and its title, and remove the entry here.
 
 | ID | Behaviour now | Expected | Pinned by | Fix |
 |---|---|---|---|---|
-| H20/H21 | `isSignal` does not recognise a signal created by another copy of the module: the mark is a module-local `Symbol()` | Signals from any copy are recognised | `packages/core/test/unit/signals.test.ts` | B3: `Symbol.for('teact.signal')` |
 | H33 | In a `teactFastList`, preserved children move only when their `teactOrderKey` changes, so reordering them without changing any order key leaves the DOM order | The DOM follows the order of the children | `e2e/specs/TestOrdered.spec.ts` | 0.2 (T-fastorder) |
 | K1 | When a controlled input rejects a character typed in the middle of its value, the value is restored, but the caret goes to the position saved after the keystroke: one character to the right. In `hll` with the caret after `h`, a rejected `a` leaves the caret after `hl`, and a following `x` gives `hlxl` | The caret stays where the user typed, so `x` gives `hxll` | `packages/core/test/browser/controlled.test.tsx`, `e2e/specs/TestControlledInput.spec.ts` | 0.2 or later |
 | K2 | stricterdom never reports child-list changes of HTML elements: the check meant to exempt `contentEditable` elements reads `element.contentEditable`, a non-empty string (`'inherit'`) on every HTML element | Only content-editable elements are exempt (`isContentEditable`) | `packages/core/test/browser/strict.test.tsx` | 0.2 or later |
