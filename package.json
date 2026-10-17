@@ -7,7 +7,8 @@
   "workspaces": [
     "packages/*",
     "demo",
-    "e2e"
+    "e2e",
+    "benchmark"
   ],
   "scripts": {
     "build": "npm run build -w @teact/core",
@@ -23,6 +24,8 @@
     "test:mutations": "scripts/mutate-teact-dom.sh",
     "dev:demo": "npm run build && npm run dev -w teact-demo",
     "build:demo": "npm run build && npm run build -w teact-demo",
+    "dev:benchmark": "npm run build && npm run dev -w teact-benchmark",
+    "build:benchmark": "npm run build && npm run build -w teact-benchmark",
     "upstream:check": "node scripts/upstream-check.mjs",
     "check:e2e-upstream": "node scripts/check-e2e-upstream.mjs",
     "canary:web-a": "node scripts/canary/web-a/run.mjs",
