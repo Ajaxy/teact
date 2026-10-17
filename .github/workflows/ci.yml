@@ -28,6 +28,7 @@ jobs:
 
       - run: npm ci
       - run: npm run lint
+      - run: npm run check:e2e-upstream
       - run: npm run typecheck
       - run: npm run build
       - run: npx publint packages/core
