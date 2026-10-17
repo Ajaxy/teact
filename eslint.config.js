@@ -30,6 +30,8 @@ export default defineConfig(
     '**/playwright-report/',
     '**/test-results/',
     'docs/',
+    // Compiled against the packed package, with their own TypeScript versions (type-tests/run.mjs)
+    'packages/core/type-tests/*/',
   ]),
   {
     name: 'teact-config',
@@ -216,7 +218,11 @@ export default defineConfig(
     languageOptions: {
       parserOptions: {
         projectService: {
-          allowDefaultProject: ['*.js', 'scripts/*.mjs'],
+          allowDefaultProject: [
+            '*.js',
+            'scripts/*.mjs',
+            'packages/core/type-tests/*.mjs',
+          ],
         },
         tsconfigRootDir: import.meta.dirname,
       },
@@ -232,7 +238,7 @@ export default defineConfig(
   },
   {
     name: 'node-scripts',
-    files: ['scripts/**'],
+    files: ['scripts/**', 'packages/core/type-tests/*.mjs'],
     rules: {
       'no-console': 'off',
     },

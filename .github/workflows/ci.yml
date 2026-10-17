@@ -93,8 +93,10 @@ jobs:
       - run: npm ci
       # Chromium runs the entries in a module Worker (T-noside)
       - run: npx playwright install --with-deps chromium
-      # Builds the package first. T-build, T-dist, T-api, T-noside and T-devtools on dist/ and dist/dev/
+      # Each script builds the package first. T-build, T-dist, T-api, T-noside and T-devtools on dist/ and dist/dev/
       - run: npm run test:dist
+      # T-types: the packed tarball, installed outside the workspace, on TypeScript 5.8.3 and 6.0.3
+      - run: npm run test:types
 
   e2e:
     runs-on: ubuntu-latest

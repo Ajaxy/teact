@@ -1,0 +1,10 @@
+{
+  "name": "teact-type-test-automatic-ts60",
+  "private": true,
+  "description": "Telegram Web A's setup: the automatic JSX runtime, TypeScript 6.0, @types/react 19.3",
+  "type": "module",
+  "devDependencies": {
+    "@types/react": "19.3.0",
+    "typescript": "6.0.3"
+  }
+}

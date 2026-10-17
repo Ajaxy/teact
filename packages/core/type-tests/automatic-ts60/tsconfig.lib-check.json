@@ -1,0 +1,9 @@
+{
+  // Also checks the declaration files; run.mjs counts only the errors in @teact/core's own files. Without the
+  // `webworker` lib, whose declarations conflict with `dom` ones when checked, only the known `ref` conflict remains.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "lib": ["dom", "esnext"],
+    "skipLibCheck": false
+  }
+}

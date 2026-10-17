@@ -1,0 +1,10 @@
+{
+  "name": "teact-type-test-classic-ts58",
+  "private": true,
+  "description": "MyTonWallet's setup: the classic JSX runtime, TypeScript 5.8, @types/react 19.1",
+  "type": "module",
+  "devDependencies": {
+    "@types/react": "19.1.5",
+    "typescript": "5.8.3"
+  }
+}
