@@ -8,7 +8,8 @@ interface SignalState<T> {
   effects: CallbackManager;
 }
 
-const SIGNAL_MARK = Symbol('SIGNAL_MARK');
+// A registered symbol, so that `isSignal` also recognises the signals of another copy of this module
+const SIGNAL_MARK: unique symbol = Symbol.for('teact.signal');
 
 export type Signal<T = unknown> = ((() => T) & {
   readonly [SIGNAL_MARK]: symbol;

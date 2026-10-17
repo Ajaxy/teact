@@ -107,7 +107,7 @@ describe('isSignal', () => {
     expect(isSignal(undefined)).toBe(false);
   });
 
-  test('currently does not recognise a signal created by another copy of the module', async () => {
+  test('recognises a signal created by another copy of the module', async () => {
     vi.resetModules();
     const otherCopy = await import('@teact/core');
     const [getOther] = otherCopy.createSignal(0);
@@ -115,9 +115,9 @@ describe('isSignal', () => {
 
     expect(otherCopy.isSignal).not.toBe(isSignal);
     expect(otherCopy.isSignal(getOther)).toBe(true);
-    // KNOWN ISSUE H20/H21 (pinned in B2; fix in B3, see KNOWN-ISSUES.md): the mark is a module-local `Symbol()`.
-    // TODO(B3): `Symbol.for('teact.signal')` makes both of these true.
-    expect(isSignal(getOther)).toBe(false);
-    expect(otherCopy.isSignal(getLocal)).toBe(false);
+    // The mark is the registered `Symbol.for('teact.signal')`, the same in every copy (H20/H21)
+    expect(isSignal(getOther)).toBe(true);
+    expect(otherCopy.isSignal(getLocal)).toBe(true);
+    expect(Object.getOwnPropertySymbols(getLocal)).toEqual([Symbol.for('teact.signal')]);
   });
 });
