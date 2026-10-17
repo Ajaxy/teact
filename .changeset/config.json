@@ -7,7 +7,7 @@
   "format": false,
   "fixed": [],
   "linked": [],
-  "ignore": ["teact-demo", "teact-e2e", "teact-benchmark"],
+  "ignore": ["teact-demo", "teact-e2e", "teact-benchmark", "teact-site"],
   "privatePackages": { "version": false, "tag": false },
   "updateInternalDependencies": "patch"
 }

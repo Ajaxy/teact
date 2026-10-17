@@ -1,14 +1,15 @@
 {
   "name": "teact-workspace",
   "private": true,
-  "description": "Teact monorepo: the @teact/core package and its demo",
+  "description": "Teact monorepo: the @teact/core package, its demo, benchmark and website",
   "license": "MIT",
   "type": "module",
   "workspaces": [
     "packages/*",
     "demo",
     "e2e",
-    "benchmark"
+    "benchmark",
+    "site"
   ],
   "scripts": {
     "build": "npm run build -w @teact/core",
@@ -26,6 +27,7 @@
     "build:demo": "npm run build && npm run build -w teact-demo",
     "dev:benchmark": "npm run build && npm run dev -w teact-benchmark",
     "build:benchmark": "npm run build && npm run build -w teact-benchmark",
+    "build:site": "npm run build && npm run build -w teact-demo -w teact-benchmark && npm run build -w teact-site",
     "upstream:check": "node scripts/upstream-check.mjs",
     "check:e2e-upstream": "node scripts/check-e2e-upstream.mjs",
     "canary:web-a": "node scripts/canary/web-a/run.mjs",

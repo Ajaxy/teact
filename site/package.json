@@ -1,0 +1,10 @@
+{
+  "name": "teact-site",
+  "version": "0.0.0",
+  "private": true,
+  "description": "The GitHub Pages site: landing page, demo, benchmark and the Fasterdom article",
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs"
+  }
+}

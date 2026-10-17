@@ -1,0 +1,95 @@
+# GitHub Pages, https://ajaxy.github.io/teact/: `npm run build:site` assembles site/dist (see site/build.mjs):
+#   /                                         landing page (site/public)
+#   /demo/                                    the demo, built from demo/
+#   /benchmark/                               the benchmark, built from benchmark/
+#   /Fasterdom-Optimized-Browser-Rendering/   the article, copied byte for byte from docs/
+#
+# Not active yet. Today GitHub's legacy builder publishes Pages from the docs/ directory of main, so `deploy` runs
+# only once the repository's Pages source is "GitHub Actions" (Settings → Pages → Build and deployment → Source).
+# Until then, each run builds the site and uploads it as an artifact without deploying it, which checks the build.
+# After the switch, the next push to main, or a manual run on main, deploys.
+# Once /, /demo/, /benchmark/ and the article return 200 from the new deployment, a follow-up commit deletes
+# docs/demo and docs/benchmark and moves the article to site/public.
+name: Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions: {}
+
+# One deployment at a time; a newer run waits instead of cancelling a deployment in progress
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pages: read # to read the Pages source
+    outputs:
+      deploy: ${{ steps.source.outputs.deploy }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+
+      - run: npm ci
+      - run: npm run build:site
+
+      - id: source
+        name: Check the Pages source
+        env:
+          GH_TOKEN: ${{ github.token }}
+        # HTTP 404 means that Pages is not set up. Any other error fails the run on main, so that a deployment is never
+        # skipped silently.
+        run: |
+          if response=$(gh api "repos/$GITHUB_REPOSITORY/pages" --jq .build_type 2> "$RUNNER_TEMP/pages-error"); then
+            build_type=$response
+          elif grep -q '(HTTP 404)' "$RUNNER_TEMP/pages-error"; then
+            build_type='none (Pages is not set up)'
+          else
+            cat "$RUNNER_TEMP/pages-error"
+            echo "$response"
+            if [ "$GITHUB_REF" = refs/heads/main ]; then
+              echo "::error::Could not read the Pages source, so it is unknown whether to deploy"
+              exit 1
+            fi
+            echo "::warning::Could not read the Pages source"
+            build_type=unknown
+          fi
+
+          if [ "$build_type" = workflow ] && [ "$GITHUB_REF" = refs/heads/main ]; then
+            echo "deploy=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "deploy=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Not deploying: the Pages source is '$build_type' (deploys need 'workflow', from main)"
+          fi
+
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: site/dist
+
+  deploy:
+    needs: build
+    if: needs.build.outputs.deploy == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      pages: write # to deploy
+      id-token: write # to verify that the deployment comes from this workflow
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
